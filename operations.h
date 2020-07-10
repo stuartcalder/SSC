@@ -43,11 +43,14 @@
 #	error "Unsupported operating system."
 #endif
 
+#define BITS_TO_BYTES_(bits)	(bits  / CHAR_BIT)
+#define BYTES_TO_BITS_(bytes)	(bytes * CHAR_BIT)
+
 #define UNSIGNED_MASK_T_(bits) \
 	uint##bits_t
 
 #define UNSIGNED_MASK_(bits) \
-	((UNSIGNED_MASK_T_ (bits))((CHAR_BIT * sizeof(UNSIGNED_MASK_T_ (bits))) - 1))
+	((UNSIGNED_MASK_T_ (bits))((BYTES_TO_BITS_ (sizeof(UNSIGNED_MASK_T_ (bits))) - 1))) \
 
 #define MASKED_COUNT_(bits,count) \
 	((UNSIGNED_MASK_ (bits)) & count)
@@ -67,14 +70,24 @@
 #undef MASKED_COUNT_
 #undef UNSIGNED_MASK_
 #undef UNSIGNED_MASK_T_
-
-#define SHIM_XOR_BLOCK(block_p, add_p, block_bits) \
-	static_assert (block_bits % CHAR_BIT == 0, "block_bits must be divisible into bytes."); \
-	for( int unique_i = 0; i < (block_bits / CHAR_BIT); ++i ) \
-		SHIM_REINTERPRET_CAST_VALUE_TO (block_p, uint8_t*      )[ unique_i ] ^= \
-		SHIM_REINTERPRET_CAST_VALUE_TO (add_p  , uint8_t const*)[ unique_i ]
+#undef BYTES_TO_BITS_
+#undef BITS_TO_BYTES_
 
 SHIM_BEGIN_DECLS
+
+#define DEFINE_SHIM_XOR_(block_bytes) \
+	extern inline void \
+	shim_xor_##block_bytes (void * SHIM_RESTRICT block, void * SHIM_RESTRICT add) { \
+		for( int i = 0; i < block_bytes; ++i ) { \
+			SHIM_REINTERPRET_CAST_VALUE_TO (block, uint8_t*      )[ i ] ^= \
+			SHIM_REINTERPRET_CAST_VALUE_TO (add  , uint8_t const*)[ i ]; \
+		} \
+	}
+DEFINE_SHIM_XOR_ (16)
+DEFINE_SHIM_XOR_ (32)
+DEFINE_SHIM_XOR_ (64)
+DEFINE_SHIM_XOR_ (128)
+#undef DEFINE_SHIM_XOR_
 
 extern inline void
 shim_obtain_os_entropy (uint8_t *buffer, size_t num_bytes) {
@@ -92,16 +105,16 @@ shim_obtain_os_entropy (uint8_t *buffer, size_t num_bytes) {
 	shim_close_file( random_dev );
 #	undef DEV_RANDOM_
 #elif  defined (SHIM_OS_UNIXLIKE)
-#	define MAX_BYTES_ 256
-	while( num_bytes > MAX_BYTES_ ) {
-		if( getentropy( buffer, MAX_BYTES_ ) != 0 )
+#	define MAX_ 256
+	while( num_bytes > MAX_ ) {
+		if( getentropy( buffer, MAX_ ) != 0 )
 			SHIM_ERRX ("Error: Failed to getentropy()\n");
-		num_bytes -= MAX_BYTES_;
-		buffer    += MAX_BYTES_;
+		num_bytes -= MAX_;
+		buffer    += MAX_;
 	}
 	if( getentropy( buffer, num_bytes ) != 0 )
 		SHIM_ERRX ("Error: Failed to getentropy()\n");
-#	undef MAX_BYTES_
+#	undef MAX_
 #elif  defined (SHIM_OS_WINDOWS)
 	BCRYPT_ALG_HANDLE cng_provider_handle;
 	if( BCryptOpenAlgorithmProvider( &cng_provider_handle, L"RNG", NULL, 0 ) != STATUS_SUCCESS )
