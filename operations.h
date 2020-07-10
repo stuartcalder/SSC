@@ -160,6 +160,7 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 					((b >> 4) & ONE_MASK_) |
 					((b >> 3) & ONE_MASK_) |
 					((b >> 2) & ONE_MASK_) |
+					((b >> 1) & ONE_MASK_) |
 					((b     ) & ONE_MASK_)
 				   );
 	}
