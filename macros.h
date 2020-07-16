@@ -52,7 +52,8 @@
        defined (__FreeBSD__)   || \
        defined (__NetBSD__)    || \
        defined (__gnu_linux__) || \
-       defined (SHIM_OS_OSX)
+       defined (SHIM_OS_OSX)   || \
+       defined (__Dragonfly__)
 #	ifdef SHIM_OS_UNIXLIKE
 #		error 'SHIM_OS_UNIXLIKE already defined'
 #	endif
@@ -124,14 +125,9 @@
 #ifdef __cplusplus
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
-
-#	define SHIM_STATIC_CAST_VALUE_TO(value,type)		static_cast<type>(value)
-#	define SHIM_REINTERPRET_CAST_VALUE_TO(value,type)	reinterpret_cast<type>(value)
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
-#	define SHIM_STATIC_CAST_VALUE_TO(value,type)		((type)value)
-#	define SHIM_REINTERPRET_CAST_VALUE_TO(value,type)	((type)value)
 #endif
 
 #endif // ~ SHIM_MACROS_H

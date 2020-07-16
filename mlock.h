@@ -37,7 +37,7 @@
 #	ifdef __cplusplus
 #		define CONST_CAST_(value, type) const_cast<type>(value)
 #	else
-#		define CONST_CAST_(value, type) value
+#		define CONST_CAST_(value, type) ((type)value)
 #	endif
 
 #	if    defined (SHIM_OS_UNIXLIKE)
@@ -54,7 +54,7 @@ shim_lock_memory (void LOCK_CONST_ *address, size_t const length) {
 	if( mlock( address, length ) != 0 )
 		SHIM_ERRX ("Error: Failed to mlock()\n");
 #	elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualLock( CONST_CAST_ (address, void*), length ) == 0 )
+	if( VirtualLock( ((void *)address), length ) == 0 )
 		SHIM_ERRX ("Error: Failed to VirtualLock()\n");
 #	else
 #		error "Unsupported operating system."
@@ -67,7 +67,7 @@ shim_unlock_memory (void LOCK_CONST_ *address, size_t const length) {
 	if( munlock( address, length ) != 0 )
 		SHIM_ERRX ("Error: Failed to munlock()\n");
 #	elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualUnlock( CONST_CAST_ (address, void*), length ) == 0 )
+	if( VirtualUnlock( ((void *)address), length ) == 0 )
 		SHIM_ERRX ("Error: Failed to VirtualUnlock()\n");
 #	else
 #		error "Unsupported operating system."

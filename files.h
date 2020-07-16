@@ -75,12 +75,12 @@ shim_file_size (Shim_File_t const shim_file)
 	struct stat stat_st;
 	if( fstat( shim_file, &stat_st ) == -1 )
 		SHIM_ERRX ("Error: Unable to fstat file descriptor #%d\n", shim_file);
-	return SHIM_STATIC_CAST_VALUE_TO (stat_st.st_size,size_t);
+	return (size_t)stat_st.st_size;
 #elif  defined (SHIM_OS_WINDOWS)
 	LARGE_INTEGER lg_int;
 	if( GetFileSizeEx( shim_file, &lg_int ) == 0 )
 		SHIM_ERRX ("Error: GetFileSizeEx() failed\n");
-	return SHIM_STATIC_CAST_VALUE_TO (lg_int.QuadPart,size_t);
+	return (size_t)lg_int.QuadPart;
 #else
 #	error "Unsupported operating system."
 #endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
@@ -116,22 +116,22 @@ shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
 			     bool const readonly)
 {
 	shim_enforce_filepath_existence( filepath, true );
+	Shim_File_t shim_file;
 #if    defined (SHIM_OS_UNIXLIKE)
-	int file_d;
 	int const read_write_rights = (readonly ? O_RDONLY : O_RDWR);
-	if( (file_d = open( filepath, read_write_rights, SHIM_STATIC_CAST_VALUE_TO(0600,mode_t) )) == -1 )
+	if( (shim_file = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
 		SHIM_ERRX ("Error: Unable to open existing file %s with open()\n", filepath);
-	return file_d;
+	return shim_file;
 #elif  defined (SHIM_OS_WINDOWS)
-	HANDLE file_h;
+	//HANDLE file_h;
 	if( readonly ) {
-		if( (file_h = CreateFileA( filepath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
+		if( (shim_file = CreateFileA( filepath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 			SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
 	} else {
-		if( (file_h = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
+		if( (shim_file = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 			SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
 	}
-	return file_h;
+	return shim_file;
 #else
 #	error "Unsupported operating system."
 #endif
@@ -141,16 +141,15 @@ Shim_File_t
 shim_create_filepath (char const *filepath)
 {
 	shim_enforce_filepath_existence( filepath, false );
+	Shim_File_t shim_file;
 #if    defined (SHIM_OS_UNIXLIKE)
-	int file_d;
-	if( (file_d = open( filepath, O_RDWR|O_TRUNC|O_CREAT, SHIM_STATIC_CAST_VALUE_TO (0600,mode_t) )) == -1 )
+	if( (shim_file = open( filepath, O_RDWR|O_TRUNC|O_CREAT, (mode_t)0600 )) == -1 )
 		SHIM_ERRX ("Error: Unable to create new file %s with open()\n", filepath);
-	return file_d;
+	return shim_file;
 #elif  defined (SHIM_OS_WINDOWS)
-	HANDLE file_h;
-	if( (file_h = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
+	if( (shim_file = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 		SHIM_ERRX ("Error: Unable to create file %s with CreateFileA()\n", filepath);
-	return file_h;
+	return shim_file;
 #else
 #	error "Unsupported operating system."
 #endif
