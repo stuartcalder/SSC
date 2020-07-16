@@ -48,6 +48,8 @@
 #		error "Unsupported operating system."
 #	endif
 
+SHIM_BEGIN_DECLS
+
 extern inline void
 shim_lock_memory (void LOCK_CONST_ *address, size_t const length) {
 #	if    defined (SHIM_OS_UNIXLIKE)
@@ -77,5 +79,7 @@ shim_unlock_memory (void LOCK_CONST_ *address, size_t const length) {
 #	undef LOCK_CONST_
 #	undef CONST_CAST_
 #endif // ~ ENABLE_MEMORYLOCKING_
+
+SHIM_END_DECLS
 
 #endif // ~ SHIM_MLOCK_H

@@ -100,7 +100,7 @@ shim_filepath_exists (char const *filepath)
 
 void
 shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
-				 bool const force_to_exist)
+				 bool const                 force_to_exist)
 {
 	if( shim_filepath_exists( filepath ) ) {
 		if( !force_to_exist )
@@ -113,7 +113,7 @@ shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 
 Shim_File_t
 shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
-			     bool const readonly)
+			     bool const                 readonly)
 {
 	shim_enforce_filepath_existence( filepath, true );
 	Shim_File_t shim_file;
@@ -121,9 +121,7 @@ shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
 	int const read_write_rights = (readonly ? O_RDONLY : O_RDWR);
 	if( (shim_file = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
 		SHIM_ERRX ("Error: Unable to open existing file %s with open()\n", filepath);
-	return shim_file;
 #elif  defined (SHIM_OS_WINDOWS)
-	//HANDLE file_h;
 	if( readonly ) {
 		if( (shim_file = CreateFileA( filepath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 			SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
@@ -131,10 +129,10 @@ shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
 		if( (shim_file = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 			SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
 	}
-	return shim_file;
 #else
 #	error "Unsupported operating system."
 #endif
+	return shim_file;
 }
 
 Shim_File_t
@@ -145,14 +143,13 @@ shim_create_filepath (char const *filepath)
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( (shim_file = open( filepath, O_RDWR|O_TRUNC|O_CREAT, (mode_t)0600 )) == -1 )
 		SHIM_ERRX ("Error: Unable to create new file %s with open()\n", filepath);
-	return shim_file;
 #elif  defined (SHIM_OS_WINDOWS)
 	if( (shim_file = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 		SHIM_ERRX ("Error: Unable to create file %s with CreateFileA()\n", filepath);
-	return shim_file;
 #else
 #	error "Unsupported operating system."
 #endif
+	return shim_file;
 }
 
 void
