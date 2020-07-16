@@ -1,3 +1,6 @@
+/* Copyright (c) 2020 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef SHIM_MLOCK_H
 #define SHIM_MLOCK_H
 
