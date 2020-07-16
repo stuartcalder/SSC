@@ -7,7 +7,7 @@
 SHIM_BEGIN_DECLS
 
 extern inline void
-shim_print_byte_buffer (uint8_t *bytes, size_t const num_bytes) {
+shim_print_byte_buffer (uint8_t * SHIM_RESTRICT bytes, size_t const num_bytes) {
 	if( num_bytes == 0 )
 		return;
 	uint8_t const *alias = bytes;

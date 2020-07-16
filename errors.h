@@ -9,6 +9,8 @@
 #include <stdarg.h>
 #include "macros.h"
 
+#define SHIM_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure!\n"
+
 #if    defined (SHIM_OS_UNIXLIKE)
 /* Pretty sure all the Unixlike platforms have err.h
  */

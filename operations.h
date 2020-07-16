@@ -23,6 +23,9 @@
 #		include <machine/bswap.h>
 #		include <string.h>
 #		include <sys/param.h>
+#		if    (__NetBSD_Version_ < 1000000000)
+#			include "files.h"
+#		endif
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
 #	elif  defined (SHIM_OS_OSX)
@@ -43,54 +46,48 @@
 #	error "Unsupported operating system."
 #endif
 
-#define BITS_TO_BYTES_(bits)	(bits  / CHAR_BIT)
-#define BYTES_TO_BITS_(bytes)	(bytes * CHAR_BIT)
+static_assert (CHAR_BIT == 8, "Code wholly assumes a byte to be 8 bits.");
+#define SHIM_BITS_TO_BYTES(bits)	(bits / CHAR_BIT)
+#define SHIM_BYTES_TO_BITS(bytes)	(bytes * CHAR_BIT)
 
-#define UNSIGNED_MASK_T_(bits) \
-	uint##bits_t
+#define SHIM_ROT_UNSIGNED_MASK_T_(bits) \
+	uint##bits##_t
 
-#define UNSIGNED_MASK_(bits) \
-	((UNSIGNED_MASK_T_ (bits))((BYTES_TO_BITS_ (sizeof(UNSIGNED_MASK_T_ (bits))) - 1))) \
+#define SHIM_ROT_UNSIGNED_MASK_(bits) \
+	((SHIM_ROT_UNSIGNED_MASK_T_(bits))(SHIM_BYTES_TO_BITS(sizeof(SHIM_ROT_UNSIGNED_MASK_T_(bits))) - 1))
+#define SHIM_ROT_MASKED_COUNT_(bits, count) \
+	((SHIM_ROT_UNSIGNED_MASK_(bits)) & count)
 
-#define MASKED_COUNT_(bits,count) \
-	((UNSIGNED_MASK_ (bits)) & count)
+#define SHIM_ROT_LEFT(value, count, bits) \
+	((value << SHIM_ROT_MASKED_COUNT_(bits,count)) | \
+	 (value >> \
+	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
+	  ))
 
-#define SHIM_ROTATE_LEFT(value, count, bits) \
-	static_assert (CHAR_BIT == 8, "Assume 8-bits bytes." ); \
-	static_assert (bits == 16 || bits == 32 || bits == 64, "Invalid `bits` parameter."); \
-	static_assert (count >= 1, "Cannot shift by less than 1"); \
-	((value << MASK_COUNT_ (bits,count)) | (value >> ((-MASK_COUNT_ (bits,count)) & UNSIGNED_MASK_ (bits))))
-
-#define SHIM_ROTATE_RIGHT(value, count, bits) \
-	static_assert (CHAR_BIT == 8, "Assume 8-bits bytes." ); \
-	static_assert (bits == 16 || bits == 32 || bits == 64, "Invalid `bits` parameter."); \
-	static_assert (count >= 1, "Cannot shift by less than 1"); \
-	((value >> MASK_COUNT_ (bits,count)) | (value << ((-MASK_COUNT_ (bits,count)) & UNSIGNED_MASK_ (bits))))
-
-#undef MASKED_COUNT_
-#undef UNSIGNED_MASK_
-#undef UNSIGNED_MASK_T_
-#undef BYTES_TO_BITS_
-#undef BITS_TO_BYTES_
+#define SHIM_ROT_RIGHT(value, count, bits) \
+	((value >> SHIM_ROT_MASKED_COUNT_(bits,count)) | \
+	 (value << \
+	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
+	  ))
 
 SHIM_BEGIN_DECLS
 
-#define DEFINE_SHIM_XOR_(block_bytes) \
+#define DEFINE_GENERIC_SHIM_XOR_(block_bytes) \
 	extern inline void \
-	shim_xor_##block_bytes (void * SHIM_RESTRICT block, void * SHIM_RESTRICT add) { \
+	shim_xor_##block_bytes (void * SHIM_RESTRICT block, void const * SHIM_RESTRICT add) { \
 		for( int i = 0; i < block_bytes; ++i ) { \
-			SHIM_REINTERPRET_CAST_VALUE_TO (block, uint8_t*      )[ i ] ^= \
-			SHIM_REINTERPRET_CAST_VALUE_TO (add  , uint8_t const*)[ i ]; \
+			((uint8_t *)    block)[ i ] ^= \
+			((uint8_t const *)add)[ i ]; \
 		} \
 	}
-DEFINE_SHIM_XOR_ (16)
-DEFINE_SHIM_XOR_ (32)
-DEFINE_SHIM_XOR_ (64)
-DEFINE_SHIM_XOR_ (128)
-#undef DEFINE_SHIM_XOR_
+DEFINE_GENERIC_SHIM_XOR_ (16)
+DEFINE_GENERIC_SHIM_XOR_ (32)
+DEFINE_GENERIC_SHIM_XOR_ (64)
+DEFINE_GENERIC_SHIM_XOR_ (128)
+#undef DEFINE_GENERIC_SHIM_XOR_
 
 extern inline void
-shim_obtain_os_entropy (uint8_t *buffer, size_t num_bytes) {
+shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX) || (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000))
 #	if    defined (SHIM_OS_OSX)
 #		define DEV_RANDOM_ "/dev/random"
@@ -100,7 +97,7 @@ shim_obtain_os_entropy (uint8_t *buffer, size_t num_bytes) {
 #		error "This should be impossible."
 #	endif
 	Shim_File_t random_dev = shim_open_existing_filepath( DEV_RANDOM_, true );
-	if( read( random_dev, buffer, num_bytes ) != SHIM_STATIC_CAST_VALUE_TO (num_bytes, ssize_t) )
+	if( read( random_dev, buffer, num_bytes ) != ((ssize_t)num_bytes) )
 		SHIM_ERRX ("Error: Failed to read from " DEV_RANDOM_ "\n");
 	shim_close_file( random_dev );
 #	undef DEV_RANDOM_
@@ -129,11 +126,11 @@ shim_obtain_os_entropy (uint8_t *buffer, size_t num_bytes) {
 } // ~ shim_obtain_os_entropy(...)
 
 extern inline void
-shim_secure_zero (void *buffer, size_t num_bytes) {
+shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX)
-	SHIM_STATIC_CAST_VALUE_TO (memset_s( buffer, num_bytes, 0, num_bytes ), void);
+	(void)memset_s( buffer, num_bytes, 0, num_bytes );
 #elif  defined (__NetBSD__)
-	SHIM_STATIC_CAST_VALUE_TO (explicit_memset( buffer, 0, num_bytes ), void);
+	(void)explicit_memset( buffer, 0, num_bytes );
 #elif  defined (SHIM_OS_UNIXLIKE)
 	explicit_bzero( buffer, num_bytes );
 #elif  defined (SHIM_OS_WINDOWS)
@@ -148,11 +145,12 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 		   void const * SHIM_RESTRICT right,
 		   size_t const               size)
 {
+	static_assert (CHAR_BIT == 8, "We need 8-bit bytes for this.");
 	int non_equal_bytes = 0;
 #define ONE_MASK_ UINT8_C (0x01)
 	for( size_t i = 0; i < size; ++i ) {
-		uint8_t const b = SHIM_REINTERPRET_CAST_VALUE_TO(left ,uint8_t const*)[ i ] ^
-			          SHIM_REINTERPRET_CAST_VALUE_TO(right,uint8_t const*)[ i ];
+		uint8_t const b = ((uint8_t const *) left)[ i ] ^
+			          ((uint8_t const *)right)[ i ];
 		non_equal_bytes += (
 					((b >> 7)            ) |
 					((b >> 6) & ONE_MASK_) |
