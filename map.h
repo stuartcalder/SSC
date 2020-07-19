@@ -61,8 +61,8 @@ shim_map_memory (Shim_Map *shim_map, bool const readonly) {
 		map_readwrite_flag = FILE_MAP_READ|FILE_MAP_WRITE;
 	}
 
-	static_assert (sizeof(shim_map->size) == 8, "Shim_Map's size must be 8 bytes.");
-	static_assert (sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
+	SHIM_STATIC_ASSERT (sizeof(shim_map->size) == 8, "Shim_Map's size must be 8 bytes.");
+	SHIM_STATIC_ASSERT (sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
 	DWORD high_bits = (DWORD)(shim_map->size >> 32);
 	DWORD low_bits  = (DWORD)(shim_map->size)
 	shim_map->windows_filemapping = CreateFileMappingA( shim_map->shim_file, NULL, page_readwrite_flag, high_bits, low_bits, NULL );

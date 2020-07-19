@@ -97,9 +97,10 @@
 #	elif  defined (SHIM_OPENBSD_PLEDGE)
 #		error 'SHIM_OPENBSD_PLEDGE already defined'
 #	endif
-#	include "errors.h"
 
 #	include <unistd.h>
+#	include "errors.h"
+
 #	define SHIM_OPENBSD_UNVEIL(path,permissions) \
 		if( unveil( path, permissions ) != 0 ) \
 			SHIM_ERRX ("Failed to unveil()\n")
@@ -125,9 +126,21 @@
 #ifdef __cplusplus
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
+#	define SHIM_STATIC_ASSERT(boolean, message) \
+	static_assert (boolean, message)
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
+#	if    defined (__STDC_VERSION__)
+#		if    __STDC_VERSION__ >= 201112L
+#			define SHIM_STATIC_ASSERT(boolean, message) \
+			_Static_assert (boolean, message)
+#		else
+#			define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
+#		endif
+#	else
+#		define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
+#	endif
 #endif
 
 #endif // ~ SHIM_MACROS_H

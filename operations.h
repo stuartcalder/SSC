@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
+#include <assert.h>
 #include "macros.h"
 #include "errors.h"
 
@@ -16,7 +17,7 @@
 #	include <unistd.h>
 #	if    defined (__OpenBSD__)
 #		include <endian.h>
-#	elif  defined (__FreeBSD__)
+#	elif  defined (__FreeBSD__) || defined (__Dragonfly__)
 #		include <sys/endian.h>
 #	elif  defined (__NetBSD__)
 #		include <sys/types.h>
@@ -46,7 +47,6 @@
 #	error "Unsupported operating system."
 #endif
 
-static_assert (CHAR_BIT == 8, "Code wholly assumes a byte to be 8 bits.");
 #define SHIM_BITS_TO_BYTES(bits)	(bits / CHAR_BIT)
 #define SHIM_BYTES_TO_BITS(bytes)	(bytes * CHAR_BIT)
 
@@ -88,10 +88,12 @@ DEFINE_GENERIC_SHIM_XOR_ (128)/* 1024-bits */
 
 extern inline void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
-#if    defined (SHIM_OS_OSX) || (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000))
+#if    defined (SHIM_OS_OSX) \
+   || (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) \
+   ||  defined (__Dragonfly__)
 #	if    defined (SHIM_OS_OSX)
 #		define DEV_RANDOM_ "/dev/random"
-#	elif  defined (__NetBSD__)
+#	elif  defined (__NetBSD__) || defined (__Dragonfly__)
 #		define DEV_RANDOM_ "/dev/urandom"
 #	else
 #		error "This should be impossible."
@@ -145,7 +147,7 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 		   void const * SHIM_RESTRICT right,
 		   size_t const               size)
 {
-	static_assert (CHAR_BIT == 8, "We need 8-bit bytes for this.");
+	SHIM_STATIC_ASSERT (CHAR_BIT == 8, "We need 8-bit bytes for this.");
 	int non_equal_bytes = 0;
 #define ONE_MASK_ UINT8_C (0x01)
 	for( size_t i = 0; i < size; ++i ) {
@@ -170,7 +172,7 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 
 #if    defined (__OpenBSD__)
 #	define SWAP_F_IMPL_(size,u)	swap##size( u )
-#elif  defined (__FreeBSD__) || defined (__NetBSD__)
+#elif  defined (__FreeBSD__) || defined (__NetBSD__) || defined (__Dragonfly__)
 #	define SWAP_F_IMPL_(size,u)	bswap##size( u )
 #elif  defined (__gnu_linux__)
 #	define SWAP_F_IMPL_(size,u)	bswap_##size( u )
