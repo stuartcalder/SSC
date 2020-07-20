@@ -13,11 +13,12 @@
 #	define  SHIM_PRIVATE
 #else
 #	if    defined (_WIN32) || defined (__CYGWIN__)
+#		define SHIM_PRIVATE /*null macro*/
 #		ifdef	SHIM_BUILD_DLL
 #			ifdef	__GNUC__
 #				define	SHIM_PUBLIC __attribute__ ((dllexport))
 #			else
-#				define	SHIM_PRIVATE __declspec(dllexport)
+#				define	SHIM_PUBLIC __declspec(dllexport)
 #			endif // ~ #ifdef __GNUC__
 #		else
 #			ifdef	__GNUC__
@@ -26,7 +27,6 @@
 #				define	SHIM_PUBLIC __declspec(dllimport)
 #			endif // ~ #ifdef __GNUC__
 #		endif // ~ #ifdef SHIM_BUILD_DLL
-#		define	SHIM_PRIVATE
 #	else
 #		if    defined (__GNUC__) && (__GNUC__ >= 4)
 #			define	SHIM_PUBLIC  __attribute__ ((visibility ("default")))
@@ -110,8 +110,8 @@
 #else
 /* These macros define to nothing on non-OpenBSD operating systems.
  */
-#	define SHIM_OPENBSD_UNVEIL(null0,null1)
-#	define SHIM_OPENBSD_PLEDGE(null0,null1)
+#	define SHIM_OPENBSD_UNVEIL(null0,null1) /*null macro*/
+#	define SHIM_OPENBSD_PLEDGE(null0,null1) /*null macro*/
 #endif // ~ #ifdef __OpenBSD__
 
 /* Simplification Macros */
