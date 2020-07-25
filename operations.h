@@ -24,14 +24,14 @@
 #		include <machine/bswap.h>
 #		include <string.h>
 #		include <sys/param.h>
-#		if    (__NetBSD_Version_ < 1000000000)
+#		if    (__NetBSD_Version__ < 1000000000)
 #			include "files.h"
 #		endif
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
 #	elif  defined (SHIM_OS_OSX)
 #		if   !defined (__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1)
-#			error "The macro __STDC_WANT_LIB_EXT1__ msut be #defined to 1 for access to memset_s."
+#			error "The macro __STDC_WANT_LIB_EXT1__ must be #defined to 1 for access to memset_s."
 #		endif
 #		include "files.h"
 #		include <string.h>
@@ -70,6 +70,13 @@
 	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
 	  ))
 
+#define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) { \
+	type_t tmp_name; \
+	mempcy( &tmp_name, ptr, sizeof(tmp_name) ); \
+	statement; \
+	memcpy( ptr, &tmp_name, sizeof(tmp_name) ); \
+	}
+
 SHIM_BEGIN_DECLS
 
 #define DEFINE_GENERIC_SHIM_XOR_(block_bytes) \
@@ -93,10 +100,8 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
    ||  defined (__Dragonfly__)
 #	if    defined (SHIM_OS_OSX)
 #		define DEV_RANDOM_ "/dev/random"
-#	elif  defined (__NetBSD__) || defined (__Dragonfly__)
-#		define DEV_RANDOM_ "/dev/urandom"
 #	else
-#		error "This should be impossible."
+#		define DEV_RANDOM_ "/dev/urandom"
 #	endif
 	Shim_File_t random_dev = shim_open_existing_filepath( DEV_RANDOM_, true );
 	if( read( random_dev, buffer, num_bytes ) != ((ssize_t)num_bytes) )
@@ -202,10 +207,12 @@ shim_swap_16 (uint16_t val) {
 extern inline uint32_t
 shim_swap_32 (uint32_t val) {
 #ifdef SHIM_OS_OSX
-	return (((val >> (3*8))) | \
-		((val >> 8    ) & UINT32_C (0x0000ff00)) | \
-		((val << 8    ) & UINT32_C (0x00ff0000)) | \
-		((val << (3*8))));
+	return (
+		 (val >> (3*8)) |
+		((val >>    8 ) & UINT32_C (0x0000ff00)) |
+		((val <<    8 ) & UINT32_C (0x00ff0000)) |
+		 (val << (3*8))
+	       );
 #else
 	return SWAP_F_ (SIZE_ (32,ulong),val);
 #endif
@@ -214,14 +221,16 @@ shim_swap_32 (uint32_t val) {
 extern inline uint64_t
 shim_swap_64 (uint64_t val) {
 #ifdef SHIM_OS_OSX
-	return  ((val >> (7*8)) | \
-		 ((val >> (5*8)) & UINT64_C (0x000000000000ff00)) | \
-		 ((val >> (3*8)) & UINT64_C (0x0000000000ff0000)) | \
-		 ((val >> 8    ) & UINT64_C (0x00000000ff000000)) | \
-		 ((val << 8    ) & UINT64_C (0x000000ff00000000)) | \
-		 ((val << (3*8)) & UINT64_C (0x0000ff0000000000)) | \
-		 ((val << (5*8)) & UINT64_C (0x00ff000000000000)) | \
-		 (val << (7*8)));
+	return (
+		 (val >> (7*8))                                  |
+		((val >> (5*8)) & UINT64_C (0x000000000000ff00)) |
+		((val >> (3*8)) & UINT64_C (0x0000000000ff0000)) |
+		((val >>    8 ) & UINT64_C (0x00000000ff000000)) |
+		((val <<    8 ) & UINT64_C (0x000000ff00000000)) |
+		((val << (3*8)) & UINT64_C (0x0000ff0000000000)) |
+		((val << (5*8)) & UINT64_C (0x00ff000000000000)) |
+		 (val << (7*8))
+	       );
 #else
 	return SWAP_F_ (SIZE_ (64,uint64),val);
 #endif
