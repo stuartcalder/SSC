@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
+#include <strings.h>
 #include <assert.h>
 #include "macros.h"
 #include "errors.h"
@@ -70,17 +71,43 @@
 	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
 	  ))
 
-#define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) { \
-	type_t tmp_name; \
-	mempcy( &tmp_name, ptr, sizeof(tmp_name) ); \
-	statement; \
-	memcpy( ptr, &tmp_name, sizeof(tmp_name) ); \
-	}
+#define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) \
+	SHIM_MACRO_SHIELD \
+		type_t tmp_name; \
+		memcpy( &tmp_name, ptr, sizeof(tmp_name) ); \
+		statement; \
+		memcpy( ptr, &tmp_name, sizeof(tmp_name) ); \
+	SHIM_MACRO_SHIELD_EXIT
 
 SHIM_BEGIN_DECLS
 
+static inline void
+shim_xor_16 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+static inline void
+shim_xor_32 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+static inline void
+shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+static inline void
+shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+static inline void
+shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
+static inline void
+shim_secure_zero (void * SHIM_RESTRICT, size_t);
+static inline int
+shim_ctime_memcmp (void const * SHIM_RESTRICT,
+		   void const * SHIM_RESTRICT,
+		   size_t const);
+static inline uint16_t
+shim_swap_16 (uint16_t);
+static inline uint32_t
+shim_swap_32 (uint32_t);
+static inline uint64_t
+shim_swap_64 (uint64_t);
+
+SHIM_END_DECLS
+
 #define DEFINE_GENERIC_SHIM_XOR_(block_bytes) \
-	extern inline void \
+	static inline void \
 	shim_xor_##block_bytes (void * SHIM_RESTRICT block, void const * SHIM_RESTRICT add) { \
 		for( int i = 0; i < block_bytes; ++i ) { \
 			((uint8_t *)    block)[ i ] ^= \
@@ -93,7 +120,7 @@ DEFINE_GENERIC_SHIM_XOR_ (64) /*  512-bits */
 DEFINE_GENERIC_SHIM_XOR_ (128)/* 1024-bits */
 #undef DEFINE_GENERIC_SHIM_XOR_
 
-extern inline void
+static inline void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX) \
    || (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) \
@@ -132,7 +159,7 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
 #endif
 } // ~ shim_obtain_os_entropy(...)
 
-extern inline void
+static inline void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX)
 	(void)memset_s( buffer, num_bytes, 0, num_bytes );
@@ -147,7 +174,7 @@ shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #endif
 } // ~ shim_secure_zero(...)
 
-extern inline int
+static inline int
 shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 		   void const * SHIM_RESTRICT right,
 		   size_t const               size)
@@ -195,7 +222,7 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 #	error "Unsupported operating system."
 #endif
 
-extern inline uint16_t
+static inline uint16_t
 shim_swap_16 (uint16_t val) {
 #ifdef SHIM_OS_OSX
 	return (val >> 8) | (val << 8);
@@ -204,7 +231,7 @@ shim_swap_16 (uint16_t val) {
 #endif
 }
 
-extern inline uint32_t
+static inline uint32_t
 shim_swap_32 (uint32_t val) {
 #ifdef SHIM_OS_OSX
 	return (
@@ -218,7 +245,7 @@ shim_swap_32 (uint32_t val) {
 #endif
 }
 
-extern inline uint64_t
+static inline uint64_t
 shim_swap_64 (uint64_t val) {
 #ifdef SHIM_OS_OSX
 	return (
@@ -236,7 +263,6 @@ shim_swap_64 (uint64_t val) {
 #endif
 }
 
-SHIM_END_DECLS
 
 #undef SIZE_
 #undef SWAP_F_IMPL_

@@ -29,16 +29,16 @@ typedef struct SHIM_PUBLIC {
 
 SHIM_BEGIN_DECLS
 
-extern inline void 
+static inline void 
 shim_map_memory (Shim_Map *, bool const);
 
-extern inline void
+static inline void
 shim_unmap_memory (Shim_Map const *);
 
-extern inline void
+static inline void
 shim_sync_map (Shim_Map const *);
 
-extern inline void
+static inline void
 shim_nullify_map (Shim_Map *);
 
 SHIM_END_DECLS

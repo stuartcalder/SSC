@@ -9,7 +9,13 @@
 
 SHIM_BEGIN_DECLS
 
-extern inline void
+static inline void
+shim_print_byte_buffer (uint8_t * SHIM_RESTRICT, size_t const);
+
+SHIM_END_DECLS
+
+
+void
 shim_print_byte_buffer (uint8_t * SHIM_RESTRICT bytes, size_t const num_bytes) {
 	if( num_bytes == 0 )
 		return;
@@ -21,7 +27,5 @@ shim_print_byte_buffer (uint8_t * SHIM_RESTRICT bytes, size_t const num_bytes) {
 	printf( FORMAT_STR_, alias[ backtick_one_index ] );
 #undef FORMAT_STR_
 } // ~ shim_print_byte_buffer (uint8_t*, size_t const)
-
-SHIM_END_DECLS
 
 #endif // ~ SHIM_PRINT_H

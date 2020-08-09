@@ -131,13 +131,10 @@
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
-#	if    defined (__STDC_VERSION__)
-#		if    __STDC_VERSION__ >= 201112L
-#			define SHIM_STATIC_ASSERT(boolean, message) \
-			_Static_assert (boolean, message)
-#		else
-#			define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
-#		endif
+#	if    defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#		define SHIM_STATIC_ASSERT(boolean, message) \
+		_Static_assert (boolean, message)
+#		include <stdalign.h>
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
 #	endif

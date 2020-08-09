@@ -50,7 +50,7 @@
 
 SHIM_BEGIN_DECLS
 
-extern inline void
+static inline void
 shim_lock_memory (void LOCK_CONST_ *address, size_t const length) {
 #	if    defined (SHIM_OS_UNIXLIKE)
 	if( mlock( address, length ) != 0 )
@@ -63,7 +63,7 @@ shim_lock_memory (void LOCK_CONST_ *address, size_t const length) {
 #	endif
 }
 
-extern inline void
+static inline void
 shim_unlock_memory (void LOCK_CONST_ *address, size_t const length) {
 #	if    defined (SHIM_OS_UNIXLIKE)
 	if( munlock( address, length ) != 0 )
