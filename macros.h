@@ -79,17 +79,6 @@
 #	error 'Unsupported OS'
 #endif // ~ #if defined (unixlike_os's...)
 
-/* Compile-Time-Constant short-hand macros. */
-
-#ifdef SHIM_RESTRICT
-#	error 'SHIM_RESTRICT already defined'
-#endif
-#ifdef __cplusplus
-#	define SHIM_RESTRICT __restrict
-#else
-#	define SHIM_RESTRICT restrict
-#endif
-
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
 #	if    defined (SHIM_OPENBSD_UNVEIL)
@@ -101,10 +90,10 @@
 #	include <unistd.h>
 #	include "errors.h"
 
-#	define SHIM_OPENBSD_UNVEIL(path,permissions) \
+#	define SHIM_OPENBSD_UNVEIL(path, permissions) \
 		if( unveil( path, permissions ) != 0 ) \
 			SHIM_ERRX ("Failed to unveil()\n")
-#	define SHIM_OPENBSD_PLEDGE(promises,execpromises) \
+#	define SHIM_OPENBSD_PLEDGE(promises, execpromises) \
 		if( pledge( promises, execpromises ) != 0 ) \
 			SHIM_ERRX ("Failed to pledge()\n")
 #else
@@ -127,26 +116,31 @@
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) \
-	static_assert (boolean, message)
+		static_assert (boolean, message)
 #	define SHIM_ALIGNAS(align_to) \
-	alignas(align_to)
+		alignas(align_to)
 #	define SHIM_ALIGNOF(align_of) \
-	alignof(align_of)
+		alignof(align_of)
+#	define SHIM_RESTRICT __restrict
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
-#	if    defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-#		define SHIM_STATIC_ASSERT(boolean, message) \
-		_Static_assert (boolean, message)
-#		include <stdalign.h>
-#		define SHIM_ALIGNAS(align_to) \
-		alignas(align_to)
-#		define SHIM_ALIGNOF(align_of) \
-		alignof(align_of)
+#	if   !defined (__STDC_VERSION__)
+#		error "C standard not detected with the __STDC_VERSION__ macro."
 #	else
-#		define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
-#		define SHIM_ALIGNAS(align_to) /* null macro */
-#		define SHIM_ALIGNOF(align_of) /* null macro */
+#		if    (__STDC_VERSION__ < 201112L)
+#			error "At minimum, we need C11."
+#		else
+#			include <inttypes.h>
+#			include <stdalign.h>
+#			define SHIM_STATIC_ASSERT(boolean, message) \
+				_Static_assert (boolean, message)
+#			define SHIM_ALIGNAS(align_to) \
+				_Alignas(align_to)
+#			define SHIM_ALIGNOF(align_of) \
+				_Alignof(align_of)
+#			define SHIM_RESTRICT restrict
+#		endif
 #	endif
 #endif
 
