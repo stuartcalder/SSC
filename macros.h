@@ -128,6 +128,10 @@
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) \
 	static_assert (boolean, message)
+#	define SHIM_ALIGNAS(align_to) \
+	alignas(align_to)
+#	define SHIM_ALIGNOF(align_of) \
+	alignof(align_of)
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
@@ -135,8 +139,14 @@
 #		define SHIM_STATIC_ASSERT(boolean, message) \
 		_Static_assert (boolean, message)
 #		include <stdalign.h>
+#		define SHIM_ALIGNAS(align_to) \
+		alignas(align_to)
+#		define SHIM_ALIGNOF(align_of) \
+		alignof(align_of)
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message) /* null macro */
+#		define SHIM_ALIGNAS(align_to) /* null macro */
+#		define SHIM_ALIGNOF(align_of) /* null macro */
 #	endif
 #endif
 
