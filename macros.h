@@ -113,6 +113,9 @@
 #define SHIM_MACRO_SHIELD_EXIT	} while(0)
 
 #ifdef __cplusplus
+#	if    (__cplusplus < 201100L)
+#		error "Need at least C++11"
+#	endif
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) \

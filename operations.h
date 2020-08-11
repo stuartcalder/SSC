@@ -107,7 +107,7 @@ shim_swap_64 (uint64_t);
 SHIM_END_DECLS
 
 #define DEFINE_GENERIC_SHIM_XOR_(block_bytes) \
-	static inline void \
+	void \
 	shim_xor_##block_bytes (void * SHIM_RESTRICT block, void const * SHIM_RESTRICT add) { \
 		for( int i = 0; i < block_bytes; ++i ) { \
 			((uint8_t *)    block)[ i ] ^= \
@@ -120,7 +120,7 @@ DEFINE_GENERIC_SHIM_XOR_ (64) /*  512-bits */
 DEFINE_GENERIC_SHIM_XOR_ (128)/* 1024-bits */
 #undef DEFINE_GENERIC_SHIM_XOR_
 
-static inline void
+void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX) \
    || (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) \
@@ -159,7 +159,7 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
 #endif
 } // ~ shim_obtain_os_entropy(...)
 
-static inline void
+void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #if    defined (SHIM_OS_OSX)
 	(void)memset_s( buffer, num_bytes, 0, num_bytes );
@@ -174,7 +174,7 @@ shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #endif
 } // ~ shim_secure_zero(...)
 
-static inline int
+int
 shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 		   void const * SHIM_RESTRICT right,
 		   size_t const               size)
@@ -222,7 +222,7 @@ shim_ctime_memcmp (void const * SHIM_RESTRICT left,
 #	error "Unsupported operating system."
 #endif
 
-static inline uint16_t
+uint16_t
 shim_swap_16 (uint16_t val) {
 #ifdef SHIM_OS_OSX
 	return (val >> 8) | (val << 8);
@@ -231,7 +231,7 @@ shim_swap_16 (uint16_t val) {
 #endif
 }
 
-static inline uint32_t
+uint32_t
 shim_swap_32 (uint32_t val) {
 #ifdef SHIM_OS_OSX
 	return (
@@ -245,7 +245,7 @@ shim_swap_32 (uint32_t val) {
 #endif
 }
 
-static inline uint64_t
+uint64_t
 shim_swap_64 (uint64_t val) {
 #ifdef SHIM_OS_OSX
 	return (
