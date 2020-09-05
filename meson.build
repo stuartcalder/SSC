@@ -45,6 +45,15 @@ if os == 'darwin' # On OSX we require __STDC_WANT_LIB_EXT1__ to be defined as 1,
   lang_flags += _flag
 endif
 
+if os in _UNIXLIKE_OPERATING_SYSTEMS
+  if get_option('native_optimize')
+    lang_flags += '-march=native'
+  endif
+  if compiler.get_id() in _GCC_COMPATIBLE_COMPILERS
+    lang_flags += gcc_compatible_flags
+  endif
+endif
+
 if os in _UNIXLIKE_OPERATING_SYSTEMS and compiler.get_id() in _GCC_COMPATIBLE_COMPILERS
   lang_flags += gcc_compatible_flags
 endif

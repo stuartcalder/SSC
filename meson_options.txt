@@ -1,0 +1,1 @@
+option('native_optimize', type: 'boolean', value: false)
