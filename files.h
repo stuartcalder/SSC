@@ -35,7 +35,7 @@ typedef int	Shim_File_t;
 
 #elif  defined (SHIM_OS_WINDOWS)
 typedef HANDLE	Shim_File_t;
-#	define SHIM_NULL_FILE NULL
+#	define SHIM_NULL_FILE INVALID_HANDLE_VALUE
 
 #else
 #	error "Unsupported operating system."
