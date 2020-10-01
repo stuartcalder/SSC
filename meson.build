@@ -23,7 +23,8 @@ else
 endif
 
 src = [
-  'impl/operations.c'
+  'impl/operations.c',
+  'impl/files.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []
