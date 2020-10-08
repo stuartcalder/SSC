@@ -29,87 +29,27 @@ typedef struct SHIM_PUBLIC {
 
 SHIM_BEGIN_DECLS
 
-static inline void 
+void SHIM_PUBLIC
 shim_map_memory (Shim_Map *, bool const);
 
-static inline void
+void SHIM_PUBLIC
 shim_unmap_memory (Shim_Map const *);
 
-static inline void
+void SHIM_PUBLIC
 shim_sync_map (Shim_Map const *);
 
-static inline void
+static inline void 
 shim_nullify_map (Shim_Map *);
 
 SHIM_END_DECLS
 
 void
-shim_map_memory (Shim_Map *shim_map, bool const readonly) {
-#if    defined (SHIM_OS_UNIXLIKE)
-	int const read_write_flag = (readonly ? PROT_READ : PROT_READ|PROT_WRITE);
-	shim_map->ptr = (uint8_t *)mmap( NULL, shim_map->size, read_write_flag, MAP_SHARED, shim_map->shim_file, 0 );
-	if( shim_map->ptr == MAP_FAILED )
-		SHIM_ERRX ("Error: Failed to mmap() the file descriptor %d\n", shim_map->shim_file );
-#elif  defined (SHIM_OS_WINDOWS)
-	DWORD page_readwrite_flag;
-	DWORD map_readwrite_flag;
-	if( readonly ) {
-		page_readwrite_flag = PAGE_READONLY;
-		map_readwrite_flag = FILE_MAP_READ;
-	} else {
-		page_readwrite_flag = PAGE_READWRITE;
-		map_readwrite_flag = FILE_MAP_READ|FILE_MAP_WRITE;
-	}
-
-	SHIM_STATIC_ASSERT (sizeof(shim_map->size) == 8, "Shim_Map's size must be 8 bytes.");
-	SHIM_STATIC_ASSERT (sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
-	DWORD high_bits = (DWORD)(shim_map->size >> 32);
-	DWORD low_bits  = (DWORD)(shim_map->size)
-	shim_map->windows_filemapping = CreateFileMappingA( shim_map->shim_file, NULL, page_readwrite_flag, high_bits, low_bits, NULL );
-	if( !shim_map->windows_filemapping )
-		SHIM_ERRX ("Error: Failed during CreateFileMappingA()\n");
-	shim_map->ptr = (uint8_t *)MapViewOfFile( shim_map->windows_filemapping, map_readwrite_flag, 0, 0, shim_map->size );
-	if( !shim_map->ptr )
-		SHIM_ERRX ("Error: Failed during MapViewOfFile()\n");
-#else
-#	error "Unsupported operating system."
-#endif
-} // ~ shim_map_memory(...)
-
-void
-shim_unmap_memory (Shim_Map const *shim_map) {
-#if    defined (SHIM_OS_UNIXLIKE)
-	if( munmap( shim_map->ptr, shim_map->size ) == -1 )
-		SHIM_ERRX ("Error: Failed to munmap()\n");
-#elif  defined (SHIM_OS_WINDOWS)
-	if( UnmapViewOfFile( (LPCVOID)shim_map->ptr ) == 0 )
-		SHIM_ERRX ("Error: Failed to UnmapViewOfFile()\n");
-	shim_close_file( shim_map->windows_filemapping );
-#else
-#	error "Unsupported operating system."
-#endif
-} // ~ shim_unmap_memory(...)
-
-void
-shim_sync_map (Shim_Map const *shim_map) {
-#if    defined (SHIM_OS_UNIXLIKE)
-	if( msync( shim_map->ptr, shim_map->size, MS_SYNC ) == -1 )
-		SHIM_ERRX ("Error: Failed to msync()\n");
-#elif  defined (SHIM_OS_WINDOWS)
-	if( FlushViewOfFile( (LPCVOID)shim_map->ptr, shim_map->size ))
-		SHIM_ERRX ("Error: Failed to FlushViewOfFile()\n");
-#else
-#	error "Unsupported operating system."
-#endif
-}
-
-void
-shim_nullify_map (Shim_Map *shim_map) {
-	shim_map->ptr = NULL;
-	shim_map->size = 0;
-	shim_map->shim_file = SHIM_NULL_FILE;
+shim_nullify_map (Shim_Map *map) {
+	map->ptr = NULL;
+	map->size = 0;
+	map->shim_file = SHIM_NULL_FILE;
 #ifdef SHIM_OS_WINDOWS
-	shim_map->windows_filemapping = SHIM_NULL_FILE;
+	map->windows_filemapping = SHIM_NULL_FILE;
 #endif
 }
 
