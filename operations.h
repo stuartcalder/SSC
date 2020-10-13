@@ -101,24 +101,33 @@ SHIM_BEGIN_DECLS
 
 void
 shim_xor_16 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+
 void
 shim_xor_32 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+
 void
 shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+
 void
 shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
+
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
+
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
+
 int
 shim_ctime_memcmp (void const * SHIM_RESTRICT,
 		   void const * SHIM_RESTRICT,
 		   size_t const);
+
 SWAP_DECL_ uint16_t
 shim_swap_16 (uint16_t);
+
 SWAP_DECL_ uint32_t
 shim_swap_32 (uint32_t);
+
 SWAP_DECL_ uint64_t
 shim_swap_64 (uint64_t);
 
