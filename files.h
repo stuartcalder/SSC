@@ -23,23 +23,15 @@
 #	include <sys/stat.h>
 #	include <unistd.h>
 #	include <fcntl.h>
+typedef int	Shim_File_t;
+#	define SHIM_NULL_FILE -1
 #elif  defined (SHIM_OS_WINDOWS)
 #	include <windows.h>
+typedef HANDLE	Shim_File_t;
+#	define SHIM_NULL_FILE INVALID_HANDLE_VALUE
 #else
 #	error "Unsupported operating system."
 #endif // ~ SHIM_OS_UNIXLIKE
-
-#if    defined (SHIM_OS_UNIXLIKE)
-typedef int	Shim_File_t;
-#	define SHIM_NULL_FILE -1
-
-#elif  defined (SHIM_OS_WINDOWS)
-typedef HANDLE	Shim_File_t;
-#	define SHIM_NULL_FILE INVALID_HANDLE_VALUE
-
-#else
-#	error "Unsupported operating system."
-#endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
 
 SHIM_BEGIN_DECLS
 

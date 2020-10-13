@@ -25,7 +25,8 @@ endif
 src = [
   'impl/operations.c',
   'impl/files.c',
-  'impl/map.c'
+  'impl/map.c',
+  'impl/args.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []
