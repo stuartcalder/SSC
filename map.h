@@ -39,19 +39,17 @@ void SHIM_PUBLIC
 shim_sync_map (Shim_Map const *);
 
 static inline void 
-shim_nullify_map (Shim_Map *);
-
-SHIM_END_DECLS
-
-void
-shim_nullify_map (Shim_Map *map) {
-	map->ptr = NULL;
-	map->size = 0;
+shim_nullify_map (Shim_Map * map) {
+	memset( map, 0, sizeof(*map) );
+#if SHIM_NULL_FILE != 0
 	map->shim_file = SHIM_NULL_FILE;
-#ifdef SHIM_OS_WINDOWS
+	#ifdef SHIM_OS_WINDOWS
 	map->windows_filemapping = SHIM_NULL_FILE;
+	#endif
 #endif
 }
+
+SHIM_END_DECLS
 
 #endif // ~ SHIM_MAP_H
 

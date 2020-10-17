@@ -7,12 +7,12 @@
  * 	the rest of the program.
  */
 
-typedef void Shim_Arg_Handler_t (char **, void *);
-typedef Shim_Arg_Handler_t * Shim_Arg_Parser_t (char *);
+typedef void Shim_Arg_Handler_t (char **, void * SHIM_RESTRICT);
+typedef Shim_Arg_Handler_t * Shim_Arg_Parser_t (char const *);
 
 void SHIM_PUBLIC
 shim_process_args (int argc, char ** argv,
-		   Shim_Arg_Parser_t * const parser,
-		   void * state_modifier);
-
+		   Shim_Arg_Parser_t * const short_parser,
+		   Shim_Arg_Parser_t * const long_parser,
+		   void * SHIM_RESTRICT state_modifier);
 #endif /* ~ SHIM_ARGS_H */

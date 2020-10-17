@@ -26,7 +26,8 @@ src = [
   'impl/operations.c',
   'impl/files.c',
   'impl/map.c',
-  'impl/args.c'
+  'impl/args.c',
+  'impl/term.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []
@@ -63,11 +64,15 @@ endif
 
 if os == 'openbsd' or os == 'freebsd' or os == 'darwin' # On OpenBSD, FreeBSD, and OSX, the library dependencies and 'include_install' directory are the same.
   include_install = '/usr/local/include'
+  lib_deps += compiler.find_library('ncurses')
 elif os == 'netbsd'
   include_install = '/usr/local/include'
   inc_dir += '/usr/pkg/include'
+  lib_deps += compiler.find_library('ncurses')
 elif os == 'linux'
   include_install = '/usr/include'
+  lib_deps += compiler.find_library('ncurses')
+  lib_deps += compiler.find_library('tinfo')
 elif os == 'windows'
   lib_deps += compiler.find_library('bcrypt')
   include_install = 'C:/include'
