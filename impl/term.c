@@ -20,28 +20,18 @@
 #	error "Minimum buffer size of 2 bytes."
 #endif
 
+#ifdef SHIM_OS_UNIXLIKE
+/* On Windows these functions are inlined. */
 void SHIM_PUBLIC
 shim_term_init () {
-#if    defined (SHIM_OS_UNIXLIKE)
 	initscr();
 	clear();
-#elif  defined (SHIM_OS_WINDOWS)
-	system( "cls" );
-#else
-#	error "Unsupported OS."
-#endif
 }
-
 void SHIM_PUBLIC
 shim_term_end () {
-#if    defined (SHIM_OS_UNIXLIKE)
 	endwin();
-#elif  defined (SHIM_OS_WINDOWS)
-	system( "cls" );
-#else
-#	error "Unsupported OS."
-#endif
 }
+#endif /* ~ SHIM_OS_UNIXLIKE */
 
 int SHIM_PUBLIC
 shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,

@@ -19,7 +19,7 @@
 #endif
 
 typedef struct SHIM_PUBLIC {
-	uint8_t     *ptr;
+	uint8_t *    ptr;
 	uint64_t    size;
 	Shim_File_t shim_file;
 #ifdef SHIM_OS_WINDOWS
@@ -43,9 +43,9 @@ shim_nullify_map (Shim_Map * map) {
 	memset( map, 0, sizeof(*map) );
 #if SHIM_NULL_FILE != 0
 	map->shim_file = SHIM_NULL_FILE;
-	#ifdef SHIM_OS_WINDOWS
+#	ifdef SHIM_OS_WINDOWS
 	map->windows_filemapping = SHIM_NULL_FILE;
-	#endif
+#	endif
 #endif
 }
 
