@@ -21,28 +21,11 @@
 
 SHIM_BEGIN_DECLS
 
-static inline void
-shim_term_init () {
-#if    defined (SHIM_OS_UNIXLIKE)
-	initscr();
-	clear();
-#elif  defined (SHIM_OS_WINDOWS)
-	system( "cls" );
-#else
-#	error "Unsupported OS."
-#endif
-}
+void SHIM_PUBLIC
+shim_term_init ();
 
-static inline void
-shim_term_end () {
-#if    defined (SHIM_OS_UNIXLIKE)
-	endwin();
-#elif  defined (SHIM_OS_WINDOWS)
-	system( "cls" );
-#else
-#	error "Unsupported OS."
-#endif
-}
+void SHIM_PUBLIC
+shim_term_end ();
 
 int SHIM_PUBLIC
 shim_term_get_secret_string (uint8_t * SHIM_RESTRICT,
