@@ -78,8 +78,10 @@ shim_unlock_memory (void LOCK_CONST_ *address, size_t const length) {
 
 #	undef LOCK_CONST_
 #	undef CONST_CAST_
-#endif // ~ ENABLE_MEMORYLOCKING_
 
 SHIM_END_DECLS
+
+#endif // ~ ENABLE_MEMORYLOCKING_
+
 
 #endif // ~ SHIM_MLOCK_H

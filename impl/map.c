@@ -1,12 +1,12 @@
 #include "map.h"
 
 void SHIM_PUBLIC
-shim_map_memory (Shim_Map *map, bool const readonly) {
+shim_map_memory (Shim_Map * map, bool const readonly) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	int const rw_flag = (readonly ? PROT_READ : PROT_READ|PROT_WRITE);
-	map->ptr = (uint8_t*)mmap( NULL, map->size, rw_flag, MAP_SHARED, map->shim_file, 0 );
+	map->ptr = (uint8_t *)mmap( NULL, map->size, rw_flag, MAP_SHARED, map->file, 0 );
 	if( map->ptr == MAP_FAILED )
-		SHIM_ERRX ("Error: Failed to mmap() the file descriptor %d\n", map->shim_file);
+		SHIM_ERRX ("Error: Failed to mmap() the file descriptor %d\n", map->file);
 #elif  defined (SHIM_OS_WINDOWS)
 	DWORD page_rw_flag = PAGE_READONLY;
 	DWORD map_rw_flag = FILE_MAP_READ;
@@ -18,10 +18,10 @@ shim_map_memory (Shim_Map *map, bool const readonly) {
 	SHIM_STATIC_ASSERT (sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
 	DWORD high_bits = (DWORD)(map->size >> 32);
 	DWORD low_bits = (DWORD)map->size;
-	map->windows_filemapping = CreateFileMappingA( map->shim_file, NULL, page_rw_flag, high_bits, low_bits, NULL );
-	if( !map->windows_filemapping )
+	map->win_fmapping = CreateFileMappingA( map->file, NULL, page_rw_flag, high_bits, low_bits, NULL );
+	if( !map->win_fmapping )
 		SHIM_ERRX ("Error: Failed during CreateFileMappingA()\n");
-	map->ptr = (uint8_t *)MapViewOfFile( map->windows_filemapping, map_rw_flag, 0, 0, map->size );
+	map->ptr = (uint8_t *)MapViewOfFile( map->win_fmapping, map_rw_flag, 0, 0, map->size );
 	if( !map->ptr )
 		SHIM_ERRX ("Error: Failed during MapViewOfFile()\n");
 #else
@@ -30,21 +30,21 @@ shim_map_memory (Shim_Map *map, bool const readonly) {
 }
 
 void SHIM_PUBLIC
-shim_unmap_memory (Shim_Map const *map) {
+shim_unmap_memory (Shim_Map const * map) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( munmap( map->ptr, map->size ) == -1 )
 		SHIM_ERRX ("Error: Failed to munmap()\n");
 #elif  defined (SHIM_OS_WINDOWS)
 	if( UnmapViewOfFile( (LPCVOID)map->ptr ) == 0 )
 		SHIM_ERRX ("Error: Failed to UnmapViewOfFile()\n");
-	shim_close_file( map->windows_filemapping );
+	shim_close_file( map->win_fmapping );
 #else
 #	error "Unsupported operating system."
 #endif
 }
 
 void SHIM_PUBLIC
-shim_sync_map (Shim_Map const *map) {
+shim_sync_map (Shim_Map const * map) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( msync( map->ptr, map->size, MS_SYNC ) == -1 )
 		SHIM_ERRX ("Error: Failed to msync()\n");
