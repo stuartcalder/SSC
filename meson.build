@@ -27,7 +27,8 @@ src = [
   'impl/files.c',
   'impl/map.c',
   'impl/args.c',
-  'impl/term.c'
+  'impl/term.c',
+  'impl/print.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []

@@ -3,7 +3,9 @@
 #include "macros.h"
 #include "operations.h"
 
-#define SHIM_TERM_MAX_PW_SIZE	120
+#ifndef SHIM_TERM_MAX_PW_SIZE
+#	define SHIM_TERM_MAX_PW_SIZE	120
+#endif
 #define SHIM_TERM_BUFFER_SIZE	(SHIM_TERM_MAX_PW_SIZE + 1)
 #if    defined (SHIM_OS_UNIXLIKE)
 #	ifdef __NetBSD__
