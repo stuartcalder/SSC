@@ -28,7 +28,8 @@ src = [
   'impl/map.c',
   'impl/args.c',
   'impl/term.c',
-  'impl/print.c'
+  'impl/print.c',
+  'impl/strings.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []
@@ -81,7 +82,7 @@ endif
 
 inc_dir += '..'
 
-install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: '.gitignore')
+install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build'])
 
 if os == 'windows'
   shared_library('shim', sources: src, dependencies: lib_deps,

@@ -14,5 +14,6 @@ void SHIM_PUBLIC
 shim_process_args (int argc, char ** argv,
 		   Shim_Arg_Parser_t * const short_parser,
 		   Shim_Arg_Parser_t * const long_parser,
+		   Shim_Arg_Parser_t * const floating_parser,
 		   void * SHIM_RESTRICT state_modifier);
 #endif /* ~ SHIM_ARGS_H */

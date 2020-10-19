@@ -11,7 +11,7 @@
 
 #define SHIM_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure!\n"
 
-#if    defined (SHIM_OS_UNIXLIKE)
+#ifdef SHIM_OS_UNIXLIKE
 /* Pretty sure all the Unixlike platforms have err.h
  */
 #	include <err.h>
@@ -21,17 +21,16 @@
 #	define SHIM_ERRX_CODE(code, ...) \
 		errx( code, __VA_ARGS__ )
 
-#elif  defined (SHIM_OS_WINDOWS)
-#	include <windows.h>
-
+#else
+/* On any other platform we'll just do it ourselves with fprintf
+ * and exit.
+ */
 #	define SHIM_ERRX_CODE(code, ...) \
 		SHIM_MACRO_SHIELD \
 			fprintf( stderr, __VA_ARGS__ ); \
 			exit( code ); \
 		SHIM_MACRO_SHIELD_EXIT
 
-#else
-#	error "Unsupported operating system."
 #endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
 
 #define SHIM_ERRX(...) \
