@@ -46,7 +46,6 @@
 #		error "Unsupported unix-like OS."
 #	endif
 #elif  defined (SHIM_OS_WINDOWS)
-#	define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 #	include <windows.h>
 #	include <ntstatus.h>
 #	include <bcrypt.h>

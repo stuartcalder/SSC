@@ -19,7 +19,7 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 	DWORD high_bits = (DWORD)(map->size >> 32);
 	DWORD low_bits = (DWORD)map->size;
 	map->win_fmapping = CreateFileMappingA( map->file, NULL, page_rw_flag, high_bits, low_bits, NULL );
-	if( !map->win_fmapping )
+	if( map->win_fmapping == SHIM_NULL_FILE )
 		SHIM_ERRX ("Error: Failed during CreateFileMappingA()\n");
 	map->ptr = (uint8_t *)MapViewOfFile( map->win_fmapping, map_rw_flag, 0, 0, map->size );
 	if( !map->ptr )

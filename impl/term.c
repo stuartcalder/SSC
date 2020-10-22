@@ -147,13 +147,12 @@ shim_term_obtain_password (uint8_t *    SHIM_RESTRICT password_buf,
 	int size;
 	while( 1 ) {
 		size = shim_term_get_secret_string( password_buf, entry_prompt );
-		if( size < min_pw_size ) {
+		if( size < min_pw_size )
 			shim_term_notify( "Password is not long enough." NEWLINE_ );
-		} else if( size > max_pw_size ) {
+		else if( size > max_pw_size )
 			shim_term_notify( "Password is too long." NEWLINE_ );
-		} else {
+		else
 			break;
-		}
 	}
 	return size;
 }

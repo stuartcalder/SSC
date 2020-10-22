@@ -1,29 +1,25 @@
 #include "args.h"
 #include <stdbool.h>
 
-enum Op_Type {
-	Op_Type_FLOATING_,
-	Op_Type_SHORT_,
-	Op_Type_LONG_
+enum {
+	OP_TYPE_FLOATING_,
+	OP_TYPE_SHORT_,		/* i.e. -h */
+	OP_TYPE_LONG_		/* i.e. --help */
 };
 
 static int
 get_op_type_ (char const * str) {
 	char const * p = str;
 	int number_hyphens = 0;
-	while( p ) {
-		if( *p++ == '-' )
-			++number_hyphens;
-		else
-			break;
-	}
+	while( *p++ == '-' )
+		++number_hyphens;
 	switch( number_hyphens ) {
 		case 1:
-			return Op_Type_SHORT_;
+			return OP_TYPE_SHORT_;
 		case 2:
-			return Op_Type_LONG_;
+			return OP_TYPE_LONG_;
 		default:
-			return Op_Type_FLOATING_;
+			return OP_TYPE_FLOATING_;
 	}
 }
 
@@ -35,28 +31,25 @@ shim_process_args (int argc, char ** argv,
 		   void * SHIM_RESTRICT state_modifier)
 {
 	for( int i = 1; i < argc; ++i ) {
-		char ** ptr = argv + 1;
+		char ** ptr = argv + i;
 		if( *ptr ) {
 			int const op_type = get_op_type_( *ptr );
 			Shim_Arg_Handler_t * handler;
 			switch( op_type ) {
-				case Op_Type_SHORT_:
+				case OP_TYPE_SHORT_:
 					handler = short_parser( *ptr );
 					break;
-				case Op_Type_LONG_:
+				case OP_TYPE_LONG_:
 					handler = long_parser( *ptr );
 					break;
-				case Op_Type_FLOATING_:
+				case OP_TYPE_FLOATING_:
+				default:
 					handler = floating_parser( *ptr );
 					break;
-				default:
-					handler = NULL;
-					break;
 			}
-			if( handler ) {
+			if( handler )
 				handler( ptr, state_modifier );
-				*ptr = NULL;
-			}
+			*ptr = NULL;
 		}
 	}
 }
