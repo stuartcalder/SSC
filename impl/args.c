@@ -49,7 +49,6 @@ shim_process_args (int argc, char ** argv,
 			}
 			if( handler )
 				handler( ptr, argc - i, state_modifier );
-			*ptr = NULL;
 		}
 	}
 }
