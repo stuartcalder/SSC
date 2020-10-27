@@ -14,6 +14,14 @@ GENERIC_SHIM_XOR_ (32)
 GENERIC_SHIM_XOR_ (64)
 GENERIC_SHIM_XOR_ (128)
 
+void SHIM_PUBLIC * 
+shim_checked_malloc (size_t size) {
+	void * mem = malloc( size );
+	if( !mem )
+		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
+	return mem;
+}
+
 #ifndef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 void SHIM_PUBLIC
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT mem, size_t size)

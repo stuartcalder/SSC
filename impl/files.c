@@ -18,6 +18,21 @@ shim_file_size (Shim_File_t const shim_file)
 #endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
 }
 
+size_t SHIM_PUBLIC
+shim_filepath_size (char const * filepath) {
+#if    defined (SHIM_OS_UNIXLIKE)
+	struct stat stat_st;
+	if( stat( filepath, &stat_st ) == -1 )
+		SHIM_ERRX ("Error: Unable to stat filepath %s. Does the file exist?\n", filepath);
+	return (size_t)stat_st.st_size;
+#else /* Any other OS */
+	Shim_File_t file = shim_open_existing_filepath( filepath, true );
+	size_t const size = shim_file_size( file );
+	shim_close_file( file );
+	return size;
+#endif
+}
+
 bool SHIM_PUBLIC
 shim_filepath_exists (char const *filepath)
 {

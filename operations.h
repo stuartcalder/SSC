@@ -110,6 +110,9 @@ shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 void
 shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
+void *
+shim_checked_malloc (size_t size);
+
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 

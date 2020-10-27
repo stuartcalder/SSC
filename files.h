@@ -38,6 +38,9 @@ SHIM_BEGIN_DECLS
 NO_DISCARD_ size_t
 shim_file_size (Shim_File_t const);
 
+NO_DISCARD_ size_t
+shim_filepath_size (char const *);
+
 NO_DISCARD_ bool
 shim_filepath_exists (char const *);
 

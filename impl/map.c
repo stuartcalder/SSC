@@ -8,12 +8,13 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 	if( map->ptr == MAP_FAILED )
 		SHIM_ERRX ("Error: Failed to mmap() the file descriptor %d\n", map->file);
 #elif  defined (SHIM_OS_WINDOWS)
-	DWORD page_rw_flag = PAGE_READONLY;
-	DWORD map_rw_flag = FILE_MAP_READ;
+	DWORD page_rw_flag = PAGE_READWRITE;
+	DWORD map_rw_flag = (FILE_MAP_READ | FILE_MAP_WRITE);
 	if( readonly ) {
-		page_rw_flag = PAGE_READWRITE;
-		map_rw_flag |= FILE_MAP_WRITE;
+		page_rw_flag = PAGE_READONLY;
+		map_rw_flag = FILE_MAP_READ;
 	}
+	SHIM_STATIC_ASSERT (CHAR_BIT == 8, "Bytes must be 8 bits.");
 	SHIM_STATIC_ASSERT (sizeof(map->size) == 8, "Map's size must be 8 bytes.");
 	SHIM_STATIC_ASSERT (sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
 	DWORD high_bits = (DWORD)(map->size >> 32);

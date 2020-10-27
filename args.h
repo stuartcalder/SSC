@@ -1,3 +1,6 @@
+/* Copyright (c) 2020 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef SHIM_ARGS_H
 #define SHIM_ARGS_H
 #include <stdlib.h>
