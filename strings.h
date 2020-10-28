@@ -6,7 +6,11 @@
 #include "macros.h"
 #include "errors.h"
 
+SHIM_BEGIN_DECLS
+
 int SHIM_PUBLIC
 shim_shift_left_digits (char * SHIM_RESTRICT, int const);
+
+SHIM_END_DECLS
 
 #endif

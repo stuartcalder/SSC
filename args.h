@@ -21,6 +21,8 @@ enum {
 	SHIM_ARGTYPE_LONG
 };
 
+SHIM_BEGIN_DECLS
+
 int SHIM_PUBLIC
 shim_argtype (char const *);
 
@@ -28,5 +30,7 @@ void SHIM_PUBLIC
 shim_process_args (int argc, char ** argv,
 		   Shim_Arg_Processor_t * processor,
 		   void * SHIM_RESTRICT state);
+
+SHIM_END_DECLS
 		   
 #endif /* ~ SHIM_ARGS_H */

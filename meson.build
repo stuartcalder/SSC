@@ -13,8 +13,8 @@ _SUPPORTED_COMPILERS         = _GCC_COMPATIBLE_COMPILERS + ['msvc']
 compiler = meson.get_compiler(_LANG)
 os = host_machine.system()
 
-assert (os in _SUPPORTED_OPERATING_SYSTEMS, 'You are trying to build symm using an unsupported operating system!')
-assert (compiler.get_id() in _SUPPORTED_COMPILERS, 'You are trying to build symm using an unsupported compiler!')
+assert (os in _SUPPORTED_OPERATING_SYSTEMS, 'You are trying to build ' + _PROJECT + ' using an unsupported operating system!')
+assert (compiler.get_id() in _SUPPORTED_COMPILERS, 'You are trying to build ' + _PROJECT + ' using an unsupported compiler!')
 
 if os == 'windows' and compiler.get_id() == 'msvc'
 	_D_PREFIX = '/D'
