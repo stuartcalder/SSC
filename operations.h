@@ -138,46 +138,133 @@ shim_swap_64 (uint64_t);
 
 SHIM_END_DECLS
 
-#ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-void
-shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes) {
+/* obtain_os_entropy implementation */
 #if    defined (SHIM_OS_OSX) || \
       (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) || \
        defined (__Dragonfly__)
 #	if    defined (SHIM_OS_OSX)
-#		define DEV_RANDOM_ "/dev/random"
+#		define SHIM_OPERATIONS_DEV_RANDOM "/dev/random"
 #	else
-#		define DEV_RANDOM_ "/dev/urandom"
+#		define SHIM_OPERATIONS_DEV_RANDOM "/dev/urandom"
 #	endif
-	Shim_File_t random_dev = shim_open_existing_filepath( DEV_RANDOM_, true );
-	if( read( random_dev, buffer, num_bytes ) != ((ssize_t)num_bytes) )
-		SHIM_ERRX ("Error: Failed to read from " DEV_RANDOM_ "\n");
-	shim_close_file( random_dev );
-#	undef DEV_RANDOM_
-#elif  	defined (SHIM_OS_UNIXLIKE)
-#	define MAX_ 256
-	while( num_bytes > MAX_ ) {
-		if( getentropy( buffer, MAX_ ) != 0 )
-			SHIM_ERRX ("Error: Failed to getentropy()\n");
-		num_bytes -= MAX_;
-		buffer    += MAX_;
-	}
-	if( getentropy( buffer, num_bytes ) != 0 )
-		SHIM_ERRX ("Error: Failed to getentropy()\n");
-#	undef MAX_
+#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
+		{ \
+			Shim_File_t dev_random = shim_open_existing_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
+			if( read( dev_random, ptr_v, size_v ) != ((size_t)size_v) ) \
+				SHIM_ERRX ("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
+			shim_close_file( dev_random ); \
+		}
+#elif  defined (SHIM_OS_UNIXLIKE)
+#	define SHIM_OPERATIONS_GETENTROPY_MAX 256
+#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
+		{ \
+			while( size_v > SHIM_OPERATIONS_GETENTROPY_MAX ) { \
+				if( getentropy( ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) != 0 ) \
+					SHIM_ERRX ("Error: Failed to getentropy()\n"); \
+				size_v -= SHIM_OPERATIONS_GETENTROPY_MAX; \
+				ptr_v  += SHIM_OPERATIONS_GETENTROPY_MAX; \
+			} \
+			if( getentropy( ptr_v, size_v ) != 0 ) \
+				SHIM_ERRX ("Error: Failed to getentropy()\n"); \
+		}
 #elif  defined (SHIM_OS_WINDOWS)
-	BCRYPT_ALG_HANDLE cng_provider_handle;
-	if( BCryptOpenAlgorithmProvider( &cng_provider_handle, L"RNG", NULL, 0 ) != STATUS_SUCCESS )
-		SHIM_ERRX ("Error: BCryptOpenAlgorithmProvider() failed\n");
-	if( BCryptGenRandom( cng_provider_handle, buffer, num_bytes, 0 ) != STATUS_SUCCESS )
-		SHIM_ERRX ("Error: BCryptGenRandom() failed\n");
-	if( BCryptCloseAlgorithmProvider( cng_provider_handle, 0 ) != STATUS_SUCCESS )
-		SHIM_ERRX ("Error: BCryptCloseAlgorithmProvider() failed\n");
-#	else
-#		error "Unsupported operating system."
-#	endif
-} // ~ shim_obtain_os_entropy(...)
-#endif /* SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY */
+#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
+		{ \
+			BCRYPT_ALG_HANDLER cng_h; \
+			if( BCryptOpenAlgorithmProvider( &cng_h, L"RNG", NULL, 0 ) != STATUS_SUCCESS ) \
+				SHIM_ERRX ("Error: BCryptOpenAlgorithmProvider() failed\n"); \
+			if( BCryptGenRandom( cng_h, ptr_v, size_v, 0 ) != STATUS_SUCCESS ) \
+				SHIM_ERRX ("Error: BCryptGenRandom() failed\n"); \
+			if( BCryptCloseAlgorithmProvider( cng_h, 0 ) != STATUS_SUCCESS ) \
+				SHIM_ERRX ("Error: BCryptCloseAlgorithmProvider() failed\n"); \
+		}
+#else
+#	error "Unsupported OS."
+#endif
+/* swap functions implementation */
+#define SHIM_OPERATIONS_SWAP_F(size, u) \
+	SHIM_OPERATIONS_SWAP_F_IMPL (size, u)
+#ifdef SHIM_OS_OSX
+#	define SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
+#endif
+#if    defined (__OpenBSD__)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
+		swap##size( u )
+#elif  defined (__FreeBSD__) || defined (__NetBSD__) || defined (__Dragonfly__)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
+		bswap##size( u )
+#elif  defined (__gnu_linux__)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
+		bswap_##size( u )
+#elif  defined (SHIM_OS_WINDOWS)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
+		_byteswap_##size( u )
+#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS)
+#	error "Unsupported OS."
+#endif
+
+#if    defined (SHIM_OS_UNIXLIKE)
+#	define SHIM_OPERATIONS_SWAP_SIZE(unixlike, windows) unixlike
+#elif  defined (SHIM_OS_WINDOWS)
+#	define SHIM_OPERATIONS_SWAP_SIZE(unixlike, windows) windows
+#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS)
+#	error "Unsupported OS."
+#endif
+
+#ifdef SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
+#	define SHIM_OPERATIONS_SWAP_16_IMPL(u16_var) \
+		{ \
+			return (u16_var >> 8) | (u16_var << 8); \
+		}
+#	define SHIM_OPERATIONS_SWAP_32_IMPL(u32_var) \
+		{ \
+			return ( (u32_var >> (3 * 8)) | \
+				((u32_var >> (    8)) & UINT32_C (0x0000ff00)) | \
+				((u32_var << (    8)) & UINT32_C (0x00ff0000)) | \
+				 (u32_var << (3 * 8)) ); \
+		}
+#	define SHIM_OPERATIONS_SWAP_64_IMPL(u64_var) \
+		{ \
+			return ( (u64_var >> (7 * 8)) | \
+				((u64_var >> (5 * 8)) & UINT64_C (0x000000000000ff00)) | \
+				((u64_var >> (3 * 8)) & UINT64_C (0x0000000000ff0000)) | \
+				((u64_var >> (    8)) & UINT64_C (0x00000000ff000000)) | \
+				((u64_var << (    8)) & UINT64_C (0x000000ff00000000)) | \
+				((u64_var << (3 * 8)) & UINT64_C (0x0000ff0000000000)) | \
+				((u64_var << (5 * 8)) & UINT64_C (0x00ff000000000000)) | \
+				 (u64_var << (7 * 8)) ); \
+		}
+#else
+#	define SHIM_OPERATIONS_SWAP_16_IMPL(u16_var) \
+		{ \
+			return SHIM_OPERATIONS_SWAP_F (SHIM_OPERATIONS_SWAP_SIZE (16, ushort), u16_var); \
+		}
+#	define SHIM_OPERATIONS_SWAP_32_IMPL(u32_var) \
+		{ \
+			return SHIM_OPERATIONS_SWAP_F (SHIM_OPERATIONS_SWAP_SIZE (32, ulong), u32_var); \
+		}
+#	define SHIM_OPERATIONS_SWAP_64_IMPL(u64_var) \
+		{ \
+			return SHIM_OPERATIONS_SWAP_F (SHIM_OPERATIONS_SWAP_SIZE (64, uint64), u64_var); \
+		}
+#endif
+
+#ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
+void
+shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes)
+	SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL (buffer, num_bytes)
+#endif
+#ifndef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
+uint16_t
+shim_swap_16 (uint16_t u16)
+	SHIM_OPERATIONS_SWAP_16_IMPL (u16)
+uint32_t
+shim_swap_32 (uint32_t u32)
+	SHIM_OPERATIONS_SWAP_32_IMPL (u32)
+uint64_t
+shim_swap_64 (uint64_t u64)
+	SHIM_OPERATIONS_SWAP_64_IMPL (u64)
+#endif
 
 void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
@@ -193,76 +280,5 @@ shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 #	error "Unsupported operating system."
 #endif
 } // ~ shim_secure_zero(...)
-
-#ifndef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-
-#	define SWAP_F_(size, u) \
-		SWAP_F_IMPL_ (size, u)
-#	if    defined (__OpenBSD__)
-#		define SWAP_F_IMPL_(size,u)	swap##size( u )
-#	elif  defined (__FreeBSD__) || defined (__NetBSD__) || defined (__Dragonfly__)
-#		define SWAP_F_IMPL_(size,u)	bswap##size( u )
-#	elif  defined (__gnu_linux__)
-#		define SWAP_F_IMPL_(size,u)	bswap_##size( u )
-#	elif  defined (SHIM_OS_WINDOWS)
-#		define SWAP_F_IMPL_(size,u)	_byteswap_##size( u )
-#	elif !defined (SHIM_OS_OSX)
-#		error "Unsupported operating system."
-#	endif
-
-#	if    defined (SHIM_OS_UNIXLIKE) && !defined (SHIM_OS_OSX)
-#		define SIZE_(unixlike, windows)	unixlike
-#	elif  defined (SHIM_OS_WINDOWS)
-#		define SIZE_(unixlike, windows) windows
-#	elif !defined (SHIM_OS_OSX)
-#		error "Unsupported operating system."
-#	endif
-
-uint16_t
-shim_swap_16 (uint16_t val) {
-#	ifdef SHIM_OS_OSX
-	return (val >> 8) | (val << 8);
-#	else
-	return SWAP_F_ (SIZE_ (16,ushort),val);
-#	endif
-}
-
-uint32_t
-shim_swap_32 (uint32_t val) {
-#	ifdef SHIM_OS_OSX
-	return (
-		 (val >> (3*8)) |
-		((val >>    8 ) & UINT32_C (0x0000ff00)) |
-		((val <<    8 ) & UINT32_C (0x00ff0000)) |
-		 (val << (3*8))
-	       );
-#	else
-	return SWAP_F_ (SIZE_ (32,ulong),val);
-#	endif
-}
-
-uint64_t
-shim_swap_64 (uint64_t val) {
-#	ifdef SHIM_OS_OSX
-	return (
-		 (val >> (7*8))                                  |
-		((val >> (5*8)) & UINT64_C (0x000000000000ff00)) |
-		((val >> (3*8)) & UINT64_C (0x0000000000ff0000)) |
-		((val >>    8 ) & UINT64_C (0x00000000ff000000)) |
-		((val <<    8 ) & UINT64_C (0x000000ff00000000)) |
-		((val << (3*8)) & UINT64_C (0x0000ff0000000000)) |
-		((val << (5*8)) & UINT64_C (0x00ff000000000000)) |
-		 (val << (7*8))
-	       );
-#	else
-	return SWAP_F_ (SIZE_ (64,uint64),val);
-#	endif
-}
-
-
-#	undef SIZE_
-#	undef SWAP_F_IMPL_
-#	undef SWAP_F_
-#endif /* SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS */
 
 #endif // ~ SHIM_OPERATIONS_H
