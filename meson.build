@@ -29,7 +29,8 @@ src = [
   'impl/args.c',
   'impl/term.c',
   'impl/print.c',
-  'impl/strings.c'
+  'impl/strings.c',
+  'impl/mlock.c'
   ]
 # Setup these empty arrays that we will be appending to depending on OS, etc.
 lib_deps   = []

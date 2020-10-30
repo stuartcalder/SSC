@@ -17,7 +17,7 @@ shim_argtype (char const * str) {
 }
 
 void SHIM_PUBLIC
-shim_process_args (int argc, char ** argv,
+shim_process_args (int const argc, char ** argv,
 		   Shim_Arg_Processor_t * const processor,
 		   void * SHIM_RESTRICT state)
 {

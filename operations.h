@@ -110,8 +110,21 @@ shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 void
 shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
-void *
-shim_checked_malloc (size_t size);
+static inline void *
+shim_checked_malloc (size_t size) {
+	void * mem = malloc( size );
+	if( !mem )
+		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
+	return mem;
+}
+
+static inline void *
+shim_checked_calloc (size_t num_elements, size_t element_size) {
+	void * mem = calloc( num_elements, element_size );
+	if( !mem )
+		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
+	return mem;
+}
 
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
@@ -150,7 +163,7 @@ SHIM_END_DECLS
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
 			Shim_File_t dev_random = shim_open_existing_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
-			if( read( dev_random, ptr_v, size_v ) != ((size_t)size_v) ) \
+			if( read( dev_random, ptr_v, size_v ) != ((ssize_t)size_v) ) \
 				SHIM_ERRX ("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
 			shim_close_file( dev_random ); \
 		}

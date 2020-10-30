@@ -7,7 +7,7 @@
 #include "macros.h"
 
 #ifdef ENABLE_MEMORYLOCKING_
-#	error "ENABLE_MEMORYLOCKING_ already defined"
+#	error "ENABLE_MEMORYLOCKING_ already defined."
 #endif
 
 #if    (defined (SHIM_OS_UNIXLIKE) && !defined (__OpenBSD__)) || defined (SHIM_OS_WINDOWS)
@@ -34,54 +34,17 @@
 #		error "Unsupported operating system."
 #	endif
 
-#	ifdef __cplusplus
-#		define CONST_CAST_(value, type) const_cast<type>(value)
-#	else
-#		define CONST_CAST_(value, type) ((type)value)
-#	endif
-
-#	if    defined (SHIM_OS_UNIXLIKE)
-#		define LOCK_CONST_ const
-#	elif  defined (SHIM_OS_WINDOWS)
-#		define LOCK_CONST_ /*null macro*/
-#	else
-#		error "Unsupported operating system."
-#	endif
 
 SHIM_BEGIN_DECLS
 
-static inline void
-shim_lock_memory (void LOCK_CONST_ *address, size_t const length) {
-#	if    defined (SHIM_OS_UNIXLIKE)
-	if( mlock( address, length ) != 0 )
-		SHIM_ERRX ("Error: Failed to mlock()\n");
-#	elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualLock( ((void *)address), length ) == 0 )
-		SHIM_ERRX ("Error: Failed to VirtualLock()\n");
-#	else
-#		error "Unsupported operating system."
-#	endif
-}
-
-static inline void
-shim_unlock_memory (void LOCK_CONST_ *address, size_t const length) {
-#	if    defined (SHIM_OS_UNIXLIKE)
-	if( munlock( address, length ) != 0 )
-		SHIM_ERRX ("Error: Failed to munlock()\n");
-#	elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualUnlock( ((void *)address), length ) == 0 )
-		SHIM_ERRX ("Error: Failed to VirtualUnlock()\n");
-#	else
-#		error "Unsupported operating system."
-#	endif
-}
-
-#	undef LOCK_CONST_
-#	undef CONST_CAST_
+void
+shim_lock_memory (void * SHIM_RESTRICT, size_t const);
+void
+shim_unlock_memory (void * SHIM_RESTRICT, size_t const);
 
 SHIM_END_DECLS
 
-#endif // ~ ENABLE_MEMORYLOCKING_
+#endif /* ~ ENABLE_MEMORYLOCKING_ */
 
 
-#endif // ~ SHIM_MLOCK_H
+#endif /* ~ SHIM_MLOCK_H */
