@@ -23,10 +23,10 @@ enum {
 
 SHIM_BEGIN_DECLS
 
-int SHIM_PUBLIC
+SHIM_API int
 shim_argtype (char const *);
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_process_args (int const argc, char ** argv,
 		   Shim_Arg_Processor_t * processor,
 		   void * SHIM_RESTRICT state);

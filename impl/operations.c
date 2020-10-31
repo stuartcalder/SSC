@@ -1,7 +1,7 @@
 #include "operations.h"
 
 #define GENERIC_SHIM_XOR_(bytes) \
-	void SHIM_PUBLIC \
+	void \
 	shim_xor_##bytes (void * SHIM_RESTRICT mem, void const * SHIM_RESTRICT add) { \
 		for( int i = 0; i < bytes; ++i ) { \
 			((uint8_t *)      mem)[ i ] ^= \
@@ -15,24 +15,24 @@ GENERIC_SHIM_XOR_ (64)
 GENERIC_SHIM_XOR_ (128)
 
 #ifndef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-void SHIM_PUBLIC
+void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT mem, size_t size)
 	SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL (mem, size)
 #endif
 
 #ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-uint16_t SHIM_PUBLIC
+uint16_t
 shim_swap_16 (uint16_t u16)
 	SHIM_OPERATIONS_SWAP_16_IMPL (u16)
-uint32_t SHIM_PUBLIC
+uint32_t
 shim_swap_32 (uint32_t u32)
 	SHIM_OPERATIONS_SWAP_32_IMPL (u32)
-uint64_t SHIM_PUBLIC
+uint64_t
 shim_swap_64 (uint64_t u64)
 	SHIM_OPERATIONS_SWAP_64_IMPL (u64)
 #endif
 
-int SHIM_PUBLIC
+int
 shim_ctime_memcmp (void const * SHIM_RESTRICT mem_0,
 		   void const * SHIM_RESTRICT mem_1,
 		   size_t const               size)

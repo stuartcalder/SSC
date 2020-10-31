@@ -1,11 +1,16 @@
 #include "args.h"
 #include <stdbool.h>
 
-int SHIM_PUBLIC
+int
 shim_argtype (char const * str) {
 	int num_hyphens = 0;
-	while( *str++ == '-' )
-		++num_hyphens;
+	for( int i = 0; i < 2; ++i ) {
+		char const c = str[ i ];
+		if( c == '-' )
+			++num_hyphens;
+		else
+			break;
+	}
 	switch( num_hyphens ) {
 		case 1:
 			return SHIM_ARGTYPE_SHORT;
@@ -16,7 +21,7 @@ shim_argtype (char const * str) {
 	}
 }
 
-void SHIM_PUBLIC
+void
 shim_process_args (int const argc, char ** argv,
 		   Shim_Arg_Processor_t * const processor,
 		   void * SHIM_RESTRICT state)

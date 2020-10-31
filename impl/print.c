@@ -1,6 +1,6 @@
 #include "print.h"
 
-void SHIM_PUBLIC
+void
 shim_print_byte_buffer (uint8_t * SHIM_RESTRICT bytes,
 			size_t const num_bytes)
 {

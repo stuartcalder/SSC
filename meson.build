@@ -36,6 +36,9 @@ src = [
 lib_deps   = []
 lang_flags = []
 inc_dir    = []
+# We're building Shim.
+_flag = _D_PREFIX + 'SHIM_EXT_BUILD'
+lang_flags += _flag
 # Determine flags to pass to gcc-compatible compilers.
 gcc_compatible_flags = [
   '-fvisibility=hidden',

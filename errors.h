@@ -26,10 +26,10 @@
  * and exit.
  */
 #	define SHIM_ERRX_CODE(code, ...) \
-		SHIM_MACRO_SHIELD \
+		do { \
 			fprintf( stderr, __VA_ARGS__ ); \
 			exit( code ); \
-		SHIM_MACRO_SHIELD_EXIT
+		} while( 0 )
 
 #endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
 

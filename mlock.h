@@ -37,9 +37,9 @@
 
 SHIM_BEGIN_DECLS
 
-void
+SHIM_API void
 shim_lock_memory (void * SHIM_RESTRICT, size_t const);
-void
+SHIM_API void
 shim_unlock_memory (void * SHIM_RESTRICT, size_t const);
 
 SHIM_END_DECLS

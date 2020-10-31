@@ -4,40 +4,6 @@
 #ifndef SHIM_MACROS_H
 #define SHIM_MACROS_H
 
-#if    defined (SHIM_PUBLIC) || defined (SHIM_PRIVATE)
-#	error 'Symbol Macro Already Defined'
-#endif
-/* Symbol visibility macros */
-#if defined (SHIM_BUILD_STATIC) || defined (SHIM_IMPORT_STATIC)
-#	define  SHIM_PUBLIC
-#	define  SHIM_PRIVATE
-#else
-#	if    defined (_WIN32) || defined (__CYGWIN__)
-#		define SHIM_PRIVATE /*null macro*/
-#		ifdef	SHIM_BUILD_DLL
-#			ifdef	__GNUC__
-#				define	SHIM_PUBLIC __attribute__ ((dllexport))
-#			else
-#				define	SHIM_PUBLIC __declspec(dllexport)
-#			endif // ~ #ifdef __GNUC__
-#		else
-#			ifdef	__GNUC__
-#				define	SHIM_PUBLIC __attribute__ ((dllimport))
-#			else
-#				define	SHIM_PUBLIC __declspec(dllimport)
-#			endif // ~ #ifdef __GNUC__
-#		endif // ~ #ifdef SHIM_BUILD_DLL
-#	else
-#		if    defined (__GNUC__) && (__GNUC__ >= 4)
-#			define	SHIM_PUBLIC  __attribute__ ((visibility ("default")))
-#			define	SHIM_PRIVATE __attribute__ ((visibility ("hidden")))
-#		else
-#			define	SHIM_PUBLIC
-#			define	SHIM_PRIVATE
-#		endif // ~ #if defined (__GNUC__) && (__GNUC__ >= 4)
-#	endif // ~ #if defined (_WIN32) || defined (__CYGWIN__)
-#endif // ~ #if defined (SHIM_BUILD_STATIC) || defined (SHIM_IMPORT_STATIC)
-
 /* Operating System Macros */
 
 #if    defined (__APPLE__) && defined (__MACH__)
@@ -97,20 +63,12 @@
 		if( pledge( promises, execpromises ) != 0 ) \
 			SHIM_ERRX ("Failed to pledge()\n")
 #else
-/* These macros define to nothing on non-OpenBSD operating systems.
- */
-#	define SHIM_OPENBSD_UNVEIL(null0,null1) /*null macro*/
-#	define SHIM_OPENBSD_PLEDGE(null0,null1) /*null macro*/
+/* These macros define to nothing on non-OpenBSD operating systems. */
+#	define SHIM_OPENBSD_UNVEIL(path, permission)		/* Nil */
+#	define SHIM_OPENBSD_PLEDGE(promises, execpromises)	/* Nil */
 #endif // ~ #ifdef __OpenBSD__
 
 /* Simplification Macros */
-#if    defined (SHIM_MACRO_SHIELD)
-#	error 'SHIM_MACRO_SHIELD already defined'
-#elif  defined (SHIM_MACRO_SHIELD_EXIT)
-#	error 'SHIM_MACRO_SHIELD_EXIT already defined'
-#endif
-#define SHIM_MACRO_SHIELD	do {
-#define SHIM_MACRO_SHIELD_EXIT	} while(0)
 
 #ifdef __cplusplus
 #	if    (__cplusplus < 201100L)
@@ -146,5 +104,33 @@
 #		endif
 #	endif
 #endif
+
+/* Symbol Visibility, Export/Import Macros */
+#if    defined (SHIM_OS_WINDOWS) || defined (__CYGWIN__)
+#	ifdef __GNUC__
+#		define SHIM_EXPORT_SYMBOL __attribute__ ((dllexport))
+#		define SHIM_IMPORT_SYMBOL __attribute__ ((dllimport))
+#	else
+#		define SHIM_EXPORT_SYMBOL __declspec(dllexport)
+#		define SHIM_IMPORT_SYMBOL __declspec(dllimport)
+#	endif
+#elif  defined (SHIM_OS_UNIXLIKE)
+#	if    defined (__GNUC__) && (__GNUC__ >= 4)
+#		define SHIM_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+#		define SHIM_IMPORT_SYMBOL __attribute__ ((visibility ("default")))
+#	else
+#		define SHIM_EXPORT_SYMBOL /* Nil */
+#		define SHIM_IMPORT_SYMBOL /* Nil */
+#	endif
+#else
+#	error "Unsupported operating system."
+#endif
+
+#ifdef SHIM_EXT_BUILD
+#	define SHIM_API SHIM_EXPORT_SYMBOL
+#else
+#	define SHIM_API SHIM_IMPORT_SYMBOL
+#endif
+
 
 #endif // ~ SHIM_MACROS_H

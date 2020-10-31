@@ -29,10 +29,10 @@ SHIM_BEGIN_DECLS
  * doing so will mean needing to link directly with ncurses,
  * which is not necessary.
  */
-void SHIM_PUBLIC
+SHIM_API void
 shim_term_init ();
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_term_end ();
 #elif  defined (SHIM_OS_WINDOWS)
 /* On Windows, inline term_init and term_end, since they're
@@ -51,17 +51,17 @@ shim_term_end () {
 #	error "Unsupported OS."
 #endif
 
-int SHIM_PUBLIC
+SHIM_API int
 shim_term_get_secret_string (uint8_t * SHIM_RESTRICT,
 			     char const *    SHIM_RESTRICT);
 
-int SHIM_PUBLIC
+SHIM_API int
 shim_term_obtain_password (uint8_t *    SHIM_RESTRICT,
 			   char const * SHIM_RESTRICT,
 			   int const,
 			   int const);
 
-int SHIM_PUBLIC
+SHIM_API int
 shim_term_obtain_password_checked (uint8_t * SHIM_RESTRICT,
 				   uint8_t * SHIM_RESTRICT,
 				   char const * SHIM_RESTRICT,
@@ -69,7 +69,7 @@ shim_term_obtain_password_checked (uint8_t * SHIM_RESTRICT,
 				   int const,
 				   int const);
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_term_notify (char const *);
 
 SHIM_END_DECLS

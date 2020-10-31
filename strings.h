@@ -8,7 +8,7 @@
 
 SHIM_BEGIN_DECLS
 
-int SHIM_PUBLIC
+SHIM_API int 
 shim_shift_left_digits (char * SHIM_RESTRICT, int const);
 
 SHIM_END_DECLS

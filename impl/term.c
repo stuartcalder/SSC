@@ -22,18 +22,18 @@
 
 #ifdef SHIM_OS_UNIXLIKE
 /* On Windows these functions are inlined. */
-void SHIM_PUBLIC
+void
 shim_term_init () {
 	initscr();
 	clear();
 }
-void SHIM_PUBLIC
+void
 shim_term_end () {
 	endwin();
 }
 #endif /* ~ SHIM_OS_UNIXLIKE */
 
-int SHIM_PUBLIC
+int
 shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 			     char const * SHIM_RESTRICT prompt)
 #if    defined (SHIM_OS_UNIXLIKE)
@@ -138,7 +138,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 #	error "Unsupported OS."
 #endif
 
-int SHIM_PUBLIC
+int
 shim_term_obtain_password (uint8_t *    SHIM_RESTRICT password_buf,
 			   char const * SHIM_RESTRICT entry_prompt,
 			   int const                  min_pw_size,
@@ -157,7 +157,7 @@ shim_term_obtain_password (uint8_t *    SHIM_RESTRICT password_buf,
 	return size;
 }
 
-int SHIM_PUBLIC
+int
 shim_term_obtain_password_checked (uint8_t *    SHIM_RESTRICT password_buf,
 				   uint8_t *    SHIM_RESTRICT check_buf,
 				   char const * SHIM_RESTRICT entry_prompt,
@@ -185,7 +185,7 @@ shim_term_obtain_password_checked (uint8_t *    SHIM_RESTRICT password_buf,
 	return size;
 }
 
-void SHIM_PUBLIC
+void
 shim_term_notify (char const * notice) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	WINDOW * w = newwin( 1, strlen( notice ) + 1, 0, 0 );
@@ -205,8 +205,3 @@ shim_term_notify (char const * notice) {
 #	error "Unsupported OS."
 #endif
 }
-
-
-
-
-

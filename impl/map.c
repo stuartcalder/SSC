@@ -1,6 +1,6 @@
 #include "map.h"
 
-void SHIM_PUBLIC
+void
 shim_map_memory (Shim_Map * map, bool const readonly) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	int const rw_flag = (readonly ? PROT_READ : PROT_READ|PROT_WRITE);
@@ -30,7 +30,7 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 #endif
 }
 
-void SHIM_PUBLIC
+void
 shim_unmap_memory (Shim_Map const * map) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( munmap( map->ptr, map->size ) == -1 )
@@ -44,7 +44,7 @@ shim_unmap_memory (Shim_Map const * map) {
 #endif
 }
 
-void SHIM_PUBLIC
+void
 shim_sync_map (Shim_Map const * map) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( msync( map->ptr, map->size, MS_SYNC ) == -1 )
@@ -56,7 +56,3 @@ shim_sync_map (Shim_Map const * map) {
 #	error "Unsupported operating system."
 #endif
 }
-
-
-
-

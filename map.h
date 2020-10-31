@@ -18,7 +18,7 @@
 #	error "Unsupported operating system."
 #endif
 
-typedef struct SHIM_PUBLIC {
+typedef struct {
 	uint8_t *    ptr;
 	uint64_t    size;
 	Shim_File_t file;
@@ -29,13 +29,13 @@ typedef struct SHIM_PUBLIC {
 
 SHIM_BEGIN_DECLS
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_map_memory (Shim_Map *, bool const);
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_unmap_memory (Shim_Map const *);
 
-void SHIM_PUBLIC
+SHIM_API void
 shim_sync_map (Shim_Map const *);
 
 static inline void 

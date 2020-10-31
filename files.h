@@ -35,30 +35,30 @@ typedef HANDLE	Shim_File_t;
 
 SHIM_BEGIN_DECLS
 
-NO_DISCARD_ size_t
+NO_DISCARD_ SHIM_API size_t
 shim_file_size (Shim_File_t const);
 
-NO_DISCARD_ size_t
+NO_DISCARD_ SHIM_API size_t
 shim_filepath_size (char const *);
 
-NO_DISCARD_ bool
+NO_DISCARD_ SHIM_API bool 
 shim_filepath_exists (char const *);
 
-void
+SHIM_API void
 shim_enforce_filepath_existence (char const * SHIM_RESTRICT,
 				 bool const);
 
-NO_DISCARD_ Shim_File_t
+NO_DISCARD_ SHIM_API Shim_File_t
 shim_open_existing_filepath (char const * SHIM_RESTRICT,
 			     bool const);
 
-NO_DISCARD_ Shim_File_t
+NO_DISCARD_ SHIM_API Shim_File_t 
 shim_create_filepath (char const *);
 
-void
+SHIM_API void 
 shim_close_file (Shim_File_t const);
 
-void
+SHIM_API void 
 shim_set_file_size (Shim_File_t const, size_t const);
 
 SHIM_END_DECLS

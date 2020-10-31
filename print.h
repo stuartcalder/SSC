@@ -9,7 +9,7 @@
 
 SHIM_BEGIN_DECLS
 
-void SHIM_PUBLIC
+SHIM_API void 
 shim_print_byte_buffer (uint8_t * SHIM_RESTRICT, size_t const);
 
 SHIM_END_DECLS

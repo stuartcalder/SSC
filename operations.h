@@ -78,36 +78,37 @@
 	  ))
 
 #define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) \
-	SHIM_MACRO_SHIELD \
+	do { \
 		type_t tmp_name; \
 		memcpy( &tmp_name, ptr, sizeof(tmp_name) ); \
 		statement; \
 		memcpy( ptr, &tmp_name, sizeof(tmp_name) ); \
-	SHIM_MACRO_SHIELD_EXIT
+	} while( 0 )
 
 SHIM_BEGIN_DECLS
 
 #ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-#	define SWAP_DECL_ /*nil*/
+#	define SWAP_DECL_ SHIM_API_
 #else
 #	define SWAP_DECL_ static inline
 #endif
+
 #ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 #	define OS_ENT_DECL_ static inline
 #else
-#	define OS_ENT_DECL_ /*nil*/
+#	define OS_ENT_DECL_ SHIM_API
 #endif
 
-void
+SHIM_API void
 shim_xor_16 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
-void
+SHIM_API void 
 shim_xor_32 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
-void
+SHIM_API void 
 shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
-void
+SHIM_API void 
 shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
 static inline void *
@@ -132,7 +133,7 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
 
-int
+SHIM_API int
 shim_ctime_memcmp (void const * SHIM_RESTRICT,
 		   void const * SHIM_RESTRICT,
 		   size_t const);
