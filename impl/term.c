@@ -42,9 +42,6 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 	noecho();
 	keypad( stdscr, TRUE );
 	int index = 0;
-	#if 0
-	WINDOW * w = newwin( 5, MAX_PASSWORD_SIZE_ + 10, 0, 0 );
-	#endif
 	WINDOW * w = newwin( 5, SHIM_TERM_MAX_PW_SIZE + 10, 0, 0 );
 	keypad( w, TRUE );
 	bool outer, inner;
@@ -78,9 +75,6 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 					inner = false;
 				} break;
 				default: {
-					#if 0
-					if( index < MAX_PASSWORD_SIZE_ ) {
-					#endif
 					if( index < SHIM_TERM_MAX_PW_SIZE ) {
 						waddch( w, '*' );
 						wrefresh( w );
