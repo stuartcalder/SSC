@@ -88,7 +88,7 @@
 SHIM_BEGIN_DECLS
 
 #ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-#	define SWAP_DECL_ SHIM_API_
+#	define SWAP_DECL_ SHIM_API
 #else
 #	define SWAP_DECL_ static inline
 #endif
