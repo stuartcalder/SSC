@@ -54,14 +54,11 @@
 #	error "Unsupported operating system."
 #endif
 
-#define SHIM_BITS_TO_BYTES(bits)	(bits / CHAR_BIT)
-#define SHIM_BYTES_TO_BITS(bytes)	(bytes * CHAR_BIT)
-
 #define SHIM_ROT_UNSIGNED_MASK_T_(bits) \
 	uint##bits##_t
 
 #define SHIM_ROT_UNSIGNED_MASK_(bits) \
-	((SHIM_ROT_UNSIGNED_MASK_T_(bits))(SHIM_BYTES_TO_BITS(sizeof(SHIM_ROT_UNSIGNED_MASK_T_(bits))) - 1))
+	((SHIM_ROT_UNSIGNED_MASK_T_(bits))(sizeof(SHIM_ROT_UNSIGNED_MASK_T_(bits)) * CHAR_BIT) - 1)
 #define SHIM_ROT_MASKED_COUNT_(bits, count) \
 	((SHIM_ROT_UNSIGNED_MASK_(bits)) & count)
 
