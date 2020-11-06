@@ -82,7 +82,7 @@ endif
 
 include_dirs += '..'
 # Install the shim folder into the system header directory
-install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build'])
+install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
 
 if os == 'windows'
   shared_library('shim', sources: src, dependencies: lib_deps,
