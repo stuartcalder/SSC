@@ -69,9 +69,9 @@ shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
 	if( (file = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
 		SHIM_ERRX ("Error: Unable to open existing file %s with open()\n", filepath);
 #elif  defined (SHIM_OS_WINDOWS)
-	DWORD read_write_rights = GENERIC_READ;
+	DWORD read_write_rights = (GENERIC_READ|GENERIC_WRITE);
 	if( readonly )
-		read_write_rights |= GENERIC_WRITE;
+		read_write_rights = GENERIC_READ;
 	if( (file = CreateFileA( filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
 		SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
 #else

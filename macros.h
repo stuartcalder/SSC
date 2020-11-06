@@ -117,7 +117,7 @@
 #elif  defined (SHIM_OS_UNIXLIKE)
 #	if    defined (__GNUC__) && (__GNUC__ >= 4)
 #		define SHIM_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
-#		define SHIM_IMPORT_SYMBOL __attribute__ ((visibility ("default")))
+#		define SHIM_IMPORT_SYMBOL SHIM_EXPORT_SYMBOL
 #	else
 #		define SHIM_EXPORT_SYMBOL /* Nil */
 #		define SHIM_IMPORT_SYMBOL /* Nil */

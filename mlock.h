@@ -15,7 +15,6 @@
 #endif
 
 #if    defined (ENABLE_MEMORYLOCKING_) && !defined (SHIM_EXT_DISABLE_MEMORYLOCKING)
-#	undef ENABLE_MEMORYLOCKING_
 #	ifdef SHIM_FEATURE_MEMORYLOCKING
 #		error "SHIM_FEATURE_MEMORYLOCKING already defined"
 #	endif
@@ -45,6 +44,7 @@ shim_unlock_memory (void * SHIM_RESTRICT, size_t const);
 SHIM_END_DECLS
 
 #endif /* ~ ENABLE_MEMORYLOCKING_ */
+#undef ENABLE_MEMORYLOCKING_
 
 
 #endif /* ~ SHIM_MLOCK_H */
