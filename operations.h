@@ -54,26 +54,24 @@
 #	error "Unsupported operating system."
 #endif
 
-#define SHIM_ROT_UNSIGNED_MASK_T_(bits) \
+#define SHIM_ROT_IMPL_UNSIGNED_MASK_TYPE(bits) \
 	uint##bits##_t
-
-#define SHIM_ROT_UNSIGNED_MASK_(bits) \
-	((SHIM_ROT_UNSIGNED_MASK_T_(bits))(sizeof(SHIM_ROT_UNSIGNED_MASK_T_(bits)) * CHAR_BIT) - 1)
-#define SHIM_ROT_MASKED_COUNT_(bits, count) \
-	((SHIM_ROT_UNSIGNED_MASK_(bits)) & count)
-
+#define SHIM_ROT_IMPL_UNSIGNED_MASK(bits) \
+	((SHIM_ROT_IMPL_UNSIGNED_MASK_TYPE(bits))(sizeof(SHIM_ROT_IMPL_UNSIGNED_MASK_TYPE(bits)) * CHAR_BIT) - 1)
+#define SHIM_ROT_IMPL_MASKED_COUNT(bits, count) \
+	((SHIM_ROT_IMPL_UNSIGNED_MASK(bits)) & count)
 #define SHIM_ROT_LEFT(value, count, bits) \
-	((value << SHIM_ROT_MASKED_COUNT_(bits,count)) | \
-	 (value >> \
-	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
-	  ))
-
+	((value << SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) | \
+		(value >> \
+			((-SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) & SHIM_ROT_IMPL_UNSIGNED_MASK(bits)) \
+		) \
+	)
 #define SHIM_ROT_RIGHT(value, count, bits) \
-	((value >> SHIM_ROT_MASKED_COUNT_(bits,count)) | \
-	 (value << \
-	  ((-SHIM_ROT_MASKED_COUNT_(bits,count)) & SHIM_ROT_UNSIGNED_MASK_(bits)) \
-	  ))
-
+	((value >> SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) | \
+		(value << \
+			((-SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) & SHIM_ROT_IMPL_UNSIGNED_MASK(bits)) \
+		) \
+	)
 #define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) \
 	do { \
 		type_t tmp_name; \

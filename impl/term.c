@@ -16,10 +16,6 @@
 
 #define OS_PROMPT_ "> " NEWLINE_
 
-#if (SHIM_TERM_BUFFER_SIZE < 2)
-#	error "Minimum buffer size of 2 bytes."
-#endif
-
 #ifdef SHIM_OS_UNIXLIKE
 /* On Windows these functions are inlined. */
 void
@@ -33,21 +29,28 @@ shim_term_end () {
 }
 #endif /* ~ SHIM_OS_UNIXLIKE */
 
+#define STR_IMPL_(text) #text
+#define STR_(text)	STR_IMPL_ (text)
+#define SECRET_STR_MIN_BUFSIZE_ 2
 int
-shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
-			     char const * SHIM_RESTRICT prompt)
+shim_term_get_secret_string (uint8_t * SHIM_RESTRICT    buffer,
+			     char const * SHIM_RESTRICT prompt,
+			     int const                  buffer_size)
 #if    defined (SHIM_OS_UNIXLIKE)
 { /* Unixlike impl */
+	if( buffer_size < SECRET_STR_MIN_BUFSIZE_ )
+		SHIM_ERRX ("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_ (SECRET_STR_MIN_BUFSIZE_) ".\n");
+	int const max_pw_size = buffer_size - 1;
 	cbreak();
 	noecho();
 	keypad( stdscr, TRUE );
 	int index = 0;
-	WINDOW * w = newwin( 5, SHIM_TERM_MAX_PW_SIZE + 10, 0, 0 );
+	WINDOW * w = newwin( 5, max_pw_size + 10, 0, 0 );
 	keypad( w, TRUE );
 	bool outer, inner;
 	outer = true;
 	while( outer ) {
-		memset( buffer, 0, SHIM_TERM_BUFFER_SIZE );
+		memset( buffer, 0, buffer_size );
 		wclear( w );
 		wmove( w, 1, 0 );
 		waddstr( w, prompt );
@@ -75,7 +78,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 					inner = false;
 				} break;
 				default: {
-					if( index < SHIM_TERM_MAX_PW_SIZE ) {
+					if( index < max_pw_size ) {
 						waddch( w, '*' );
 						wrefresh( w );
 						buffer[ index++ ] = (uint8_t)ch;
@@ -91,11 +94,14 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 } /* ~ Unixlike impl */
 #elif  defined (SHIM_OS_WINDOWS)
 { /* Windows impl */
+	if( buffer_size < SECRET_STR_MIN_BUFSIZE_ )
+		SHIM_ERRX ("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_ (SECRET_STR_MIN_BUFSIZE_) ".\n");
+	int const max_pw_size = buffer_size - 1;
 	int index = 0;
 	bool repeat_ui, repeat_input;
 	repeat_ui = true;
 	while( repeat_ui ) {
-		memset( buffer, 0, SHIM_TERM_BUFFER_SIZE );
+		memset( buffer, 0, buffer_size );
 		system( "cls" );
 		if( _cputs( prompt ) != 0 )
 			SHIM_ERRX ("Failed to _cputs()!\n");
@@ -114,7 +120,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 					repeat_input = false;
 				} break;
 				default: {
-					if( (index < SHIM_TERM_BUFFER_SIZE) && (ch >= 32) && (ch <= 126) ) {
+					if( (index < buffer_size) && (ch >= 32) && (ch <= 126) ) {
 						if( _putch( "*" ) == EOF )
 							SHIM_ERRX ("Failed to _putch()!\n");
 						buffer[ index++ ] = (uint8_t)ch;
@@ -136,11 +142,15 @@ int
 shim_term_obtain_password (uint8_t *    SHIM_RESTRICT password_buf,
 			   char const * SHIM_RESTRICT entry_prompt,
 			   int const                  min_pw_size,
-			   int const                  max_pw_size)
+			   int const                  max_pw_size,
+			   int const                  buffer_size)
 {
+	if( buffer_size < (max_pw_size + 1) )
+		SHIM_ERRX ("Error: Buffer size in shim_term_obtain_password too small (%d) for max password size (%d).\n",
+			   buffer_size, max_pw_size);
 	int size;
 	while( 1 ) {
-		size = shim_term_get_secret_string( password_buf, entry_prompt );
+		size = shim_term_get_secret_string( password_buf, entry_prompt, buffer_size );
 		if( size < min_pw_size )
 			shim_term_notify( "Password is not long enough." NEWLINE_ );
 		else if( size > max_pw_size )
@@ -157,22 +167,23 @@ shim_term_obtain_password_checked (uint8_t *    SHIM_RESTRICT password_buf,
 				   char const * SHIM_RESTRICT entry_prompt,
 				   char const * SHIM_RESTRICT reentry_prompt,
 				   int const                  min_pw_size,
-				   int const                  max_pw_size)
+				   int const                  max_pw_size,
+				   int const                  buffer_size)
 {
 	int size;
 	while( 1 ) {
-		size = shim_term_get_secret_string( password_buf, entry_prompt );
+		size = shim_term_get_secret_string( password_buf, entry_prompt, buffer_size );
 		if( size < min_pw_size ) {
 			shim_term_notify( "Password is not long enough." NEWLINE_ );
 			continue;
 		} else if( size > max_pw_size ) {
 			shim_term_notify( "Password is too long." NEWLINE_ );
 			continue;
-		} else if( shim_term_get_secret_string( check_buf, reentry_prompt ) != size ) {
+		} else if( shim_term_get_secret_string( check_buf, reentry_prompt, buffer_size ) != size ) {
 			shim_term_notify( "Second password not the same size as the first." NEWLINE_ );
 			continue;
 		}
-		if( shim_ctime_memcmp( password_buf, check_buf, SHIM_TERM_BUFFER_SIZE ) == 0 )
+		if( shim_ctime_memcmp( password_buf, check_buf, buffer_size ) == 0 )
 			break;
 		shim_term_notify( "Passwords do not match." NEWLINE_ );
 	}

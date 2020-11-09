@@ -9,31 +9,30 @@
 #include <stdarg.h>
 #include "macros.h"
 
+/* In general, when failing to allocate memory display this error string
+ * as the default on stdout. */
 #define SHIM_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure!\n"
 
 #ifdef SHIM_OS_UNIXLIKE
-/* Pretty sure all the Unixlike platforms have err.h
- */
+/* Pretty sure all the Unixlike platforms have err.h */
 #	include <err.h>
 
-/*	SHIM_ERRX_CODE(exit_code, message_string, additional params...)
- */
+/* SHIM_ERRX_CODE(exit_code, message_string, additional params...) */
 #	define SHIM_ERRX_CODE(code, ...) \
 		errx( code, __VA_ARGS__ )
 
 #else
 /* On any other platform we'll just do it ourselves with fprintf
- * and exit.
- */
+ * and exit. */
 #	define SHIM_ERRX_CODE(code, ...) \
 		do { \
 			fprintf( stderr, __VA_ARGS__ ); \
 			exit( code ); \
 		} while( 0 )
 
-#endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
+#endif /* ~ #if defined (SHIM_OS_UNIXLIKE) ... */
 
 #define SHIM_ERRX(...) \
 	SHIM_ERRX_CODE (EXIT_FAILURE, __VA_ARGS__)
 
-#endif // ~ SHIM_ERRORS_H
+#endif /* ~ SHIM_ERRORS_H */

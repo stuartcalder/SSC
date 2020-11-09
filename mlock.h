@@ -35,12 +35,16 @@
 
 
 SHIM_BEGIN_DECLS
-
+/* shim_lock_memory (memory_ptr, num_bytes)
+ * Lock the memory starting @ memory_ptr from being paged into swap memory.
+ * 	No return value. */
 SHIM_API void
 shim_lock_memory (void * SHIM_RESTRICT, size_t const);
+/* shim_unlock_memory (memory_ptr, num_bytes)
+ * Unlock the memory starting @ memory_ptr.
+ * 	No return value. */
 SHIM_API void
 shim_unlock_memory (void * SHIM_RESTRICT, size_t const);
-
 SHIM_END_DECLS
 
 #endif /* ~ ENABLE_MEMORYLOCKING_ */

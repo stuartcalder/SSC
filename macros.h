@@ -5,7 +5,6 @@
 #define SHIM_MACROS_H
 
 /* Operating System Macros */
-
 #if    defined (__APPLE__) && defined (__MACH__)
 #	ifdef SHIM_OS_OSX
 #		error 'SHIM_OS_OSX already defined'
@@ -17,9 +16,9 @@
 #if    defined (__OpenBSD__)   || \
        defined (__FreeBSD__)   || \
        defined (__NetBSD__)    || \
+       defined (__Dragonfly__) || \
        defined (__gnu_linux__) || \
-       defined (SHIM_OS_OSX)   || \
-       defined (__Dragonfly__)
+       defined (SHIM_OS_OSX)
 #	ifdef SHIM_OS_UNIXLIKE
 #		error 'SHIM_OS_UNIXLIKE already defined'
 #	endif

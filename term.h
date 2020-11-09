@@ -6,8 +6,6 @@
 #include "macros.h"
 #include "operations.h"
 
-#define SHIM_TERM_MAX_PW_SIZE	120
-#define SHIM_TERM_BUFFER_SIZE	(SHIM_TERM_MAX_PW_SIZE + 1)
 #if    defined (SHIM_OS_UNIXLIKE)
 #	ifdef __NetBSD__
 #		include <ncurses/ncurses.h>
@@ -52,22 +50,25 @@ shim_term_end () {
 #endif
 
 SHIM_API int
-shim_term_get_secret_string (uint8_t * SHIM_RESTRICT,
-			     char const *    SHIM_RESTRICT);
+shim_term_get_secret_string (uint8_t * SHIM_RESTRICT    buffer,
+			     char const * SHIM_RESTRICT prompt,
+			     int const                  buffer_size);
 
 SHIM_API int
-shim_term_obtain_password (uint8_t *    SHIM_RESTRICT,
-			   char const * SHIM_RESTRICT,
-			   int const,
-			   int const);
+shim_term_obtain_password (uint8_t *    SHIM_RESTRICT buffer,
+			   char const * SHIM_RESTRICT prompt,
+			   int const                  min_pw_size,
+			   int const                  max_pw_size,
+			   int const                  buffer_size);
 
 SHIM_API int
-shim_term_obtain_password_checked (uint8_t * SHIM_RESTRICT,
-				   uint8_t * SHIM_RESTRICT,
-				   char const * SHIM_RESTRICT,
-				   char const * SHIM_RESTRICT,
-				   int const,
-				   int const);
+shim_term_obtain_password_checked (uint8_t * SHIM_RESTRICT    password_buffer,
+				   uint8_t * SHIM_RESTRICT    check_buffer,
+				   char const * SHIM_RESTRICT entry_prompt,
+				   char const * SHIM_RESTRICT reentry_prompt,
+				   int const                  min_pw_size,
+				   int const                  max_pw_size,
+				   int const                  buffer_size);
 
 SHIM_API void
 shim_term_notify (char const *);
