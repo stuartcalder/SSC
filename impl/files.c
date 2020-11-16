@@ -31,6 +31,7 @@ shim_enforce_get_file_size (Shim_File_t const file) {
 		SHIM_ERRX (ERROR_);
 	return size;
 }
+#undef ERROR_
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
@@ -169,6 +170,7 @@ shim_enforce_close_file (Shim_File_t const file)
 	if( shim_close_file( file ) )
 		SHIM_ERRX (ERROR_);
 }
+#undef ERROR_
 
 int
 shim_set_file_size (Shim_File_t const file, size_t const new_size)
@@ -200,5 +202,4 @@ shim_enforce_set_file_size (Shim_File_t const file, size_t const new_size) {
 	if( shim_set_file_size( file, new_size ) )
 		SHIM_ERRX (ERROR_);
 }
-
-
+#undef ERROR_
