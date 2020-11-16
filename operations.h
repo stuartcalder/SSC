@@ -106,21 +106,11 @@ shim_xor_64 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 SHIM_API void 
 shim_xor_128 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
 
-static inline void *
-shim_checked_malloc (size_t size) {
-	void * mem = malloc( size );
-	if( !mem )
-		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
-	return mem;
-}
+SHIM_API void *
+shim_enforce_malloc (size_t bytes);
 
-static inline void *
-shim_checked_calloc (size_t num_elements, size_t element_size) {
-	void * mem = calloc( num_elements, element_size );
-	if( !mem )
-		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
-	return mem;
-}
+SHIM_API void *
+shim_enforce_calloc (size_t num_elements, size_t elmenet_size);
 
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
@@ -128,10 +118,10 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
 
-SHIM_API int
-shim_ctime_memcmp (void const * SHIM_RESTRICT,
-		   void const * SHIM_RESTRICT,
-		   size_t const);
+SHIM_API size_t
+shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
+		    void const * SHIM_RESTRICT mem_1,
+		    size_t const               num_bytes);
 
 SWAP_DECL_ uint16_t
 shim_swap_16 (uint16_t);
@@ -158,22 +148,22 @@ SHIM_END_DECLS
 #	endif
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
-			Shim_File_t dev_random = shim_open_existing_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
+			Shim_File_t dev_random = shim_enforce_open_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
 			if( read( dev_random, ptr_v, size_v ) != ((ssize_t)size_v) ) \
 				SHIM_ERRX ("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
-			shim_close_file( dev_random ); \
+			shim_enforce_close_file( dev_random ); \
 		}
 #elif  defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_OPERATIONS_GETENTROPY_MAX 256
-#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
+#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(u8_ptr_v, size_v) \
 		{ \
 			while( size_v > SHIM_OPERATIONS_GETENTROPY_MAX ) { \
-				if( getentropy( ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) != 0 ) \
+				if( getentropy( u8_ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) != 0 ) \
 					SHIM_ERRX ("Error: Failed to getentropy()\n"); \
-				size_v -= SHIM_OPERATIONS_GETENTROPY_MAX; \
-				ptr_v  += SHIM_OPERATIONS_GETENTROPY_MAX; \
+				size_v   -= SHIM_OPERATIONS_GETENTROPY_MAX; \
+				u8_ptr_v += SHIM_OPERATIONS_GETENTROPY_MAX; \
 			} \
-			if( getentropy( ptr_v, size_v ) != 0 ) \
+			if( getentropy( u8_ptr_v, size_v ) != 0 ) \
 				SHIM_ERRX ("Error: Failed to getentropy()\n"); \
 		}
 #elif  defined (SHIM_OS_WINDOWS)

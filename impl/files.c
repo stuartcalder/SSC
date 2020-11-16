@@ -1,43 +1,73 @@
 #include "files.h"
 
-size_t
-shim_file_size (Shim_File_t const file)
-{
+int
+shim_get_file_size (Shim_File_t const file, size_t * size_p) {
 #if    defined (SHIM_OS_UNIXLIKE)
-	struct stat stat_st;
-	if( fstat( file, &stat_st ) == -1 )
-		SHIM_ERRX ("Error: Unable to fstat file descriptor #%d\n", file);
-	return (size_t)stat_st.st_size;
+	struct stat s;
+	if( fstat( file, &s ) == -1 )
+		return -1;
+	(*size_p) = (size_t)s.st_size;
 #elif  defined (SHIM_OS_WINDOWS)
-	LARGE_INTEGER lg_int;
-	if( GetFileSizeEx( file, &lg_int ) == 0 )
-		SHIM_ERRX ("Error: GetFileSizeEx() failed\n");
-	return (size_t)lg_int.QuadPart;
+	LARGE_INTEGER li;
+	if( GetFileSizeEx( file, &li ) == 0 )
+		return -1;
+	(*size_p) = (size_t)li.QuadPart;
 #else
 #	error "Unsupported operating system."
-#endif // ~ #if defined (SHIM_OS_UNIXLIKE) ...
+#endif
+	return 0;
+}
+
+#ifdef SHIM_OS_UNIXLIKE
+#	define ERROR_	"Error: shim_enforce_get_file_size failed with fd %d!\n", file
+#else
+#	define ERROR_	"Error: shim_enforce_get_file_size failed!\n"
+#endif
+
+size_t
+shim_enforce_get_file_size (Shim_File_t const file) {
+	size_t size;
+	if( shim_get_file_size( file, &size ) )
+		SHIM_ERRX (ERROR_);
+	return size;
+}
+
+int
+shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
+		    size_t *     SHIM_RESTRICT size_p)
+{
+#if    defined (SHIM_OS_UNIXLIKE)
+	struct stat s;
+	if( stat( fpath, &s ) == -1 )
+		return -1;
+	(*size_p) = (size_t)s.st_size;
+	return 0;
+#else /* Any other OS. */
+	Shim_File_t f;
+	if( shim_open_filepath( fpath, true, &f ) )
+		return -1;
+	if( f == SHIM_NULL_FILE )
+		return -1;
+	int s = shim_get_file_size( f, size_p );
+	(void)shim_close_file( f );
+	return s;
+#	error "Unsupported operating system."
+#endif
 }
 
 size_t
-shim_filepath_size (char const * filepath) {
-#if    defined (SHIM_OS_UNIXLIKE)
-	struct stat stat_st;
-	if( stat( filepath, &stat_st ) == -1 )
-		SHIM_ERRX ("Error: Unable to stat filepath %s. Does the file exist?\n", filepath);
-	return (size_t)stat_st.st_size;
-#else /* Any other OS */
-	Shim_File_t file = shim_open_existing_filepath( filepath, true );
-	size_t const size = shim_file_size( file );
-	shim_close_file( file );
+shim_enforce_get_filepath_size (char const * filepath) {
+	size_t size;
+	if( shim_get_filepath_size( filepath, &size ) )
+		SHIM_ERRX ("Error: shim_enforce_filepath_size failed with filepath '%s'.\n", filepath);
 	return size;
-#endif
 }
 
 bool
 shim_filepath_exists (char const * filepath)
 {
 	bool exists = false;
-	FILE * test = fopen( filepath, "rb" );
+	FILE * test = fopen( filepath, "r" );
 	if( test ) {
 		fclose( test );
 		exists = true;
@@ -58,73 +88,117 @@ shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 	}
 }
 
-Shim_File_t
-shim_open_existing_filepath (char const * SHIM_RESTRICT filepath,
-			     bool const                 readonly)
+int
+shim_open_filepath (char const * SHIM_RESTRICT  filepath,
+		    bool const                  readonly,
+		    Shim_File_t * SHIM_RESTRICT file)
 {
-	shim_enforce_filepath_existence( filepath, true );
-	Shim_File_t file;
 #if    defined (SHIM_OS_UNIXLIKE)
 	int const read_write_rights = (readonly ? O_RDONLY : O_RDWR);
-	if( (file = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
-		SHIM_ERRX ("Error: Unable to open existing file %s with open()\n", filepath);
+	if( ((*file) = open( filepath, read_write_rights, (mode_t)0600 )) == SHIM_NULL_FILE )
+		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
 	DWORD read_write_rights = (GENERIC_READ|GENERIC_WRITE);
 	if( readonly )
 		read_write_rights = GENERIC_READ;
-	if( (file = CreateFileA( filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
-		SHIM_ERRX ("Error: Unable to open existing file %s with CreateFileA()\n", filepath);
+	if( ((*file) = CreateFileA( filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL )) == SHIM_NULL_FILE )
+		return -1;
 #else
 #	error "Unsupported operating system."
 #endif
-	return file;
+	return 0;
 }
 
 Shim_File_t
-shim_create_filepath (char const *filepath)
+shim_enforce_open_filepath (char const * SHIM_RESTRICT filepath,
+			    bool const                 readonly)
 {
-	shim_enforce_filepath_existence( filepath, false );
 	Shim_File_t file;
-#if    defined (SHIM_OS_UNIXLIKE)
-	if( (file = open( filepath, O_RDWR|O_TRUNC|O_CREAT, (mode_t)0600 )) == -1 )
-		SHIM_ERRX ("Error: Unable to create new file %s with open()\n", filepath);
-#elif  defined (SHIM_OS_WINDOWS)
-	if( (file = CreateFileA( filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == INVALID_HANDLE_VALUE )
-		SHIM_ERRX ("Error: Unable to create file %s with CreateFileA()\n", filepath);
-#else
-#	error "Unsupported operating system."
-#endif
+	if( shim_open_filepath( filepath, readonly, &file ) )
+		SHIM_ERRX ("Error: shim_enforce_open_filepath failed with filepath '%s'.\n", filepath);
 	return file;
 }
 
-void
+int
+shim_create_filepath (char const *  SHIM_RESTRICT filepath,
+		      Shim_File_t * SHIM_RESTRICT file)
+{
+#if    defined (SHIM_OS_UNIXLIKE)
+	if( ((*file) = open( filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600 )) == -1 )
+		return -1;
+#elif  defined (SHIM_OS_WINDOWS)
+	if( ((*file) = CreateFileA( filepath, (GENERIC_READ|GENERIC_WRITE), 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == SHIM_NULL_FILE )
+		return -1;
+#else
+#	error "Unsupported operating system."
+#endif
+	return 0;
+}
+
+Shim_File_t
+shim_enforce_create_filepath (char const *  filepath) {
+	Shim_File_t file;
+	if( shim_create_filepath( filepath, &file ) )
+		SHIM_ERRX ("Error: shim_enforce_create_filepath failed with filepath '%s'.\n", filepath);
+	return file;
+}
+
+int
 shim_close_file (Shim_File_t const file)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( close( file ) == -1 )
-		SHIM_ERRX ("Error: Wasn't able to close file descriptor %d\n", file);
+		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
 	if( CloseHandle( file ) == 0 )
-		SHIM_ERRX ("Error: Wasn't able to close file handle\n");
+		return -1;
 #else
 #	error "Unsupported operating system."
 #endif
+	return 0;
 }
 
+#ifdef SHIM_OS_UNIXLIKE
+#	define ERROR_ "Error: shim_enforce_close_file failed with fd: %d\n.", file
+#else
+#	define ERROR_ "Error: shim_enforce_close_file!\n"
+#endif
 void
+shim_enforce_close_file (Shim_File_t const file)
+{
+	if( shim_close_file( file ) )
+		SHIM_ERRX (ERROR_);
+}
+
+int
 shim_set_file_size (Shim_File_t const file, size_t const new_size)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	if( ftruncate( file, new_size ) == -1 )
-		SHIM_ERRX ("Error: Failed to set size of file descriptor %d to %zu\n", file, new_size);
+		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
-	LARGE_INTEGER lg_int;
-	lg_int.QuadPart = new_size;
-	if( SetFilePointerEx( file, lg_int, NULL, FILE_BEGIN ) == 0 )
-		SHIM_ERRX ("Error: Failed to SetFilePointerEx()\n");
+	LARGE_INTEGER li;
+	li.QuadPart = new_size;
+	if( SetFilePointerEx( file, li, NULL, FILE_BEGIN ) == 0 )
+		return -1;
 	if( SetEndOfFile( file ) == 0 )
-		SHIM_ERRX ("Error: Failed to SetEndOfFile()\n");
+		return -1;
 #else
 #	error "Unsupported operating system."
 #endif
+	return 0;
 }
+
+#ifdef SHIM_OS_UNIXLIKE
+#	define ERROR_	"Error: shim_enforce_set_file_size failed with fd %d; size %zu.\n", file, new_size
+#else
+#	define ERROR_	"Error: shim_enforce_set_file_size failed with size %zu.\n", new_size
+#endif
+
+void
+shim_enforce_set_file_size (Shim_File_t const file, size_t const new_size) {
+	if( shim_set_file_size( file, new_size ) )
+		SHIM_ERRX (ERROR_);
+}
+
+

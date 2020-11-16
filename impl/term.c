@@ -183,7 +183,7 @@ shim_term_obtain_password_checked (uint8_t *    SHIM_RESTRICT password_buf,
 			shim_term_notify( "Second password not the same size as the first." NEWLINE_ );
 			continue;
 		}
-		if( shim_ctime_memcmp( password_buf, check_buf, buffer_size ) == 0 )
+		if( shim_ctime_memdiff( password_buf, check_buf, buffer_size ) == 0 )
 			break;
 		shim_term_notify( "Passwords do not match." NEWLINE_ );
 	}

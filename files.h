@@ -36,40 +36,49 @@ typedef HANDLE	Shim_File_t;
 #endif // ~ SHIM_OS_UNIXLIKE
 
 SHIM_BEGIN_DECLS
-/* shim_file_size (Shim_File_t)
- *	Return the size of the file; assumes there is such a file and we may access it. */
-NO_DISCARD_API_ size_t
-shim_file_size (Shim_File_t const);
-/* shim_filepath_size (filepath_str)
- * 	Return the size of the file at the path; assumes there is such a file and we may access it. */
-NO_DISCARD_API_ size_t
-shim_filepath_size (char const *);
-/* shim_filepath_exists (filepath_str)
- * 	Return true if there is a file at the path; false otherwise. */
-NO_DISCARD_API_ bool
+
+SHIM_API int
+shim_get_file_size (Shim_File_t const, size_t *);
+
+SHIM_API size_t
+shim_enforce_get_file_size (Shim_File_t const);
+
+SHIM_API int
+shim_get_filepath_size (char const * SHIM_RESTRICT, size_t * SHIM_RESTRICT);
+
+SHIM_API size_t
+shim_enforce_get_filepath_size (char const *);
+
+SHIM_API bool
 shim_filepath_exists (char const *);
-/* shim_enforce_filepath_existence (filepath_str, force)
- * Kill the program when existence or non-existence of a file is not satisfied when required. */
+
 SHIM_API void
-shim_enforce_filepath_existence (char const * SHIM_RESTRICT,
-				 bool const);
-/* shim_open_existing_filepath (filepath_str, readonly)
- * 	Return a Shim_File_t, that manages the file at the path. Assumes file exists there. */
-NO_DISCARD_API_ Shim_File_t
-shim_open_existing_filepath (char const * SHIM_RESTRICT,
-			     bool const);
-/* shim_create_filepath (filepath_str)
- * 	Return a Shim_File_t, that manages a newly created file at the path. Assumes there is not a file already there. */
-NO_DISCARD_API_ Shim_File_t
-shim_create_filepath (char const *);
-/* shim_close_file (Shim_File_t)
- * Close the file managed by the Shim_File_t. */
-SHIM_API void 
+shim_enforce_filepath_existence (char const * SHIM_RESTRICT, bool const);
+
+SHIM_API int
+shim_open_filepath (char const * SHIM_RESTRICT, bool const, Shim_File_t * SHIM_RESTRICT);
+
+SHIM_API Shim_File_t
+shim_enforce_open_filepath (char const * SHIM_RESTRICT, bool const);
+
+SHIM_API int
+shim_create_filepath (char const * SHIM_RESTRICT, Shim_File_t * SHIM_RESTRICT);
+
+SHIM_API Shim_File_t
+shim_enforce_create_filepath (char const *);
+
+SHIM_API int
 shim_close_file (Shim_File_t const);
-/* shim_set_file_size (Shim_File_t, desired_size)
- * Extends or truncates the file managed by Shim_File_t. */
-SHIM_API void 
+
+SHIM_API void
+shim_enforce_close_file (Shim_File_t const);
+
+SHIM_API int
 shim_set_file_size (Shim_File_t const, size_t const);
+
+SHIM_API void
+shim_enforce_set_file_size (Shim_File_t const, size_t const);
+
 SHIM_END_DECLS
 
 #undef NO_DISCARD_API_
