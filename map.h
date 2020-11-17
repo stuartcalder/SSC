@@ -49,12 +49,11 @@ shim_enforce_sync_map (Shim_Map const *);
 
 static inline void
 shim_nullify_map (Shim_Map * map) {
-	memset( map, 0, sizeof(*map) );
-#if SHIM_NULL_FILE != 0
+	map->ptr = NULL;
+	map->size = 0;
 	map->file = SHIM_NULL_FILE;
-#	ifdef SHIM_OS_WINDOWS
+#ifdef SHIM_OS_WINDOWS
 	map->win_fmapping = SHIM_NULL_FILE;
-#	endif
 #endif
 }
 
