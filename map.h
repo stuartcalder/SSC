@@ -27,6 +27,21 @@ typedef struct {
 #endif
 } Shim_Map;
 
+#ifdef SHIM_OS_WINDOWS
+#	define SHIM_MAP_NULL_INIT { \
+		.ptr = NULL, \
+		.size = 0, \
+		.file = SHIM_NULL_FILE, \
+		.win_fmapping = SHIM_NULL_FILE \
+	}
+#else
+#	define SHIM_MAP_NULL_INIT { \
+		.ptr = NULL, \
+		.size = 0, \
+		.file = SHIM_NULL_FILE \
+	}
+#endif
+
 SHIM_BEGIN_DECLS
 
 SHIM_API int
