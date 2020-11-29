@@ -48,15 +48,18 @@ shim_unmap_memory (Shim_Map * map) {
 	if( munmap( map->ptr, map->size ) == -1 )
 		return -1;
 	map->ptr = NULL;
-	return 0;
 #elif  defined (SHIM_OS_WINDOWS)
 	if( UnmapViewOfFile( (LPCVOID)map->ptr ) == 0 )
 		return -1;
 	map->ptr = NULL;
-	return shim_close_file( map->win_fmapping );
+	int status = shim_close_file( map->win_fmapping );
+	if( status )
+		return status;
+	map->win_fmapping = SHIM_NULL_FILE;
 #else
 #	error "Unsupported operating system."
 #endif
+	return 0;
 }
 
 void

@@ -18,7 +18,7 @@
 #	error "Unsupported operating system."
 #endif
 
-typedef struct {
+typedef struct Shim_Map_ {
 	uint8_t *    ptr;
 	uint64_t    size;
 	Shim_File_t file;

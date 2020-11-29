@@ -1,7 +1,7 @@
 #include "files.h"
 
 int
-shim_get_file_size (Shim_File_t const file, size_t * size_p) {
+shim_get_file_size (Shim_File_t const file, size_t * SHIM_RESTRICT size_p) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
 	if( fstat( file, &s ) == -1 )
@@ -35,7 +35,7 @@ shim_enforce_get_file_size (Shim_File_t const file) {
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
-		    size_t *     SHIM_RESTRICT size_p)
+		   	size_t *     SHIM_RESTRICT size_p)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
@@ -47,11 +47,11 @@ shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
 	Shim_File_t f;
 	if( shim_open_filepath( fpath, true, &f ) )
 		return -1;
-	if( f == SHIM_NULL_FILE )
+	if( shim_get_file_size( f, size_p ) ) {
+		(void)shim_close_file( f );
 		return -1;
-	int s = shim_get_file_size( f, size_p );
-	(void)shim_close_file( f );
-	return s;
+	}
+	return shim_close_file( f );
 #	error "Unsupported operating system."
 #endif
 }
@@ -60,7 +60,7 @@ size_t
 shim_enforce_get_filepath_size (char const * filepath) {
 	size_t size;
 	if( shim_get_filepath_size( filepath, &size ) )
-		SHIM_ERRX ("Error: shim_enforce_filepath_size failed with filepath '%s'.\n", filepath);
+		SHIM_ERRX ("Error: shim_enforce_get_filepath_size failed with filepath '%s'.\n", filepath);
 	return size;
 }
 
@@ -82,10 +82,10 @@ shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 {
 	if( shim_filepath_exists( filepath ) ) {
 		if( !force_to_exist )
-			SHIM_ERRX ("Error: The file %s seems to already exist.\n", filepath);
+			SHIM_ERRX ("Error: The filepath '%s' seems to already exist.\n", filepath);
 	} else {
 		if( force_to_exist )
-			SHIM_ERRX ("Error: The file %s does not seem to exist.\n", filepath);
+			SHIM_ERRX ("Error: The filepath '%s' does not seem to exist.\n", filepath);
 	}
 }
 
@@ -162,7 +162,7 @@ shim_close_file (Shim_File_t const file)
 #ifdef SHIM_OS_UNIXLIKE
 #	define ERROR_ "Error: shim_enforce_close_file failed with fd: %d\n.", file
 #else
-#	define ERROR_ "Error: shim_enforce_close_file!\n"
+#	define ERROR_ "Error: shim_enforce_close_file failed!\n"
 #endif
 void
 shim_enforce_close_file (Shim_File_t const file)

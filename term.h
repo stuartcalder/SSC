@@ -50,7 +50,7 @@ shim_term_end () {
 #endif
 
 SHIM_API int
-shim_term_get_secret_string (uint8_t * SHIM_RESTRICT    buffer,
+shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 			     char const * SHIM_RESTRICT prompt,
 			     int const                  buffer_size);
 
@@ -62,8 +62,8 @@ shim_term_obtain_password (uint8_t *    SHIM_RESTRICT buffer,
 			   int const                  buffer_size);
 
 SHIM_API int
-shim_term_obtain_password_checked (uint8_t * SHIM_RESTRICT    password_buffer,
-				   uint8_t * SHIM_RESTRICT    check_buffer,
+shim_term_obtain_password_checked (uint8_t *    SHIM_RESTRICT password_buffer,
+				   uint8_t *    SHIM_RESTRICT check_buffer,
 				   char const * SHIM_RESTRICT entry_prompt,
 				   char const * SHIM_RESTRICT reentry_prompt,
 				   int const                  min_pw_size,

@@ -110,7 +110,7 @@ SHIM_API void *
 shim_enforce_malloc (size_t bytes);
 
 SHIM_API void *
-shim_enforce_calloc (size_t num_elements, size_t elmenet_size);
+shim_enforce_calloc (size_t num_elements, size_t element_size);
 
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
@@ -141,7 +141,7 @@ SHIM_END_DECLS
 #if    defined (SHIM_OS_OSX) || \
       (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) || \
        defined (__Dragonfly__)
-#	if    defined (SHIM_OS_OSX)
+#	ifdef SHIM_OS_OSX
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/random"
 #	else
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/urandom"

@@ -38,7 +38,7 @@ typedef HANDLE	Shim_File_t;
 SHIM_BEGIN_DECLS
 
 SHIM_API int
-shim_get_file_size (Shim_File_t const, size_t *);
+shim_get_file_size (Shim_File_t const, size_t * SHIM_RESTRICT);
 
 SHIM_API size_t
 shim_enforce_get_file_size (Shim_File_t const);
