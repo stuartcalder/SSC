@@ -17,6 +17,7 @@ _GCC_COMPATIBLE_FLAGS = [
 ]
 compiler = meson.get_compiler(_LANG)
 os = host_machine.system()
+static = get_option('static')
 if os != 'netbsd' and compiler.get_id() != 'clang'
   _GCC_COMPATIBLE_FLAGS += '-flto'
 endif
@@ -43,12 +44,14 @@ lib_deps     = []
 lang_flags   = []
 include_dirs = []
 # We're building Shim
-_flag = _D_PREFIX + 'SHIM_EXT_BUILD'
-lang_flags += _flag
+if static
+  lang_flags += _D_PREFIX + 'SHIM_EXT_STATIC_LIB'
+else
+  lang_flags += _D_PREFIX + 'SHIM_EXT_BUILD_DYNAMIC_LIB'
+endif
 # OSX Requires __STDC_WANT_LIB_EXT1__ == 1
 if os == 'darwin'
-  _flag = _D_PREFIX + '__STDC_WANT_LIB_EXT1__=1'
-  lang_flags += _flag
+  lang_flags += _D_PREFIX + '__STDC_WANT_LIB_EXT1__=1'
 endif
 # Unixlike options
 if os in _UNIXLIKE_OPERATING_SYSTEMS
@@ -84,13 +87,18 @@ include_dirs += '..'
 # Install the shim folder into the system header directory
 install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
 
-if os == 'windows'
-  shared_library('shim', sources: src, dependencies: lib_deps,
-		 c_args: lang_flags, include_directories: include_dirs,
-		 name_suffix: 'dll', name_prefix: '',
-		 install: true, install_dir: 'C:/lib')
+if static
+  if os == 'windows'
+    static_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+      name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:/lib')
+  else
+    static_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+  endif
 else
-  shared_library('shim', sources: src, dependencies: lib_deps,
-		 c_args: lang_flags, include_directories: include_dirs,
-		 install: true)
+  if os == 'windows'
+    shared_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+      name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:/lib')
+  else
+    shared_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+  endif
 endif

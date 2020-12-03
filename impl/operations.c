@@ -30,6 +30,14 @@ shim_enforce_calloc (size_t num_elements, size_t element_size) {
 	return mem;
 }
 
+void *
+shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size) {
+	void * mem = realloc( ptr, size );
+	if( !mem )
+		SHIM_ERRX (SHIM_ERR_STR_ALLOC_FAILURE);
+	return mem;
+}
+
 #ifndef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT mem, size_t size)

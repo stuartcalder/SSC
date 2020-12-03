@@ -125,10 +125,14 @@
 #	error "Unsupported operating system."
 #endif
 
-#ifdef SHIM_EXT_BUILD
-#	define SHIM_API SHIM_EXPORT_SYMBOL
+#ifdef SHIM_EXT_STATIC_LIB
+#	define SHIM_API
 #else
-#	define SHIM_API SHIM_IMPORT_SYMBOL
+#	ifdef SHIM_EXT_BUILD_DYNAMIC_LIB
+#		define SHIM_API SHIM_EXPORT_SYMBOL
+#	else /* Assume that Shim is being imported as a dynamic library. */
+#		define SHIM_API SHIM_IMPORT_SYMBOL
+#	endif
 #endif
 
 

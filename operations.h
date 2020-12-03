@@ -112,6 +112,9 @@ shim_enforce_malloc (size_t bytes);
 SHIM_API void *
 shim_enforce_calloc (size_t num_elements, size_t element_size);
 
+SHIM_API void *
+shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size);
+
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 
