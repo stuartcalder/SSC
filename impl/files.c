@@ -35,7 +35,7 @@ shim_enforce_get_file_size (Shim_File_t const file) {
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
-		   	size_t *     SHIM_RESTRICT size_p)
+		   	size_t *   SHIM_RESTRICT size_p)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
@@ -90,7 +90,7 @@ shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 }
 
 int
-shim_open_filepath (char const * SHIM_RESTRICT  filepath,
+shim_open_filepath (char const *  SHIM_RESTRICT filepath,
 		    bool const                  readonly,
 		    Shim_File_t * SHIM_RESTRICT file)
 {
@@ -148,15 +148,14 @@ int
 shim_close_file (Shim_File_t const file)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
-	if( close( file ) == -1 )
-		return -1;
+	return close( file );
 #elif  defined (SHIM_OS_WINDOWS)
 	if( CloseHandle( file ) == 0 )
 		return -1;
+	return 0;
 #else
 #	error "Unsupported operating system."
 #endif
-	return 0;
 }
 
 #ifdef SHIM_OS_UNIXLIKE
@@ -176,8 +175,7 @@ int
 shim_set_file_size (Shim_File_t const file, size_t const new_size)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
-	if( ftruncate( file, new_size ) == -1 )
-		return -1;
+	return ftruncate( file, new_size );
 #elif  defined (SHIM_OS_WINDOWS)
 	LARGE_INTEGER li;
 	li.QuadPart = new_size;
@@ -185,10 +183,10 @@ shim_set_file_size (Shim_File_t const file, size_t const new_size)
 		return -1;
 	if( SetEndOfFile( file ) == 0 )
 		return -1;
+	return 0;
 #else
 #	error "Unsupported operating system."
 #endif
-	return 0;
 }
 
 #ifdef SHIM_OS_UNIXLIKE

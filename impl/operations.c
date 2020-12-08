@@ -1,4 +1,5 @@
 #include "operations.h"
+#include <stdlib.h>
 
 #define GENERIC_SHIM_XOR_(bytes) \
 	void \
