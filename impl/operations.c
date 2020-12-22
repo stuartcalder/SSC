@@ -78,3 +78,25 @@ shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 	}
 	return unequal_count;
 }
+
+bool
+shim_iszero (void const * SHIM_RESTRICT mem,
+             size_t const               num_bytes)
+{
+	for( size_t i = 0; i < num_bytes; ++i ) {
+		if( ((uint8_t const *)mem)[ i ] )
+			return false;
+	}
+	return true;
+}
+
+bool
+shim_ctime_iszero (void const * SHIM_RESTRICT mem,
+		   size_t const               num_bytes)
+{
+	uint8_t zero_test = 0;
+	for( size_t i = 0; i < num_bytes; ++i ) {
+		zero_test |= ((uint8_t const *)mem)[ i ];
+	}
+	return !zero_test;
+}

@@ -64,7 +64,7 @@ if os in _UNIXLIKE_OPERATING_SYSTEMS
 endif
 
 # On {Open,Free}BSD and OSX...
-if os == 'openbsd' or os == 'freebsd' or os == 'darwin'
+if os in ['openbsd', 'freebsd', 'darwin']
   include_install = '/usr/local/include'
   lib_deps += compiler.find_library('ncurses')
 # On NetBSD...

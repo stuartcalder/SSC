@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <limits.h>
 #include <string.h>
 #include <strings.h>
@@ -125,6 +126,14 @@ SHIM_API size_t
 shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 		    void const * SHIM_RESTRICT mem_1,
 		    size_t const               num_bytes);
+
+SHIM_API bool
+shim_iszero (void const * SHIM_RESTRICT mem,
+             size_t const               num_bytes);
+
+SHIM_API bool
+shim_ctime_iszero (void const * SHIM_RESTRICT mem,
+		   size_t const               num_bytes);
 
 SWAP_DECL_ uint16_t
 shim_swap_16 (uint16_t);

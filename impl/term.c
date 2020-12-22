@@ -33,7 +33,7 @@ shim_term_end () {
 #define STR_(text)	STR_IMPL_ (text)
 #define SECRET_STR_MIN_BUFSIZE_ 2
 int
-shim_term_get_secret_string (uint8_t * SHIM_RESTRICT    buffer,
+shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 			     char const * SHIM_RESTRICT prompt,
 			     int const                  buffer_size)
 #if    defined (SHIM_OS_UNIXLIKE)

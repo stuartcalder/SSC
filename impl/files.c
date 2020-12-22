@@ -35,7 +35,7 @@ shim_enforce_get_file_size (Shim_File_t const file) {
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
-		   	size_t *   SHIM_RESTRICT size_p)
+		   	size_t *     SHIM_RESTRICT size_p)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
@@ -96,7 +96,7 @@ shim_open_filepath (char const *  SHIM_RESTRICT filepath,
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	int const read_write_rights = (readonly ? O_RDONLY : O_RDWR);
-	if( ((*file) = open( filepath, read_write_rights, (mode_t)0600 )) == SHIM_NULL_FILE )
+	if( ((*file) = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
 		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
 	DWORD read_write_rights = (GENERIC_READ|GENERIC_WRITE);
@@ -144,25 +144,17 @@ shim_enforce_create_filepath (char const *  filepath) {
 	return file;
 }
 
+#ifndef SHIM_FILES_INLINE_CLOSE_FILE
 int
 shim_close_file (Shim_File_t const file)
-{
-#if    defined (SHIM_OS_UNIXLIKE)
-	return close( file );
-#elif  defined (SHIM_OS_WINDOWS)
-	if( CloseHandle( file ) == 0 )
-		return -1;
-	return 0;
-#else
-#	error "Unsupported operating system."
-#endif
-}
+	SHIM_FILES_CLOSE_FILE_IMPL (file)
+#endif /* ~ SHIM_FILES_INLINE_CLOSE_FILE */
 
 #ifdef SHIM_OS_UNIXLIKE
 #	define ERROR_ "Error: shim_enforce_close_file failed with fd: %d\n.", file
 #else
 #	define ERROR_ "Error: shim_enforce_close_file failed!\n"
-#endif
+#endif /* ~ SHIM_OS_UNIXLIKE */
 void
 shim_enforce_close_file (Shim_File_t const file)
 {
@@ -171,23 +163,11 @@ shim_enforce_close_file (Shim_File_t const file)
 }
 #undef ERROR_
 
+#ifndef SHIM_FILES_INLINE_SET_FILE_SIZE
 int
 shim_set_file_size (Shim_File_t const file, size_t const new_size)
-{
-#if    defined (SHIM_OS_UNIXLIKE)
-	return ftruncate( file, new_size );
-#elif  defined (SHIM_OS_WINDOWS)
-	LARGE_INTEGER li;
-	li.QuadPart = new_size;
-	if( SetFilePointerEx( file, li, NULL, FILE_BEGIN ) == 0 )
-		return -1;
-	if( SetEndOfFile( file ) == 0 )
-		return -1;
-	return 0;
-#else
-#	error "Unsupported operating system."
-#endif
-}
+	SHIM_FILES_SET_FILE_SIZE_IMPL (file, new_size)
+#endif /* ~ SHIM_FILES_INLINE_SET_FILE_SIZE */
 
 #ifdef SHIM_OS_UNIXLIKE
 #	define ERROR_	"Error: shim_enforce_set_file_size failed with fd %d; size %zu.\n", file, new_size
