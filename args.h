@@ -3,9 +3,9 @@
  */
 #ifndef SHIM_ARGS_H
 #define SHIM_ARGS_H
-#include <stdlib.h>
-#include <stdbool.h>
 #include "macros.h"
+#include <stdbool.h>
+#include <stdlib.h>
 /* Processing arguments... A series of C strings terminate by null. abc, def, ghi, NULL
  * 	How to handle some specific argument: a handler that can change the remaining arguments, and somehow change
  * 	the rest of the program.

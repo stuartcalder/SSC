@@ -43,7 +43,7 @@ shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size) {
 void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT mem, size_t size)
 	SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL (mem, size)
-#endif
+#endif /* ~ ifndef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY */
 
 #ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
 uint16_t
@@ -55,7 +55,7 @@ shim_swap_32 (uint32_t u32)
 uint64_t
 shim_swap_64 (uint64_t u64)
 	SHIM_OPERATIONS_SWAP_64_IMPL (u64)
-#endif
+#endif /* ~ ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS */
 
 size_t
 shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,

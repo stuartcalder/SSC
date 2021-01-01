@@ -3,8 +3,9 @@
  */
 #ifndef SHIM_STRINGS_H
 #define SHIM_STRINGS_H
-#include "macros.h"
+
 #include "errors.h"
+#include "macros.h"
 
 SHIM_BEGIN_DECLS
 

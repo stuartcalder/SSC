@@ -10,62 +10,65 @@
 #		error 'SHIM_OS_OSX already defined'
 #	endif
 #	define SHIM_OS_OSX
-#endif
+#endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
 
-/* Define the BSDs, GNU/Linux, and Mac OSX as UNIX-like operating systems. */
-#if    defined (__OpenBSD__)   || \
+/* Define the BSDs, GNU/Linux, and Mac OSX as UNIX-like operating systems.
+ */
+#if    defined (__Dragonfly__) || \
        defined (__FreeBSD__)   || \
        defined (__NetBSD__)    || \
-       defined (__Dragonfly__) || \
+       defined (__OpenBSD__)   || \
        defined (__gnu_linux__) || \
        defined (SHIM_OS_OSX)
 #	ifdef SHIM_OS_UNIXLIKE
 #		error 'SHIM_OS_UNIXLIKE already defined'
-#	endif
+#	endif /* ~ ifdef SHIM_OS_UNIXLIKE */
 #	define SHIM_OS_UNIXLIKE
-/* Define MS Windows, naming scheme consistent with the above. */
+/* Define MS Windows, naming scheme consistent with the above.
+ */
 #elif  defined (_WIN32)
 #	ifdef SHIM_OS_WINDOWS
 #		error 'SHIM_OS_WINDOWS already defined'
-#	endif
+#	endif /* ~ ifdef SHIM_OS_WINDOWS */
 #	define SHIM_OS_WINDOWS
 #	ifdef _WIN64
 #		ifdef SHIM_OS_WIN64
 #			error 'SHIM_OS_WIN64 already defined'
-#		endif
+#		endif /* ~ ifdef SHIM_OS_WIN64 */
 #		define SHIM_OS_WIN64
 #	else
 #		ifdef SHIM_OS_WIN32
 #			error 'SHIM_OS_WIN32 already defined'
-#		endif
+#		endif /* ~ ifdef SHIM_OS_WIN32 */
 #		define SHIM_OS_WIN32
-#	endif
+#	endif /* ~ ifdef _WIN64 */
 #else
 #	error 'Unsupported OS'
-#endif // ~ #if defined (unixlike_os's...)
+#endif /* ~ if defined (unixlike os's ...) */
 
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
-#	if    defined (SHIM_OPENBSD_UNVEIL)
-#		error 'SHIM_OPENBSD_UNVEIL already defined'
-#	elif  defined (SHIM_OPENBSD_PLEDGE)
-#		error 'SHIM_OPENBSD_PLEDGE already defined'
-#	endif
+#	if    defined (SHIM_OPENBSD_PLEDGE)
+#		error "SHIM_OPENBSD_PLEDGE already defined"
+#	elif  defined (SHIM_OPENBSD_UNVEIL)
+#		error "SHIM_OPENBSD_UNVEIL already defined"
+#	endif /* ~ if defined (SHIM_OPENBSD_PLEDGE) elif defined (SHIM_OPENBSD_UNVEIL) */
 
 #	include <unistd.h>
 #	include "errors.h"
 
-#	define SHIM_OPENBSD_UNVEIL(path, permissions) \
-		if( unveil( path, permissions ) != 0 ) \
-			SHIM_ERRX ("Failed to unveil()\n")
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) \
 		if( pledge( promises, execpromises ) != 0 ) \
 			SHIM_ERRX ("Failed to pledge()\n")
+#	define SHIM_OPENBSD_UNVEIL(path, permissions) \
+		if( unveil( path, permissions ) != 0 ) \
+			SHIM_ERRX ("Failed to unveil()\n")
 #else
-/* These macros define to nothing on non-OpenBSD operating systems. */
-#	define SHIM_OPENBSD_UNVEIL(path, permission)		/* Nil */
-#	define SHIM_OPENBSD_PLEDGE(promises, execpromises)	/* Nil */
-#endif // ~ #ifdef __OpenBSD__
+/* These macros define to nothing on non-OpenBSD operating systems.
+ */
+#	define SHIM_OPENBSD_PLEDGE(promises, execpromises)
+#	define SHIM_OPENBSD_UNVEIL(path, permission)
+#endif /* ~ ifdef __OpenBSD__ */
 
 /* Simplification Macros */
 
@@ -112,7 +115,7 @@
 #	else
 #		define SHIM_EXPORT_SYMBOL __declspec(dllexport)
 #		define SHIM_IMPORT_SYMBOL __declspec(dllimport)
-#	endif
+#	endif /* ~ ifdef __GNUC__ */
 #elif  defined (SHIM_OS_UNIXLIKE)
 #	if    defined (__GNUC__) && (__GNUC__ >= 4)
 #		define SHIM_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
@@ -120,7 +123,7 @@
 #	else
 #		define SHIM_EXPORT_SYMBOL /* Nil */
 #		define SHIM_IMPORT_SYMBOL /* Nil */
-#	endif
+#	endif /* ~ if defined (__GNUC__) and (__GNUC__ >= 4) */
 #else
 #	error "Unsupported operating system."
 #endif
@@ -130,10 +133,11 @@
 #else
 #	ifdef SHIM_EXT_BUILD_DYNAMIC_LIB
 #		define SHIM_API SHIM_EXPORT_SYMBOL
-#	else /* Assume that Shim is being imported as a dynamic library. */
+#	else /* Assume that Shim is being imported as a dynamic library.
+	      */
 #		define SHIM_API SHIM_IMPORT_SYMBOL
-#	endif
-#endif
+#	endif /* ~ ifdef SHIM_EXT_BUILD_DYNAMIC_LIB */
+#endif /* ~ ifdef SHIM_EXT_STATIC_LIB */
 
 
-#endif // ~ SHIM_MACROS_H
+#endif /* ~ ifndef SHIM_MACROS_H */

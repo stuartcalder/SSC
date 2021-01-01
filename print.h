@@ -3,9 +3,10 @@
  */
 #ifndef SHIM_PRINT_H
 #define SHIM_PRINT_H
+
 #include "macros.h"
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 SHIM_BEGIN_DECLS
 

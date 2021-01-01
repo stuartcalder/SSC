@@ -3,6 +3,7 @@
  */
 #ifndef SHIM_TERM_H
 #define SHIM_TERM_H
+
 #include "macros.h"
 #include "operations.h"
 
@@ -14,8 +15,8 @@
 #	endif
 #elif  defined (SHIM_OS_WINDOWS)
 #	include "errors.h"
-#	include <windows.h>
 #	include <conio.h>
+#	include <windows.h>
 #else
 #	error "Unsupported OS."
 #endif

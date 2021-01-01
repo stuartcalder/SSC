@@ -4,16 +4,16 @@
 #ifndef SHIM_OPERATIONS_H
 #define SHIM_OPERATIONS_H
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
+#include "errors.h"
+#include "macros.h"
+#include <assert.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <assert.h>
-#include "macros.h"
-#include "errors.h"
 
 #if    defined (SHIM_OS_UNIXLIKE)
 #	include <unistd.h>
@@ -23,16 +23,16 @@
 #		include <sys/endian.h>
 #		ifdef __Dragonfly__
 #			define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-#		endif
+#		endif /* ~ ifdef __Dragonfly__ */
 #	elif  defined (__NetBSD__)
-#		include <sys/types.h>
 #		include <machine/bswap.h>
+#		include <sys/types.h>
 #		include <string.h>
 #		include <sys/param.h>
 #		if    (__NetBSD_Version__ < 1000000000)
 #			include "files.h"
 #			define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-#		endif
+#		endif /* ~ if __NetBSD_Version__ < 1000000000 */
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
 #	elif  defined (SHIM_OS_OSX)
@@ -45,7 +45,7 @@
 #		include <string.h>
 #	else
 #		error "Unsupported unix-like OS."
-#	endif
+#	endif /* ~ if defined (unixlike_os's) ... */
 #elif  defined (SHIM_OS_WINDOWS)
 #	include <windows.h>
 #	include <ntstatus.h>
@@ -119,6 +119,8 @@ shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size);
 OS_ENT_DECL_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 
+#undef OS_ENT_DECL_
+
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
 
@@ -145,11 +147,10 @@ SWAP_DECL_ uint64_t
 shim_swap_64 (uint64_t);
 
 #undef SWAP_DECL_
-#undef OS_ENT_DECL_
 
 SHIM_END_DECLS
 
-/* obtain_os_entropy implementation */
+/* shim_obtain_os_entropy Implementation */
 #if    defined (SHIM_OS_OSX) || \
       (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) || \
        defined (__Dragonfly__)
@@ -157,7 +158,7 @@ SHIM_END_DECLS
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/random"
 #	else
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/urandom"
-#	endif
+#	endif /* ~ ifdef SHIM_OS_OSX */
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
 			Shim_File_t dev_random = shim_enforce_open_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
@@ -170,12 +171,12 @@ SHIM_END_DECLS
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(u8_ptr_v, size_v) \
 		{ \
 			while( size_v > SHIM_OPERATIONS_GETENTROPY_MAX ) { \
-				if( getentropy( u8_ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) != 0 ) \
+				if( getentropy( u8_ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) ) \
 					SHIM_ERRX ("Error: Failed to getentropy()\n"); \
 				size_v   -= SHIM_OPERATIONS_GETENTROPY_MAX; \
 				u8_ptr_v += SHIM_OPERATIONS_GETENTROPY_MAX; \
 			} \
-			if( getentropy( u8_ptr_v, size_v ) != 0 ) \
+			if( getentropy( u8_ptr_v, size_v ) ) \
 				SHIM_ERRX ("Error: Failed to getentropy()\n"); \
 		}
 #elif  defined (SHIM_OS_WINDOWS)
@@ -191,13 +192,16 @@ SHIM_END_DECLS
 		}
 #else
 #	error "Unsupported OS."
-#endif
-/* swap functions implementation */
+#endif /* ~ ifdef (os_0) elif (os_1) ... */
+
+/* Swap Functions Implementation */
 #define SHIM_OPERATIONS_SWAP_F(size, u) \
 	SHIM_OPERATIONS_SWAP_F_IMPL (size, u)
+
 #ifdef SHIM_OS_OSX
 #	define SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
-#endif
+#endif /* ~ ifdef SHIM_OS_OSX */
+
 #if    defined (__OpenBSD__)
 #	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
 		swap##size( u )
@@ -264,7 +268,8 @@ SHIM_END_DECLS
 void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT buffer, size_t num_bytes)
 	SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL (buffer, num_bytes)
-#endif
+#endif /* ~ ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY */
+
 #ifndef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
 uint16_t
 shim_swap_16 (uint16_t u16)
@@ -275,7 +280,7 @@ shim_swap_32 (uint32_t u32)
 uint64_t
 shim_swap_64 (uint64_t u64)
 	SHIM_OPERATIONS_SWAP_64_IMPL (u64)
-#endif
+#endif /* ~ ifndef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS */
 
 void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
@@ -289,7 +294,7 @@ shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
 	SecureZeroMemory( buffer, num_bytes );
 #else
 #	error "Unsupported operating system."
-#endif
-} // ~ shim_secure_zero(...)
+#endif /* ~ if defined (os's) ... */
+} /* ~ shim_secure_zero(buffer, size) */
 
-#endif // ~ SHIM_OPERATIONS_H
+#endif /* ~ ifndef SHIM_OPERATIONS_H */

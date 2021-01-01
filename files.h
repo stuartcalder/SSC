@@ -4,21 +4,21 @@
 #ifndef SHIM_FILES_H
 #define SHIM_FILES_H
 
-#include "macros.h"
 #include "errors.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "macros.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if    defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_FILES_INLINE_CLOSE_FILE
 #	define SHIM_FILES_INLINE_SET_FILE_SIZE
-#	include <sys/types.h>
-#	include <sys/stat.h>
-#	include <unistd.h>
 #	include <fcntl.h>
+#	include <unistd.h>
+#	include <sys/stat.h>
+#	include <sys/types.h>
 /* On Unix-like systems, files are managed through handles, represented by integers. */
 typedef int	Shim_File_t;
 #	define SHIM_NULL_FILE (-1)
@@ -29,7 +29,7 @@ typedef HANDLE	Shim_File_t;
 #	define SHIM_NULL_FILE INVALID_HANDLE_VALUE
 #else
 #	error "Unsupported operating system."
-#endif // ~ SHIM_OS_UNIXLIKE
+#endif /* ~ if defined (SHIM_OS_UNIXLIKE) or defined (SHIM_OS_WINDOWS) */
 
 SHIM_BEGIN_DECLS
 
@@ -67,7 +67,7 @@ shim_enforce_create_filepath (char const *);
 #	define CLOSE_API_ static inline
 #else
 #	define CLOSE_API_ SHIM_API
-#endif
+#endif /* ~ ifdef SHIM_FILES_INLINE_CLOSE_FILE */
 
 CLOSE_API_ int
 shim_close_file (Shim_File_t const);
@@ -81,7 +81,7 @@ shim_enforce_close_file (Shim_File_t const);
 #	define SET_API_ static inline
 #else
 #	define SET_API_ SHIM_API
-#endif
+#endif /* ~ ifdef SHIM_FILES_INLINE_SET_FILE_SIZE */
 
 SET_API_ int
 shim_set_file_size (Shim_File_t const, size_t const);
@@ -93,8 +93,8 @@ shim_enforce_set_file_size (Shim_File_t const, size_t const);
 
 SHIM_END_DECLS
 
+/* Inline/non-inline API function implementations */
 #if    defined (SHIM_OS_UNIXLIKE)
-/* shim_close_file implementation. */
 #	define SHIM_FILES_CLOSE_FILE_IMPL(file_const) { \
 		return close( file_const ); \
 	}
@@ -102,7 +102,6 @@ SHIM_END_DECLS
 		return ftruncate( file, new_size ); \
 	}
 #elif  defined (SHIM_OS_WINDOWS)
-/* shim_close_file implementation. */
 #	define SHIM_FILES_CLOSE_FILE_IMPL(file_const) { \
 		if( !CloseHandle( file_const ) )\
 			return -1; \
@@ -119,17 +118,18 @@ SHIM_END_DECLS
 	}
 #else
 #	error "Unsupported OS."
-#endif
+#endif /* ~ if defined (SHIM_OS_UNIXLIKE) or defined (SHIM_OS_WINDOWS) */
 
 #ifdef SHIM_FILES_INLINE_CLOSE_FILE
 int
 shim_close_file (Shim_File_t const file)
 	SHIM_FILES_CLOSE_FILE_IMPL (file)
-#endif
+#endif /* ~ ifdef SHIM_FILES_INLINE_CLOSE_FILE */
+
 #ifdef SHIM_FILES_INLINE_SET_FILE_SIZE
 int
 shim_set_file_size (Shim_File_t const file, size_t const new_size)
 	SHIM_FILES_SET_FILE_SIZE_IMPL (file, new_size)
-#endif
+#endif /* ~ ifdef SHIM_FILES_INLINE_SET_FILE_SIZE */
 
 #endif /* ~ SHIM_FILES_H */

@@ -4,12 +4,12 @@ int
 shim_get_file_size (Shim_File_t const file, size_t * SHIM_RESTRICT size_p) {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
-	if( fstat( file, &s ) == -1 )
+	if( fstat( file, &s ) )
 		return -1;
 	(*size_p) = (size_t)s.st_size;
 #elif  defined (SHIM_OS_WINDOWS)
 	LARGE_INTEGER li;
-	if( GetFileSizeEx( file, &li ) == 0 )
+	if( !GetFileSizeEx( file, &li ) )
 		return -1;
 	(*size_p) = (size_t)li.QuadPart;
 #else
@@ -39,7 +39,7 @@ shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	struct stat s;
-	if( stat( fpath, &s ) == -1 )
+	if( stat( fpath, &s ) )
 		return -1;
 	(*size_p) = (size_t)s.st_size;
 	return 0;
@@ -52,7 +52,6 @@ shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
 		return -1;
 	}
 	return shim_close_file( f );
-#	error "Unsupported operating system."
 #endif
 }
 
