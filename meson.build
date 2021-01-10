@@ -43,6 +43,12 @@ src = [
 lib_deps     = []
 lang_flags   = []
 include_dirs = []
+# Debug Build?
+if not get_option('debug_build')
+  lang_flags += _D_PREFIX + 'NDEBUG'
+else
+  lang_flags += _D_PREFIX + 'YDEBUG'
+endif
 # We're building Shim
 if static
   lang_flags += _D_PREFIX + 'SHIM_EXT_STATIC_LIB'

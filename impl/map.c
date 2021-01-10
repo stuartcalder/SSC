@@ -27,6 +27,7 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 	map->ptr = (uint8_t *)MapViewOfFile( map->win_fmapping, map_rw, 0, 0, map->size );
 	if( !map->ptr ) {
 		(void)shim_close_file( map->win_fmapping );
+		map->win_fmapping = SHIM_NULL_FILE;
 		return -1;
 	}
 
@@ -70,19 +71,11 @@ shim_enforce_unmap_memory (Shim_Map * map) {
 		SHIM_ERRX ("Error: shim_enforce_unmap_memory failed!\n");
 }
 
+#ifndef SHIM_MAP_INLINE_SYNC_MAP
 int
-shim_sync_map (Shim_Map const * map) {
-#if    defined (SHIM_OS_UNIXLIKE)
-	if( msync( map->ptr, map->size, MS_SYNC ) == -1 )
-		return -1;
-#elif  defined (SHIM_OS_WINDOWS)
-	if( FlushViewOfFile( (LPCVOID)map->ptr, map->size ) )
-		return -1;
-#else
-#	error "Unsupported operating system."
-#endif
-	return 0;
-}
+shim_sync_map (Shim_Map const * map)
+	SHIM_MAP_SYNC_MAP_IMPL (map)
+#endif /* ~ SHIM_MAP_INLINE_SYNC_MAP */
 
 void
 shim_enforce_sync_map (Shim_Map const * map) {

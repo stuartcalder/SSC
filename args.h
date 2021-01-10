@@ -39,7 +39,7 @@ shim_argtype (char const *);
  */
 SHIM_API void
 shim_process_args (int const argc, char ** argv,
-		   Shim_Arg_Processor_t * processor,
+		   Shim_Arg_Processor_t * const processor,
 		   void * SHIM_RESTRICT state);
 SHIM_END_DECLS
 		   

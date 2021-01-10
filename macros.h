@@ -58,16 +58,16 @@
 #	include "errors.h"
 
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) \
-		if( pledge( promises, execpromises ) != 0 ) \
+		if( pledge( promises, execpromises ) ) \
 			SHIM_ERRX ("Failed to pledge()\n")
 #	define SHIM_OPENBSD_UNVEIL(path, permissions) \
-		if( unveil( path, permissions ) != 0 ) \
+		if( unveil( path, permissions ) ) \
 			SHIM_ERRX ("Failed to unveil()\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems.
  */
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises)
-#	define SHIM_OPENBSD_UNVEIL(path, permission)
+#	define SHIM_OPENBSD_UNVEIL(path    , permission)
 #endif /* ~ ifdef __OpenBSD__ */
 
 /* Simplification Macros */
@@ -138,6 +138,5 @@
 #		define SHIM_API SHIM_IMPORT_SYMBOL
 #	endif /* ~ ifdef SHIM_EXT_BUILD_DYNAMIC_LIB */
 #endif /* ~ ifdef SHIM_EXT_STATIC_LIB */
-
 
 #endif /* ~ ifndef SHIM_MACROS_H */

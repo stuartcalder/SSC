@@ -35,6 +35,7 @@
 #		endif /* ~ if __NetBSD_Version__ < 1000000000 */
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
+#		include <sys/random.h>
 #	elif  defined (SHIM_OS_OSX)
 #		define SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
 #		define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
@@ -166,6 +167,21 @@ SHIM_END_DECLS
 				SHIM_ERRX ("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
 			shim_enforce_close_file( dev_random ); \
 		}
+#elif  defined (__gnu_linux__)
+#	define SHIM_OPERATIONS_GETRANDOM_MAX 256
+#	define SHIM_OPERATIONS_GETRANDOM_ERROR_IMPL(max) "Error: getrandom(%p, " #max ") failed!\n"
+#	define SHIM_OPERATIONS_GETRANDOM_ERROR(max) SHIM_OPERATIONS_GETRANDOM_ERROR_IMPL (max)
+#	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(u8_ptr_v, size_v) \
+	{ \
+		while( size_v > SHIM_OPERATIONS_GETRANDOM_MAX ) { \
+			if( getrandom( u8_ptr_v, SHIM_OPERATIONS_GETRANDOM_MAX, 0 ) != SHIM_OPERATIONS_GETRANDOM_MAX ) \
+				SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
+			size_v   -= SHIM_OPERATIONS_GETRANDOM_MAX; \
+			u8_ptr_v += SHIM_OPERATIONS_GETRANDOM_MAX; \
+		} \
+		if( getrandom( u8_ptr_v, size_v, 0 ) != size_v ) \
+			SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, size_v); \
+	}
 #elif  defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_OPERATIONS_GETENTROPY_MAX 256
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(u8_ptr_v, size_v) \

@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #if    defined (SHIM_OS_UNIXLIKE)
+#	define SHIM_MAP_INLINE_SYNC_MAP
 #	include <sys/mman.h>
 #elif  defined (SHIM_OS_WINDOWS)
 #	include <memoryapi.h>
@@ -66,12 +67,42 @@ shim_nullify_map (Shim_Map * map) {
 #endif /* ~ ifdef SHIM_OS_WINDOWS */
 }
 
-SHIM_API int
+#ifdef SHIM_MAP_INLINE_SYNC_MAP
+#	define SYNC_API_ static inline
+#else
+#	define SYNC_API_ SHIM_API
+#endif
+
+SYNC_API_ int
 shim_sync_map (Shim_Map const *);
+
+#undef SYNC_API_
 
 SHIM_API int
 shim_unmap_memory (Shim_Map *);
 
 SHIM_END_DECLS
+
+#if    defined (SHIM_OS_UNIXLIKE)
+#	define SHIM_MAP_SYNC_MAP_IMPL(map_ptr) { \
+		return msync( map_ptr->ptr, \
+			      map_ptr->size, \
+			      MS_SYNC ); \
+	}
+#elif  defined (SHIM_OS_WINDOWS)
+#	define SHIM_MAP_SYNC_MAP_IMPL(map_ptr) { \
+		if( FlushViewOfFile( (LPCVOID)map_ptr->ptr, map_ptr->size ) \
+			return -1; \
+		return 0; \
+	}
+#else
+#	error "Unsupported operating system."
+#endif
+
+#ifdef SHIM_MAP_INLINE_SYNC_MAP
+int
+shim_sync_map (Shim_Map const * map)
+	SHIM_MAP_SYNC_MAP_IMPL (map)
+#endif /* ~ SHIM_MAP_INLINE_SYNC_MAP */
 
 #endif /* ~ SHIM_MAP_H */
