@@ -67,7 +67,7 @@
 /* These macros define to nothing on non-OpenBSD operating systems.
  */
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises)
-#	define SHIM_OPENBSD_UNVEIL(path    , permission)
+#	define SHIM_OPENBSD_UNVEIL(path    , permissions )
 #endif /* ~ ifdef __OpenBSD__ */
 
 /* Simplification Macros */

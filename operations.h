@@ -174,12 +174,12 @@ SHIM_END_DECLS
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(u8_ptr_v, size_v) \
 	{ \
 		while( size_v > SHIM_OPERATIONS_GETRANDOM_MAX ) { \
-			if( getrandom( u8_ptr_v, SHIM_OPERATIONS_GETRANDOM_MAX, 0 ) != SHIM_OPERATIONS_GETRANDOM_MAX ) \
+			if( getrandom( u8_ptr_v, SHIM_OPERATIONS_GETRANDOM_MAX, 0 ) != ((ssize_t)SHIM_OPERATIONS_GETRANDOM_MAX) ) \
 				SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
 			size_v   -= SHIM_OPERATIONS_GETRANDOM_MAX; \
 			u8_ptr_v += SHIM_OPERATIONS_GETRANDOM_MAX; \
 		} \
-		if( getrandom( u8_ptr_v, size_v, 0 ) != size_v ) \
+		if( getrandom( u8_ptr_v, size_v, 0 ) != ((ssize_t)size_v) ) \
 			SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, size_v); \
 	}
 #elif  defined (SHIM_OS_UNIXLIKE)
