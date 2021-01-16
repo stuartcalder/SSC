@@ -62,19 +62,20 @@ shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 		    void const * SHIM_RESTRICT mem_1,
 		    size_t const               size)
 {
-#define ONE_ UINT8_C (0x01)
 	size_t unequal_count = 0;
 	for( size_t i = 0; i < size; ++i ) {
-		uint8_t const b = ((uint8_t const *)mem_0)[ i ] ^
-				  ((uint8_t const *)mem_1)[ i ];
-		unequal_count += ( ((b >> 7)       ) |
-				   ((b >> 6) & ONE_) |
-				   ((b >> 5) & ONE_) |
-				   ((b >> 4) & ONE_) |
-				   ((b >> 3) & ONE_) |
-				   ((b >> 2) & ONE_) |
-				   ((b >> 1) & ONE_) |
-				   ((b     ) & ONE_) );
+		uint8_t b = ((uint8_t const *)mem_0)[ i ] ^
+			    ((uint8_t const *)mem_1)[ i ];
+		b = ( (b >> 7) |
+		      (b >> 6) |
+		      (b >> 5) |
+		      (b >> 4) |
+		      (b >> 3) |
+		      (b >> 2) |
+		      (b >> 1) |
+		      (b     ) );
+		unequal_count += (b & 0x01);
+
 	}
 	return unequal_count;
 }

@@ -21,9 +21,6 @@
 #		include <endian.h>
 #	elif  defined (__FreeBSD__) || defined (__Dragonfly__)
 #		include <sys/endian.h>
-#		ifdef __Dragonfly__
-#			define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-#		endif /* ~ ifdef __Dragonfly__ */
 #	elif  defined (__NetBSD__)
 #		include <machine/bswap.h>
 #		include <sys/types.h>
@@ -31,14 +28,12 @@
 #		include <sys/param.h>
 #		if    (__NetBSD_Version__ < 1000000000)
 #			include "files.h"
-#			define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 #		endif /* ~ if __NetBSD_Version__ < 1000000000 */
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
 #		include <sys/random.h>
 #	elif  defined (SHIM_OS_OSX)
 #		define SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-#		define SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
 #		if   !defined (__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1)
 #			error "The macro __STDC_WANT_LIB_EXT1__ must be #defined to 1 for access to memset_s."
 #		endif
