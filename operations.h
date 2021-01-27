@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #if    defined (SHIM_OS_UNIXLIKE)
 #	include <unistd.h>
