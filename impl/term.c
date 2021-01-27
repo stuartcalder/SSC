@@ -121,7 +121,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 				} break;
 				default: {
 					if( (index < buffer_size) && (ch >= 32) && (ch <= 126) ) {
-						if( _putch( "*" ) == EOF )
+						if( _putch( '*' ) == EOF )
 							SHIM_ERRX ("Failed to _putch()!\n");
 						buffer[ index++ ] = (uint8_t)ch;
 					}
