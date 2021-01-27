@@ -6,11 +6,11 @@
 
 /* Operating System Macros */
 #if    defined (__APPLE__) && defined (__MACH__)
-#	ifdef SHIM_OS_OSX
-#		error 'SHIM_OS_OSX already defined'
-#	endif
 #	define SHIM_OS_OSX
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
+
+#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001
+#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010
 
 /* Define the BSDs, GNU/Linux, and Mac OSX as UNIX-like operating systems.
  */
@@ -20,26 +20,16 @@
        defined (__OpenBSD__)   || \
        defined (__gnu_linux__) || \
        defined (SHIM_OS_OSX)
-#	ifdef SHIM_OS_UNIXLIKE
-#		error 'SHIM_OS_UNIXLIKE already defined'
-#	endif /* ~ ifdef SHIM_OS_UNIXLIKE */
 #	define SHIM_OS_UNIXLIKE
+#	define SHIM_RESTRICT_SUPPORT	SHIM_C_RESTRICT_IMPL_SUPPORTED
 /* Define MS Windows, naming scheme consistent with the above.
  */
 #elif  defined (_WIN32)
-#	ifdef SHIM_OS_WINDOWS
-#		error 'SHIM_OS_WINDOWS already defined'
-#	endif /* ~ ifdef SHIM_OS_WINDOWS */
 #	define SHIM_OS_WINDOWS
+#	define SHIM_RESTRICT_SUPPORT SHIM_CPP_RESTRICT_IMPL_SUPPORTED
 #	ifdef _WIN64
-#		ifdef SHIM_OS_WIN64
-#			error 'SHIM_OS_WIN64 already defined'
-#		endif /* ~ ifdef SHIM_OS_WIN64 */
 #		define SHIM_OS_WIN64
 #	else
-#		ifdef SHIM_OS_WIN32
-#			error 'SHIM_OS_WIN32 already defined'
-#		endif /* ~ ifdef SHIM_OS_WIN32 */
 #		define SHIM_OS_WIN32
 #	endif /* ~ ifdef _WIN64 */
 #else
@@ -48,12 +38,6 @@
 
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
-#	if    defined (SHIM_OPENBSD_PLEDGE)
-#		error "SHIM_OPENBSD_PLEDGE already defined"
-#	elif  defined (SHIM_OPENBSD_UNVEIL)
-#		error "SHIM_OPENBSD_UNVEIL already defined"
-#	endif /* ~ if defined (SHIM_OPENBSD_PLEDGE) elif defined (SHIM_OPENBSD_UNVEIL) */
-
 #	include <unistd.h>
 #	include "errors.h"
 
@@ -76,6 +60,7 @@
 #	if    (__cplusplus < 201100L)
 #		error "Need at least C++11"
 #	endif
+#	define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) \
@@ -88,23 +73,31 @@
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
-#	if   !defined (__STDC_VERSION__)
-#		error "C standard not detected with the __STDC_VERSION__ macro."
+#	if    defined (__STDC_VERSION__)
+#		include <inttypes.h>
+#		include <stdalign.h>
+#		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
+#		define SHIM_ALIGNAS(align_to) _Alignas(align_to)
+#		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
+#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
 #	else
-#		if    (__STDC_VERSION__ < 201112L)
-#			error "At minimum, we need C11."
+#		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
+#		define SHIM_ALIGNAS(align_to)			/* Nil */
+#		define SHIM_ALIGNOF(align_of)			/* Nil */
+#		ifdef SHIM_OS_WINDOWS
+#			define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
 #		else
-#			include <inttypes.h>
-#			include <stdalign.h>
-#			define SHIM_STATIC_ASSERT(boolean, message) \
-				_Static_assert (boolean, message)
-#			define SHIM_ALIGNAS(align_to) \
-				_Alignas(align_to)
-#			define SHIM_ALIGNOF(align_of) \
-				_Alignof(align_of)
-#			define SHIM_RESTRICT restrict
+#			define SHIM_IMPL_RESTRICT 0
 #		endif
 #	endif
+#endif
+
+#if    (SHIM_IMPL_RESTRICT & SHIM_IMPL_CPP_RESTRICT_FLAG)
+#	define SHIM_RESTRICT __restrict
+#elif  (SHIM_IMPL_RESTRICT & SHIM_IMPL_C_RESTRICT_FLAG)
+#	define SHIM_RESTRICT restrict
+#else
+#	define SHIM_RESTRICT /* Nil */
 #endif
 
 /* Symbol Visibility, Export/Import Macros */
