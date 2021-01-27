@@ -193,7 +193,7 @@ SHIM_END_DECLS
 #elif  defined (SHIM_OS_WINDOWS)
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
-			BCRYPT_ALG_HANDLER cng_h; \
+			BCRYPT_ALG_HANDLE cng_h; \
 			if( BCryptOpenAlgorithmProvider( &cng_h, L"RNG", NULL, 0 ) != STATUS_SUCCESS ) \
 				SHIM_ERRX ("Error: BCryptOpenAlgorithmProvider() failed\n"); \
 			if( BCryptGenRandom( cng_h, ptr_v, size_v, 0 ) != STATUS_SUCCESS ) \
