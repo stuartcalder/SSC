@@ -27,8 +27,8 @@
 #	if    defined (SHIM_OS_UNIXLIKE)
 #		include <sys/mman.h>
 #	elif  defined (SHIM_OS_WINDOWS)
-#		include <memoryapi.h>
 #		include <windows.h>
+#		include <memoryapi.h>
 #	else
 #		error "Unsupported operating system."
 #	endif /* ~ if defined (SHIM_OS_UNIXLIKE) elif defined (SHIM_OS_WINDOWS) */
