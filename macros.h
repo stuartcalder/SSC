@@ -9,6 +9,7 @@
 #	define SHIM_OS_OSX
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
 
+/* Flags to indicate support for restricting pointers. */
 #define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001
 #define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010
 
@@ -21,12 +22,10 @@
        defined (__gnu_linux__) || \
        defined (SHIM_OS_OSX)
 #	define SHIM_OS_UNIXLIKE
-#	define SHIM_RESTRICT_SUPPORT	SHIM_C_RESTRICT_IMPL_SUPPORTED
 /* Define MS Windows, naming scheme consistent with the above.
  */
 #elif  defined (_WIN32)
 #	define SHIM_OS_WINDOWS
-#	define SHIM_RESTRICT_SUPPORT SHIM_CPP_RESTRICT_IMPL_SUPPORTED
 #	ifdef _WIN64
 #		define SHIM_OS_WIN64
 #	else
@@ -79,7 +78,7 @@
 #		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
 #		define SHIM_ALIGNAS(align_to) _Alignas(align_to)
 #		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
-#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
+#		define SHIM_IMPL_RESTRICT (SHIM_IMPL_C_RESTRICT_FLAG)
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
 #		define SHIM_ALIGNAS(align_to)			/* Nil */
