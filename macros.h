@@ -32,7 +32,7 @@
 #		define SHIM_OS_WIN32
 #	endif /* ~ ifdef _WIN64 */
 #else
-#	error 'Unsupported OS'
+#	error "Unsupported OS"
 #endif /* ~ if defined (unixlike os's ...) */
 
 /* OpenBSD-specific mitigations */
@@ -49,8 +49,8 @@
 #else
 /* These macros define to nothing on non-OpenBSD operating systems.
  */
-#	define SHIM_OPENBSD_PLEDGE(promises, execpromises)
-#	define SHIM_OPENBSD_UNVEIL(path    , permissions )
+#	define SHIM_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
+#	define SHIM_OPENBSD_UNVEIL(path    , permissions ) /* Nil */
 #endif /* ~ ifdef __OpenBSD__ */
 
 /* Simplification Macros */
@@ -59,6 +59,8 @@
 #	if    (__cplusplus < 201100L)
 #		error "Need at least C++11"
 #	endif
+/* C++, so we use `__restrict`, not `restrict`.
+ */
 #	define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
@@ -68,7 +70,6 @@
 		alignas(align_to)
 #	define SHIM_ALIGNOF(align_of) \
 		alignof(align_of)
-#	define SHIM_RESTRICT __restrict
 #else
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
@@ -78,7 +79,7 @@
 #		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
 #		define SHIM_ALIGNAS(align_to) _Alignas(align_to)
 #		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
-#		define SHIM_IMPL_RESTRICT (SHIM_IMPL_C_RESTRICT_FLAG)
+#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
 #		define SHIM_ALIGNAS(align_to)			/* Nil */
@@ -91,6 +92,8 @@
 #	endif
 #endif
 
+/* Prefer the non-standard __restrict over restrict by default.
+ */
 #if    (SHIM_IMPL_RESTRICT & SHIM_IMPL_CPP_RESTRICT_FLAG)
 #	define SHIM_RESTRICT __restrict
 #elif  (SHIM_IMPL_RESTRICT & SHIM_IMPL_C_RESTRICT_FLAG)
