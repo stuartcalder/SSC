@@ -71,6 +71,7 @@
 #	define SHIM_ALIGNOF(align_of) \
 		alignof(align_of)
 #else
+#	define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
 #	if    defined (__STDC_VERSION__)
@@ -79,16 +80,10 @@
 #		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
 #		define SHIM_ALIGNAS(align_to) _Alignas(align_to)
 #		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
-#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
 #		define SHIM_ALIGNAS(align_to)			/* Nil */
 #		define SHIM_ALIGNOF(align_of)			/* Nil */
-#		ifdef SHIM_OS_WINDOWS
-#			define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
-#		else
-#			define SHIM_IMPL_RESTRICT 0
-#		endif
 #	endif
 #endif
 
