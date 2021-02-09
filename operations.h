@@ -169,7 +169,7 @@ SHIM_END_DECLS
 	{ \
 		while( size_v > SHIM_OPERATIONS_GETRANDOM_MAX ) { \
 			if( getrandom( u8_ptr_v, SHIM_OPERATIONS_GETRANDOM_MAX, 0 ) != ((ssize_t)SHIM_OPERATIONS_GETRANDOM_MAX) ) \
-				SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
+				SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", ((void *)u8_ptr_v), ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
 			size_v   -= SHIM_OPERATIONS_GETRANDOM_MAX; \
 			u8_ptr_v += SHIM_OPERATIONS_GETRANDOM_MAX; \
 		} \

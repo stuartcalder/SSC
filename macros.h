@@ -61,7 +61,9 @@
 #	endif
 /* C++, so we use `__restrict`, not `restrict`.
  */
-#	define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
+#	ifndef SHIM_IMPL_RESTRICT
+#		define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
+#	endif
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) \
@@ -71,7 +73,9 @@
 #	define SHIM_ALIGNOF(align_of) \
 		alignof(align_of)
 #else
-#	define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
+#	ifndef SHIM_IMPL_RESTRICT
+#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
+#	endif
 #	define SHIM_BEGIN_DECLS /* null macro */
 #	define SHIM_END_DECLS   /* null macro */
 #	if    defined (__STDC_VERSION__)
