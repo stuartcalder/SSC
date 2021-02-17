@@ -10,8 +10,8 @@
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
 
 /* Flags to indicate support for restricting pointers. */
-#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001
-#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010
+#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
+#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
 
 /* Define the BSDs, GNU/Linux, and Mac OSX as UNIX-like operating systems.
  */

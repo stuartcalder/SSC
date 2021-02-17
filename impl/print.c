@@ -4,7 +4,7 @@ void
 shim_print_byte_buffer (uint8_t * SHIM_RESTRICT bytes,
 			size_t const 		num_bytes)
 {
-	if( num_bytes == 0 )
+	if( !num_bytes )
 		return;
 	uint8_t const *alias = bytes;
 	size_t const backtick_one_index = num_bytes - 1;
