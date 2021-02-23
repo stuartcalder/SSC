@@ -31,7 +31,7 @@
 #	elif  defined (__gnu_linux__)
 #		include <byteswap.h>
 #		include <sys/random.h>
-#	elif  defined (SHIM_OS_OSX)
+#	elif  defined (SHIM_OS_MAC)
 #		define SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
 #		if   !defined (__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1)
 #			error "The macro __STDC_WANT_LIB_EXT1__ must be #defined to 1 for access to memset_s."
@@ -146,14 +146,14 @@ shim_swap_64 (uint64_t);
 SHIM_END_DECLS
 
 /* shim_obtain_os_entropy Implementation */
-#if    defined (SHIM_OS_OSX) || \
+#if    defined (SHIM_OS_MAC) || \
       (defined (__NetBSD__) && (__NetBSD_Version__ < 1000000000)) || \
        defined (__Dragonfly__)
-#	ifdef SHIM_OS_OSX
+#	ifdef SHIM_OS_MAC
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/random"
 #	else
 #		define SHIM_OPERATIONS_DEV_RANDOM "/dev/urandom"
-#	endif /* ~ ifdef SHIM_OS_OSX */
+#	endif /* ~ ifdef SHIM_OS_MAC */
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
 			Shim_File_t dev_random = shim_enforce_open_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
@@ -208,9 +208,9 @@ SHIM_END_DECLS
 #define SHIM_OPERATIONS_SWAP_F(size, u) \
 	SHIM_OPERATIONS_SWAP_F_IMPL (size, u)
 
-#ifdef SHIM_OS_OSX
+#ifdef SHIM_OS_MAC
 #	define SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
-#endif /* ~ ifdef SHIM_OS_OSX */
+#endif /* ~ ifdef SHIM_OS_MAC */
 
 #if    defined (__OpenBSD__)
 #	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
@@ -294,7 +294,7 @@ shim_swap_64 (uint64_t u64)
 
 void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
-#if    defined (SHIM_OS_OSX)
+#if    defined (SHIM_OS_MAC)
 	(void)memset_s( buffer, num_bytes, 0, num_bytes );
 #elif  defined (__NetBSD__)
 	(void)explicit_memset( buffer, 0, num_bytes );

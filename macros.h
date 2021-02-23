@@ -6,21 +6,21 @@
 
 /* Operating System Macros */
 #if    defined (__APPLE__) && defined (__MACH__)
-#	define SHIM_OS_OSX
+#	define SHIM_OS_MAC
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
 
 /* Flags to indicate support for restricting pointers. */
 #define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
 #define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
 
-/* Define the BSDs, GNU/Linux, and Mac OSX as UNIX-like operating systems.
+/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems.
  */
 #if    defined (__Dragonfly__) || \
        defined (__FreeBSD__)   || \
        defined (__NetBSD__)    || \
        defined (__OpenBSD__)   || \
        defined (__gnu_linux__) || \
-       defined (SHIM_OS_OSX)
+       defined (SHIM_OS_MAC)
 #	define SHIM_OS_UNIXLIKE
 /* Define MS Windows, naming scheme consistent with the above.
  */

@@ -55,7 +55,7 @@ if static
 else
   lang_flags += _D_PREFIX + 'SHIM_EXT_BUILD_DYNAMIC_LIB'
 endif
-# OSX Requires __STDC_WANT_LIB_EXT1__ == 1
+# MacOS Requires __STDC_WANT_LIB_EXT1__ == 1
 if os == 'darwin'
   lang_flags += _D_PREFIX + '__STDC_WANT_LIB_EXT1__=1'
 endif
@@ -69,7 +69,7 @@ if os in _UNIXLIKE_OPERATING_SYSTEMS
   endif
 endif
 
-# On {Open,Free}BSD and OSX...
+# On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']
   include_install = '/usr/local/include'
   lib_deps += compiler.find_library('ncurses')
