@@ -1,6 +1,5 @@
 /* Copyright (c) 2020 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+ * See accompanying LICENSE file for licensing information. */
 #ifndef SHIM_MACROS_H
 #define SHIM_MACROS_H
 
@@ -13,8 +12,7 @@
 #define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
 #define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
 
-/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems.
- */
+/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems. */
 #if    defined (__Dragonfly__) || \
        defined (__FreeBSD__)   || \
        defined (__NetBSD__)    || \
@@ -22,8 +20,7 @@
        defined (__gnu_linux__) || \
        defined (SHIM_OS_MAC)
 #	define SHIM_OS_UNIXLIKE
-/* Define MS Windows, naming scheme consistent with the above.
- */
+/* Define MS Windows, naming scheme consistent with the above. */
 #elif  defined (_WIN32)
 #	define SHIM_OS_WINDOWS
 #	ifdef _WIN64
@@ -47,8 +44,7 @@
 		if( unveil( path, permissions ) ) \
 			SHIM_ERRX ("Failed to unveil()\n")
 #else
-/* These macros define to nothing on non-OpenBSD operating systems.
- */
+/* These macros define to nothing on non-OpenBSD operating systems. */
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
 #	define SHIM_OPENBSD_UNVEIL(path    , permissions ) /* Nil */
 #endif /* ~ ifdef __OpenBSD__ */
@@ -59,25 +55,21 @@
 #	if    (__cplusplus < 201100L)
 #		error "Need at least C++11"
 #	endif
-/* C++, so we use `__restrict`, not `restrict`.
- */
+/* C++, so we use `__restrict`, not `restrict`. */
 #	ifndef SHIM_IMPL_RESTRICT
 #		define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
 #	endif
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
-#	define SHIM_STATIC_ASSERT(boolean, message) \
-		static_assert (boolean, message)
-#	define SHIM_ALIGNAS(align_to) \
-		alignas(align_to)
-#	define SHIM_ALIGNOF(align_of) \
-		alignof(align_of)
+#	define SHIM_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
+#	define SHIM_ALIGNAS(align_to) alignas(align_to)
+#	define SHIM_ALIGNOF(align_of) alignof(align_of)
 #else
 #	ifndef SHIM_IMPL_RESTRICT
 #		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
 #	endif
-#	define SHIM_BEGIN_DECLS /* null macro */
-#	define SHIM_END_DECLS   /* null macro */
+#	define SHIM_BEGIN_DECLS /* Nil */
+#	define SHIM_END_DECLS   /* Nil */
 #	if    defined (__STDC_VERSION__)
 #		include <inttypes.h>
 #		include <stdalign.h>
@@ -91,8 +83,7 @@
 #	endif
 #endif
 
-/* Prefer the non-standard __restrict over restrict by default.
- */
+/* Prefer the non-standard __restrict over restrict by default. */
 #if    (SHIM_IMPL_RESTRICT & SHIM_IMPL_CPP_RESTRICT_FLAG)
 #	define SHIM_RESTRICT __restrict
 #elif  (SHIM_IMPL_RESTRICT & SHIM_IMPL_C_RESTRICT_FLAG)
@@ -127,8 +118,7 @@
 #else
 #	ifdef SHIM_EXT_BUILD_DYNAMIC_LIB
 #		define SHIM_API SHIM_EXPORT_SYMBOL
-#	else /* Assume that Shim is being imported as a dynamic library.
-	      */
+#	else /* Assume that Shim is being imported as a dynamic library. */
 #		define SHIM_API SHIM_IMPORT_SYMBOL
 #	endif /* ~ ifdef SHIM_EXT_BUILD_DYNAMIC_LIB */
 #endif /* ~ ifdef SHIM_EXT_STATIC_LIB */

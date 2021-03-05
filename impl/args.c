@@ -5,8 +5,7 @@ int
 shim_argtype (char const * str) {
 	int num_hyphens = 0;
 	for( int i = 0; i < 2; ++i ) {
-		char const c = str[ i ];
-		if( c == '-' )
+		if( str[ i ] == '-' )
 			++num_hyphens;
 		else
 			break;
