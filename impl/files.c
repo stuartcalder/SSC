@@ -64,8 +64,7 @@ shim_enforce_get_filepath_size (char const * filepath) {
 }
 
 bool
-shim_filepath_exists (char const * filepath)
-{
+shim_filepath_exists (char const * filepath) {
 	bool exists = false;
 	FILE * test = fopen( filepath, "r" );
 	if( test ) {
@@ -95,7 +94,7 @@ shim_open_filepath (char const *  SHIM_RESTRICT filepath,
 {
 #if    defined (SHIM_OS_UNIXLIKE)
 	int const read_write_rights = (readonly ? O_RDONLY : O_RDWR);
-	if( ((*file) = open( filepath, read_write_rights, (mode_t)0600 )) == -1 )
+	if( ((*file) = open( filepath, read_write_rights, (mode_t)0600 )) == SHIM_NULL_FILE )
 		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
 	DWORD read_write_rights = (GENERIC_READ|GENERIC_WRITE);
@@ -124,7 +123,7 @@ shim_create_filepath (char const *  SHIM_RESTRICT filepath,
 		      Shim_File_t * SHIM_RESTRICT file)
 {
 #if    defined (SHIM_OS_UNIXLIKE)
-	if( ((*file) = open( filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600 )) == -1 )
+	if( ((*file) = open( filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600 )) == SHIM_NULL_FILE )
 		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
 	if( ((*file) = CreateFileA( filepath, (GENERIC_READ|GENERIC_WRITE), 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL )) == SHIM_NULL_FILE )
@@ -136,7 +135,7 @@ shim_create_filepath (char const *  SHIM_RESTRICT filepath,
 }
 
 Shim_File_t
-shim_enforce_create_filepath (char const *  filepath) {
+shim_enforce_create_filepath (char const * filepath) {
 	Shim_File_t file;
 	if( shim_create_filepath( filepath, &file ) )
 		SHIM_ERRX ("Error: shim_enforce_create_filepath failed with filepath '%s'.\n", filepath);
@@ -154,9 +153,9 @@ shim_close_file (Shim_File_t const file)
 #else
 #	define ERROR_ "Error: shim_enforce_close_file failed!\n"
 #endif /* ~ SHIM_OS_UNIXLIKE */
+
 void
-shim_enforce_close_file (Shim_File_t const file)
-{
+shim_enforce_close_file (Shim_File_t const file) {
 	if( shim_close_file( file ) )
 		SHIM_ERRX (ERROR_);
 }

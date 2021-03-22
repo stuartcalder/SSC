@@ -62,7 +62,7 @@
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
 #	define SHIM_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
-#	define SHIM_ALIGNAS(align_to) alignas(align_to)
+#	define SHIM_ALIGNAS(align_as) alignas(align_as)
 #	define SHIM_ALIGNOF(align_of) alignof(align_of)
 #else
 #	ifndef SHIM_IMPL_RESTRICT
@@ -74,11 +74,11 @@
 #		include <inttypes.h>
 #		include <stdalign.h>
 #		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
-#		define SHIM_ALIGNAS(align_to) _Alignas(align_to)
+#		define SHIM_ALIGNAS(align_as) _Alignas(align_as)
 #		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
-#		define SHIM_ALIGNAS(align_to)			/* Nil */
+#		define SHIM_ALIGNAS(align_as)			/* Nil */
 #		define SHIM_ALIGNOF(align_of)			/* Nil */
 #	endif
 #endif

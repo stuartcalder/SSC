@@ -66,14 +66,13 @@ shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 	for( size_t i = 0; i < size; ++i ) {
 		uint8_t b = ((uint8_t const *)mem_0)[ i ] ^
 			    ((uint8_t const *)mem_1)[ i ];
-		b = ( (b >> 7) |
-		      (b >> 6) |
-		      (b >> 5) |
-		      (b >> 4) |
-		      (b >> 3) |
-		      (b >> 2) |
-		      (b >> 1) |
-		      (b     ) );
+		b |= ( (b >> 7) |
+		       (b >> 6) |
+		       (b >> 5) |
+		       (b >> 4) |
+		       (b >> 3) |
+		       (b >> 2) |
+		       (b >> 1) );
 		unequal_count += (b & 0x01);
 
 	}
