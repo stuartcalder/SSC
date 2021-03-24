@@ -1,19 +1,55 @@
 #include "operations.h"
 #include <stdlib.h>
 
-#define GENERIC_SHIM_XOR_(bytes) \
-	void \
-	shim_xor_##bytes (void * SHIM_RESTRICT mem, void const * SHIM_RESTRICT add) { \
-		for( int i = 0; i < bytes; ++i ) { \
-			((uint8_t *)      mem)[ i ] ^= \
-			((uint8_t const *)add)[ i ]; \
-		} \
-	}
+#define XOR_(v_ptr, vc_ptr, i) \
+	((uint8_t *)       v_ptr)[ i ] ^= \
+	((uint8_t const *)vc_ptr)[ i ]
 
-GENERIC_SHIM_XOR_ ( 16)
-GENERIC_SHIM_XOR_ ( 32)
-GENERIC_SHIM_XOR_ ( 64)
-GENERIC_SHIM_XOR_ (128)
+#define XOR_8_(v_ptr, vc_ptr, i) \
+	XOR_ (v_ptr, vc_ptr, (i + 0)); \
+	XOR_ (v_ptr, vc_ptr, (i + 1)); \
+	XOR_ (v_ptr, vc_ptr, (i + 2)); \
+	XOR_ (v_ptr, vc_ptr, (i + 3)); \
+	XOR_ (v_ptr, vc_ptr, (i + 4)); \
+	XOR_ (v_ptr, vc_ptr, (i + 5)); \
+	XOR_ (v_ptr, vc_ptr, (i + 6)); \
+	XOR_ (v_ptr, vc_ptr, (i + 7))
+
+#define XOR_16_(v_ptr, vc_ptr, i) \
+	XOR_8_ (v_ptr, vc_ptr, (i + 0)); \
+	XOR_8_ (v_ptr, vc_ptr, (i + 8))
+
+#define XOR_32_(v_ptr, vc_ptr, i) \
+	XOR_16_ (v_ptr, vc_ptr, (i +  0)); \
+	XOR_16_ (v_ptr, vc_ptr, (i + 16))
+
+#define XOR_64_(v_ptr, vc_ptr, i) \
+	XOR_32_ (v_ptr, vc_ptr, (i +  0)); \
+	XOR_32_ (v_ptr, vc_ptr, (i + 32))
+
+#define XOR_128_(v_ptr, vc_ptr, i) \
+	XOR_64_ (v_ptr, vc_ptr, (i +  0)); \
+	XOR_64_ (v_ptr, vc_ptr, (i + 64))
+
+void
+shim_xor_16 (void * SHIM_RESTRICT base, void const * SHIM_RESTRICT add) {
+	XOR_16_ (base, add, 0);
+}
+
+void
+shim_xor_32 (void * SHIM_RESTRICT base, void const * SHIM_RESTRICT add) {
+	XOR_32_ (base, add, 0);
+}
+
+void
+shim_xor_64 (void * SHIM_RESTRICT base, void const * SHIM_RESTRICT add) {
+	XOR_64_ (base, add, 0);
+}
+
+void
+shim_xor_128 (void * SHIM_RESTRICT base, void const * SHIM_RESTRICT add) {
+	XOR_128_ (base, add, 0);
+}
 
 void *
 shim_enforce_malloc (size_t num_bytes) {
