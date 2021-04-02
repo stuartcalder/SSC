@@ -77,8 +77,8 @@ SHIM_END_DECLS
 #elif  defined (SHIM_OS_WINDOWS)
 #	define SHIM_MAP_SYNC_MAP_IMPL(map_ptr) { \
 		if( FlushViewOfFile( (LPCVOID)map_ptr->ptr, map_ptr->size ) ) \
-			return -1; \
-		return 0; \
+			return 0; \
+		return -1; \
 	}
 #else
 #	error "Unsupported operating system."
