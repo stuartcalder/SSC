@@ -23,7 +23,6 @@ shim_get_file_size (Shim_File_t const file, size_t * SHIM_RESTRICT size_p) {
 #else
 #	define ERROR_	"Error: shim_enforce_get_file_size failed!\n"
 #endif
-
 size_t
 shim_enforce_get_file_size (Shim_File_t const file) {
 	size_t size;
@@ -153,7 +152,6 @@ shim_close_file (Shim_File_t const file)
 #else
 #	define ERROR_ "Error: shim_enforce_close_file failed!\n"
 #endif /* ~ SHIM_OS_UNIXLIKE */
-
 void
 shim_enforce_close_file (Shim_File_t const file) {
 	if( shim_close_file( file ) )
@@ -172,7 +170,6 @@ shim_set_file_size (Shim_File_t const file, size_t const new_size)
 #else
 #	define ERROR_	"Error: shim_enforce_set_file_size failed with size %zu.\n", new_size
 #endif
-
 void
 shim_enforce_set_file_size (Shim_File_t const file, size_t const new_size) {
 	if( shim_set_file_size( file, new_size ) )

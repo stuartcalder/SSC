@@ -23,6 +23,9 @@
 /* Define MS Windows, naming scheme consistent with the above. */
 #elif  defined (_WIN32)
 #	define SHIM_OS_WINDOWS
+#	ifndef SHIM_IMPL_RESTRICT
+#		define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
+#	endif
 #	ifdef _WIN64
 #		define SHIM_OS_WIN64
 #	else
@@ -70,7 +73,7 @@
 #	endif
 #	define SHIM_BEGIN_DECLS /* Nil */
 #	define SHIM_END_DECLS   /* Nil */
-#	if    defined (__STDC_VERSION__)
+#	if    defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #		include <inttypes.h>
 #		include <stdalign.h>
 #		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
@@ -83,6 +86,9 @@
 #	endif
 #endif
 
+#ifndef SHIM_IMPL_RESTRICT
+#	error "SHIM_IMPL_RESTRICT undefined!"
+#endif
 /* Prefer the non-standard __restrict over restrict by default. */
 #if    (SHIM_IMPL_RESTRICT & SHIM_IMPL_CPP_RESTRICT_FLAG)
 #	define SHIM_RESTRICT __restrict
