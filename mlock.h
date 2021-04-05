@@ -6,19 +6,12 @@
 
 #include "macros.h"
 
-#ifdef ENABLE_MEMORYLOCKING_
-#	error "ENABLE_MEMORYLOCKING_ already defined."
-#endif
-
 #if    (defined (SHIM_OS_UNIXLIKE) && !defined (__OpenBSD__)) || defined (SHIM_OS_WINDOWS)
 #	define ENABLE_MEMORYLOCKING_
 #endif /* ~ if defined (SHIM_OS_UNIXLIKE) and !defined (__OpenBSD__) or defined (SHIM_OS_WINDOWS) */
 
 #if    defined (ENABLE_MEMORYLOCKING_) && !defined (SHIM_EXT_DISABLE_MEMORYLOCKING)
-#	ifdef SHIM_FEATURE_MEMORYLOCKING
-#		error "SHIM_FEATURE_MEMORYLOCKING already defined"
-#	endif /* ~ ifdef SHIM_FEATURE_MEMORYLOCKING */
-#	define SHIM_FEATURE_MEMORYLOCKING
+#	define SHIM_HAS_MEMORYLOCKING
 
 #	include "errors.h"
 #	include <stdint.h>

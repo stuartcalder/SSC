@@ -53,15 +53,15 @@ shim_nullify_map (Shim_Map * map) {
 }
 
 #ifdef SHIM_MAP_INLINE_SYNC_MAP
-#	define SYNC_API_ static inline
+#	define API_ static inline
 #else
-#	define SYNC_API_ SHIM_API
+#	define API_ SHIM_API
 #endif
 
-SYNC_API_ int
+API_ int
 shim_sync_map (Shim_Map const *);
 
-#undef SYNC_API_
+#undef API_
 
 SHIM_API int
 shim_unmap_memory (Shim_Map *);

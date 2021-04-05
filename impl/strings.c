@@ -1,6 +1,9 @@
 #include "strings.h"
 #include <ctype.h>
 
+/* @str:	A null-terminated string.
+ * @size:	The number of non-null characters in the string @str.
+ * returns:	The number of digit characters shifted to the left. */
 int
 shim_shift_left_digits (char * SHIM_RESTRICT str, int const size) {
 	int index = 0;

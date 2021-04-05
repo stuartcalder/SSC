@@ -56,6 +56,7 @@
 	((SHIM_ROT_IMPL_UNSIGNED_MASK_TYPE(bits))(sizeof(SHIM_ROT_IMPL_UNSIGNED_MASK_TYPE(bits)) * CHAR_BIT) - 1)
 #define SHIM_ROT_IMPL_MASKED_COUNT(bits, count) \
 	((SHIM_ROT_IMPL_UNSIGNED_MASK(bits)) & count)
+
 #define SHIM_ROT_LEFT(value, count, bits) \
 	((value << SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) | \
 		(value >> \
@@ -68,6 +69,7 @@
 			((-SHIM_ROT_IMPL_MASKED_COUNT(bits, count)) & SHIM_ROT_IMPL_UNSIGNED_MASK(bits)) \
 		) \
 	)
+
 #define SHIM_BIT_CAST_OP(ptr, type_t, tmp_name, statement) \
 	do { \
 		type_t tmp_name; \
@@ -77,18 +79,6 @@
 	} while( 0 )
 
 SHIM_BEGIN_DECLS
-
-#ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
-#	define SWAP_DECL_ SHIM_API
-#else
-#	define SWAP_DECL_ static inline
-#endif
-
-#ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
-#	define OS_ENT_DECL_ static inline
-#else
-#	define OS_ENT_DECL_ SHIM_API
-#endif
 
 SHIM_API void
 shim_xor_16 (void * SHIM_RESTRICT, void const * SHIM_RESTRICT);
@@ -111,10 +101,16 @@ shim_enforce_calloc (size_t num_elements, size_t element_size);
 SHIM_API void *
 shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size);
 
-OS_ENT_DECL_ void
+#ifdef SHIM_OPERATIONS_INLINE_OBTAIN_OS_ENTROPY
+#	define API_ static inline
+#else
+#	define API_ SHIM_API
+#endif
+
+API_ void
 shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 
-#undef OS_ENT_DECL_
+#undef API_
 
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
@@ -132,16 +128,22 @@ SHIM_API bool
 shim_ctime_iszero (void const * SHIM_RESTRICT mem,
 		   size_t const               num_bytes);
 
-SWAP_DECL_ uint16_t
+#ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
+#	define SWAP_API_ SHIM_API
+#else
+#	define SWAP_API_ static inline
+#endif
+
+SWAP_API_ uint16_t
 shim_swap_16 (uint16_t);
 
-SWAP_DECL_ uint32_t
+SWAP_API_ uint32_t
 shim_swap_32 (uint32_t);
 
-SWAP_DECL_ uint64_t
+SWAP_API_ uint64_t
 shim_swap_64 (uint64_t);
 
-#undef SWAP_DECL_
+#undef SWAP_API_
 
 SHIM_END_DECLS
 
@@ -209,22 +211,20 @@ SHIM_END_DECLS
 	SHIM_OPERATIONS_SWAP_F_IMPL (size, u)
 
 #ifdef SHIM_OS_MAC
-#	define SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
+#	define SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCTIONS
 #endif /* ~ ifdef SHIM_OS_MAC */
 
 #if    defined (__OpenBSD__)
-#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
-		swap##size( u )
-#elif  defined (__FreeBSD__) || defined (__NetBSD__) || defined (__Dragonfly__)
-#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
-		bswap##size( u )
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u)	swap##size( u )
+#elif  defined (__FreeBSD__) || \
+       defined (__NetBSD__)  || \
+       defined (__Dragonfly__)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u)	bswap##size( u )
 #elif  defined (__gnu_linux__)
-#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
-		bswap_##size( u )
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u)	bswap_##size( u )
 #elif  defined (SHIM_OS_WINDOWS)
-#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u) \
-		_byteswap_##size( u )
-#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS)
+#	define SHIM_OPERATIONS_SWAP_F_IMPL(size, u)	_byteswap_##size( u )
+#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCTIONS)
 #	error "Unsupported OS."
 #endif
 
@@ -232,11 +232,11 @@ SHIM_END_DECLS
 #	define SHIM_OPERATIONS_SWAP_SIZE(unixlike, windows) unixlike
 #elif  defined (SHIM_OS_WINDOWS)
 #	define SHIM_OPERATIONS_SWAP_SIZE(unixlike, windows) windows
-#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS)
+#elif !defined (SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCTIONS)
 #	error "Unsupported OS."
 #endif
 
-#ifdef SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCS
+#ifdef SHIM_OPERATIONS_NO_NATIVE_SWAP_FUNCTIONS
 #	define SHIM_OPERATIONS_SWAP_16_IMPL(u16_var) \
 		{ \
 			return (u16_var >> 8) | (u16_var << 8); \

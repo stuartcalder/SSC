@@ -1,6 +1,6 @@
 project('shim',
 	'c',
-	default_options: ['c_std=c18', 'optimization=3', 'buildtype=release', 'strip=true'])
+	default_options: ['c_std=c17', 'optimization=3', 'buildtype=release', 'strip=true'])
 # Project / Language
 _PROJECT  = 'shim'
 _LANG = 'c'

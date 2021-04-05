@@ -64,29 +64,29 @@ SHIM_API Shim_File_t
 shim_enforce_create_filepath (char const *);
 
 #ifdef SHIM_FILES_INLINE_CLOSE_FILE
-#	define CLOSE_API_ static inline
+#	define API_ static inline
 #else
-#	define CLOSE_API_ SHIM_API
-#endif /* ~ ifdef SHIM_FILES_INLINE_CLOSE_FILE */
+#	define API_ SHIM_API
+#endif
 
-CLOSE_API_ int
+API_ int
 shim_close_file (Shim_File_t const);
 
-#undef CLOSE_API_
+#undef API_
 
 SHIM_API void
 shim_enforce_close_file (Shim_File_t const);
 
 #ifdef SHIM_FILES_INLINE_SET_FILE_SIZE
-#	define SET_API_ static inline
+#	define API_ static inline
 #else
-#	define SET_API_ SHIM_API
+#	define API_ SHIM_API
 #endif /* ~ ifdef SHIM_FILES_INLINE_SET_FILE_SIZE */
 
-SET_API_ int
+API_ int
 shim_set_file_size (Shim_File_t const, size_t const);
 
-#undef SET_API_
+#undef API_
 
 SHIM_API void
 shim_enforce_set_file_size (Shim_File_t const, size_t const);

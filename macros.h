@@ -3,14 +3,14 @@
 #ifndef SHIM_MACROS_H
 #define SHIM_MACROS_H
 
+/* Flags to indicate support for restricting pointers. */
+#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
+#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
+
 /* Operating System Macros */
 #if    defined (__APPLE__) && defined (__MACH__)
 #	define SHIM_OS_MAC
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
-
-/* Flags to indicate support for restricting pointers. */
-#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
-#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
 
 /* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems. */
 #if    defined (__Dragonfly__) || \
@@ -55,59 +55,76 @@
 /* Simplification Macros */
 
 #ifdef __cplusplus
-#	if    (__cplusplus < 201100L)
-#		error "Need at least C++11"
-#	endif
-/* C++, so we use `__restrict`, not `restrict`. */
+/* C++ doesn't support "restrict". Use the non-standard "__restrict" compiler extension. */
 #	ifndef SHIM_IMPL_RESTRICT
 #		define SHIM_IMPL_RESTRICT SHIM_IMPL_CPP_RESTRICT_FLAG
 #	endif
+/* Use C function name mangling. */
 #	define SHIM_BEGIN_DECLS extern "C" {
 #	define SHIM_END_DECLS   }
-#	define SHIM_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
-#	define SHIM_ALIGNAS(align_as) alignas(align_as)
-#	define SHIM_ALIGNOF(align_of) alignof(align_of)
-#else
-#	ifndef SHIM_IMPL_RESTRICT
-#		define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
-#	endif
-#	define SHIM_BEGIN_DECLS /* Nil */
-#	define SHIM_END_DECLS   /* Nil */
-#	if    defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-#		include <inttypes.h>
-#		include <stdalign.h>
-#		define SHIM_STATIC_ASSERT(boolean, message) _Static_assert(boolean, message)
-#		define SHIM_ALIGNAS(align_as) _Alignas(align_as)
-#		define SHIM_ALIGNOF(align_of) _Alignof(align_of)
+/* If we're using C++11 or above, support "static_assert", "alignas", and "alignof". */
+#	if    (__cplusplus >= 201100L)
+#		define SHIM_HAS_STATIC_ASSERT
+#		define SHIM_HAS_ALIGNAS
+#		define SHIM_HAS_ALIGNOF
+#		define SHIM_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
+#		define SHIM_ALIGNAS(align_as) alignas(align_as)
+#		define SHIM_ALIGNOF(align_of) alignof(align_of)
 #	else
 #		define SHIM_STATIC_ASSERT(boolean, message)	/* Nil */
 #		define SHIM_ALIGNAS(align_as)			/* Nil */
 #		define SHIM_ALIGNOF(align_of)			/* Nil */
 #	endif
+#else
+#	define SHIM_BEGIN_DECLS /* Nil */
+#	define SHIM_END_DECLS   /* Nil */
+#	ifdef __STDC_VERSION__
+		/* We need at least C99 to support the "restrict" qualifier . */
+#		if    (__STDC_VERSION__ >= 199901L)
+#			ifndef SHIM_IMPL_RESTRICT
+#				define SHIM_IMPL_RESTRICT SHIM_IMPL_C_RESTRICT_FLAG
+#			endif
+#		else
+#			ifndef SHIM_IMPL_RESTRICT
+#				define SHIM_IMPL_RESTRICT 0
+#			endif
+#		endif
+#		if    (__STDC_VERSION__ >= 201112L)
+#			include <inttypes.h>
+#			include <stdalign.h>
+#			define SHIM_HAS_STATIC_ASSERT
+#			define SHIM_HAS_ALIGNAS
+#			define SHIM_HAS_ALIGNOF
+#			define SHIM_STATIC_ASSERT(boolean, msg) _Static_assert(boolean, msg)
+#			define SHIM_ALIGNAS(align_as) _Alignas(align_as)
+#			define SHIM_ALIGNOF(align_of) _Alignof(align_of)
+#		else
+#			define SHIM_STATIC_ASSERT(boolean, msg)	/* Nil */
+#			define SHIM_ALIGNAS(align_as)		/* Nil */
+#			define SHIM_ALIGNOF(align_of)		/* Nil */
+#		endif
+#	else
+#		ifndef SHIM_IMPL_RESTRICT
+#			define SHIM_IMPL_RESTRICT 0
+#		endif
+#	endif /* ~ #ifdef __STDC_VERSION__ */
 #endif
 
 #ifndef SHIM_IMPL_RESTRICT
 #	error "SHIM_IMPL_RESTRICT undefined!"
 #endif
-/* Prefer the non-standard __restrict over restrict by default. */
 #if    (SHIM_IMPL_RESTRICT & SHIM_IMPL_CPP_RESTRICT_FLAG)
+#	define SHIM_HAS_RESTRICT
 #	define SHIM_RESTRICT __restrict
 #elif  (SHIM_IMPL_RESTRICT & SHIM_IMPL_C_RESTRICT_FLAG)
+#	define SHIM_HAS_RESTRICT
 #	define SHIM_RESTRICT restrict
 #else
 #	define SHIM_RESTRICT /* Nil */
 #endif
 
 /* Symbol Visibility, Export/Import Macros */
-#if    defined (SHIM_OS_WINDOWS) || defined (__CYGWIN__)
-#	ifdef __GNUC__
-#		define SHIM_EXPORT_SYMBOL __attribute__ ((dllexport))
-#		define SHIM_IMPORT_SYMBOL __attribute__ ((dllimport))
-#	else
-#		define SHIM_EXPORT_SYMBOL __declspec(dllexport)
-#		define SHIM_IMPORT_SYMBOL __declspec(dllimport)
-#	endif /* ~ ifdef __GNUC__ */
-#elif  defined (SHIM_OS_UNIXLIKE)
+#if    defined (SHIM_OS_UNIXLIKE)
 #	if    defined (__GNUC__) && (__GNUC__ >= 4)
 #		define SHIM_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
 #		define SHIM_IMPORT_SYMBOL SHIM_EXPORT_SYMBOL
@@ -115,6 +132,14 @@
 #		define SHIM_EXPORT_SYMBOL /* Nil */
 #		define SHIM_IMPORT_SYMBOL /* Nil */
 #	endif /* ~ if defined (__GNUC__) and (__GNUC__ >= 4) */
+#elif  defined (SHIM_OS_WINDOWS) || defined (__CYGWIN__)
+#	ifdef __GNUC__
+#		define SHIM_EXPORT_SYMBOL __attribute__ ((dllexport))
+#		define SHIM_IMPORT_SYMBOL __attribute__ ((dllimport))
+#	else
+#		define SHIM_EXPORT_SYMBOL __declspec(dllexport)
+#		define SHIM_IMPORT_SYMBOL __declspec(dllimport)
+#	endif /* ~ ifdef __GNUC__ */
 #else
 #	error "Unsupported operating system."
 #endif

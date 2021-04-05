@@ -1,6 +1,6 @@
 #include "mlock.h"
 
-#ifdef SHIM_FEATURE_MEMORYLOCKING
+#ifdef SHIM_HAS_MEMORYLOCKING
 
 int
 shim_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
@@ -42,4 +42,4 @@ shim_enforce_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
 		SHIM_ERRX ("Error: shim_enforce_unlock_memory failed!\n");
 }
 
-#endif /* SHIM_FEATURE_MEMORYLOCKING */
+#endif /* ~ ifdef SHIM_HAS_MEMORYLOCKING */
