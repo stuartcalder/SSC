@@ -107,6 +107,9 @@
 #		ifndef SHIM_IMPL_RESTRICT
 #			define SHIM_IMPL_RESTRICT 0
 #		endif
+#		define SHIM_STATIC_ASSERT(boolean, msg) /* Nil */
+#		define SHIM_ALIGNAS(align_as)		/* Nil */
+#		define SHIM_ALIGNOF(align_of)		/* Nil */
 #	endif /* ~ #ifdef __STDC_VERSION__ */
 #endif
 
