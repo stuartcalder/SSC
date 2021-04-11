@@ -148,7 +148,7 @@
 #endif
 
 #ifdef SHIM_EXT_STATIC_LIB
-#	define SHIM_API
+#	define SHIM_API /* Nil */
 #else
 #	ifdef SHIM_EXT_BUILD_DYNAMIC_LIB
 #		define SHIM_API SHIM_EXPORT_SYMBOL

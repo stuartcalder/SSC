@@ -13,13 +13,13 @@
 
 /* Argument Handlers modify some state as per received arguments.
  * 	No return value. */
-typedef void Shim_Arg_Handler_t (char **, int const, void * SHIM_RESTRICT);
+typedef void Shim_Arg_Handler_f (char **, int const, void * SHIM_RESTRICT);
 /* Argument Parsers determine what argument handlers will be dispatched for some string. 
  * 	If there is no appropriate handler, return a NULL pointer. */
-typedef Shim_Arg_Handler_t * Shim_Arg_Parser_t (char const *);
+typedef Shim_Arg_Handler_f * Shim_Arg_Parser_f (char const *);
 /* Argument Processors determine what Argument Parsers will be dispatched for some string.
  * 	If there is no valid parser, return a NULL pointer. */
-typedef Shim_Arg_Parser_t * Shim_Arg_Processor_t (char const *, void * SHIM_RESTRICT);
+typedef Shim_Arg_Parser_f * Shim_Arg_Processor_f (char const *, void * SHIM_RESTRICT);
 
 enum {
 	SHIM_ARGTYPE_NONE,
@@ -39,7 +39,7 @@ shim_argtype (char const *);
  */
 SHIM_API void
 shim_process_args (int const argc, char ** argv,
-		   Shim_Arg_Processor_t * const processor,
+		   Shim_Arg_Processor_f * const processor,
 		   void * SHIM_RESTRICT state);
 SHIM_END_DECLS
 		   

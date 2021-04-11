@@ -22,7 +22,7 @@ shim_argtype (char const * str) {
 
 void
 shim_process_args (int const argc, char ** argv,
-		   Shim_Arg_Processor_t * const processor,
+		   Shim_Arg_Processor_f * const processor,
 		   void * SHIM_RESTRICT state)
 {
 	/* We start processing with argument index 1, skipping the name of the binary. */
@@ -32,11 +32,11 @@ shim_process_args (int const argc, char ** argv,
 		/* If the string we're pointing at is NOT null */
 		if( *p ) {
 			/* determine what kind of parser to use on the string. May modify state. */
-			Shim_Arg_Parser_t * parser = processor( *p, state );
+			Shim_Arg_Parser_f * parser = processor( *p, state );
 			/* If the parser is NOT null */
 			if( parser ) {
 				/* Determine how to handle the string, based on how we just parsed it. */
-				Shim_Arg_Handler_t * handler = parser( *p );
+				Shim_Arg_Handler_f * handler = parser( *p );
 				/* If the handler is NOT null */
 				if( handler )
 					/* execute the handler function. May modify state. */
