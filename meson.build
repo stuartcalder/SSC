@@ -38,7 +38,8 @@ src = [
   'impl/term.c',
   'impl/print.c',
   'impl/strings.c',
-  'impl/mlock.c'
+  'impl/mlock.c',
+  'impl/errors.c'
   ]
 lib_deps     = []
 lang_flags   = []
@@ -47,6 +48,7 @@ include_dirs = []
 if not get_option('debug_build')
   lang_flags += _D_PREFIX + 'NDEBUG'
 else
+  lang_flags += _D_PREFIX + 'SHIM_EXT_DEBUG'
   lang_flags += _D_PREFIX + 'YDEBUG'
 endif
 # We're building Shim
@@ -61,10 +63,10 @@ if os == 'darwin'
 endif
 # Unixlike options
 if os in _UNIXLIKE_OPERATING_SYSTEMS
-  if get_option('native_optimize')
-    lang_flags += '-march=native'
-  endif
   if compiler.get_id() in _GCC_COMPATIBLE_COMPILERS
+    if get_option('native_optimize')
+      lang_flags += '-march=native'
+    endif
     lang_flags += _GCC_COMPATIBLE_FLAGS
   endif
 endif

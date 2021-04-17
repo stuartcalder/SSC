@@ -3,6 +3,8 @@
 #ifndef SHIM_MACROS_H
 #define SHIM_MACROS_H
 
+#include <stdarg.h>
+
 /* Flags to indicate support for restricting pointers. */
 #define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
 #define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
@@ -39,13 +41,12 @@
 #ifdef	__OpenBSD__
 #	include <unistd.h>
 #	include "errors.h"
-
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) \
-		if( pledge( promises, execpromises ) ) \
-			SHIM_ERRX ("Failed to pledge()\n")
+		if (pledge(promises, execpromises)) \
+			SHIM_ERRX("Failed to pledge()\n")
 #	define SHIM_OPENBSD_UNVEIL(path, permissions) \
-		if( unveil( path, permissions ) ) \
-			SHIM_ERRX ("Failed to unveil()\n")
+		if (unveil(path, permissions)) \
+			SHIM_ERRX("Failed to unveil()\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) /* Nil */

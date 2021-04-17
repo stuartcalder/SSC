@@ -4,6 +4,7 @@
 #ifndef SHIM_PRINT_H
 #define SHIM_PRINT_H
 
+#include "errors.h"
 #include "macros.h"
 #include <stdint.h>
 #include <stdio.h>

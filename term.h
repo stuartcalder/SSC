@@ -29,21 +29,21 @@ SHIM_BEGIN_DECLS
  * which is not necessary.
  */
 SHIM_API void
-shim_term_init ();
+shim_term_init (void);
 
 SHIM_API void
-shim_term_end ();
+shim_term_end (void);
 #elif  defined (SHIM_OS_WINDOWS)
 /* On Windows, inline term_init and term_end, since they're
  * just there to clear the screen.
  */
 static inline void
-shim_term_init () {
+shim_term_init (void) {
 	system( "cls" );
 }
 
 static inline void
-shim_term_end () {
+shim_term_end (void) {
 	system( "cls" );
 }
 #else

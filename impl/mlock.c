@@ -5,10 +5,10 @@
 int
 shim_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
 #if    defined (SHIM_OS_UNIXLIKE)
-	if( mlock( address, size ) != 0 )
+	if (mlock(address, size))
 		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualLock( address, size  ) == 0 )
+	if (!VirtualLock(address, size))
 		return -1;
 #else
 #	error "Unsupported operating system."
@@ -18,17 +18,17 @@ shim_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
 
 void
 shim_enforce_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
-	if( shim_lock_memory( address, size ) )
-		SHIM_ERRX ("Error: shim_enforce_lock_memory failed!\n");
+	if (shim_lock_memory(address, size))
+		SHIM_ERRX("Error: shim_enforce_lock_memory failed!\n");
 }
 
 int
 shim_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
 #if    defined (SHIM_OS_UNIXLIKE)
-	if( munlock( address, size ) != 0 )
+	if (munlock(address, size))
 		return -1;
 #elif  defined (SHIM_OS_WINDOWS)
-	if( VirtualUnlock( address, size ) == 0 )
+	if (!VirtualUnlock(address, size))
 		return -1;
 #else
 #	error "Unsupported operating system."
@@ -38,7 +38,7 @@ shim_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
 
 void
 shim_enforce_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
-	if( shim_unlock_memory( address, size ) )
+	if (shim_unlock_memory(address, size))
 		SHIM_ERRX ("Error: shim_enforce_unlock_memory failed!\n");
 }
 
