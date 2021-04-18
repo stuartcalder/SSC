@@ -6,8 +6,8 @@
 #include <stdarg.h>
 
 /* Flags to indicate support for restricting pointers. */
-#define SHIM_IMPL_C_RESTRICT_FLAG	0b00000001U
-#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b00000010U
+#define SHIM_IMPL_C_RESTRICT_FLAG	0b01
+#define SHIM_IMPL_CPP_RESTRICT_FLAG	0b10
 
 /* Operating System Macros */
 #if    defined (__APPLE__) && defined (__MACH__)

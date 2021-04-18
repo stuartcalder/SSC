@@ -34,7 +34,7 @@ shim_string_init (Shim_String * shim_s, char * SHIM_RESTRICT c_str, size_t size)
 void
 shim_string_init_enforced (Shim_String * shim_s, char * SHIM_RESTRICT c_str, size_t size) {
 	if (shim_string_init(shim_s, c_str, size))
-		SHIM_ERRX("ERROR: shim_string_init failed!\n");
+		shim_errx("ERROR: shim_string_init failed!\n");
 }
 
 void

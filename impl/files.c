@@ -18,19 +18,12 @@ shim_get_file_size (Shim_File_t const file, size_t * SHIM_RESTRICT size_p) {
 	return 0;
 }
 
-#ifdef SHIM_OS_UNIXLIKE
-#	define ERROR_	"Error: shim_enforce_get_file_size failed with fd %d!\n", file
-#else
-#	define ERROR_	"Error: shim_enforce_get_file_size failed!\n"
-#endif
 size_t
 shim_enforce_get_file_size (Shim_File_t const file) {
 	size_t size;
-	if (shim_get_file_size(file, &size))
-		SHIM_ERRX(ERROR_);
+	shim_assert_msg(!shim_get_file_size(file, &size), "Error: shim_enforce_get_file_size failed!\n");
 	return size;
 }
-#undef ERROR_
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
@@ -57,8 +50,7 @@ shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
 size_t
 shim_enforce_get_filepath_size (char const * filepath) {
 	size_t size;
-	if (shim_get_filepath_size(filepath, &size))
-		SHIM_ERRX("Error: shim_enforce_get_filepath_size failed with filepath '%s'.\n", filepath);
+	shim_assert_msg(!shim_get_filepath_size(filepath, &size), "Error: shim_get_filepath_size failed!\n");
 	return size;
 }
 
@@ -78,11 +70,12 @@ shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 				 bool const                 force_to_exist)
 {
 	if (shim_filepath_exists(filepath)) {
+		//TODO shim_assert_msg(shim_filepath_exists(filepath), 
 		if (!force_to_exist)
-			SHIM_ERRX("Error: The filepath '%s' seems to already exist.\n", filepath);
+			shim_errx("Error: The filepath '%s' seems to already exist.\n", filepath);
 	} else {
 		if (force_to_exist)
-			SHIM_ERRX("Error: The filepath '%s' does not seem to exist.\n", filepath);
+			shim_errx("Error: The filepath '%s' does not seem to exist.\n", filepath);
 	}
 }
 
@@ -111,7 +104,7 @@ shim_enforce_open_filepath (char const * SHIM_RESTRICT filepath,
 {
 	Shim_File_t file;
 	if (shim_open_filepath(filepath, readonly, &file))
-		SHIM_ERRX("Error: shim_enforce_open_filepath failed with filepath '%s'.\n", filepath);
+		shim_errx("Error: shim_enforce_open_filepath failed with filepath '%s'.\n", filepath);
 	return file;
 }
 
@@ -135,7 +128,7 @@ Shim_File_t
 shim_enforce_create_filepath (char const * filepath) {
 	Shim_File_t file;
 	if (shim_create_filepath(filepath, &file))
-		SHIM_ERRX("Error: shim_enforce_create_filepath failed with filepath '%s'.\n", filepath);
+		shim_errx("Error: shim_enforce_create_filepath failed with filepath '%s'.\n", filepath);
 	return file;
 }
 
@@ -153,7 +146,7 @@ shim_close_file (Shim_File_t const file)
 void
 shim_enforce_close_file (Shim_File_t const file) {
 	if (shim_close_file(file))
-		SHIM_ERRX(ERROR_);
+		shim_errx(ERROR_);
 }
 #undef ERROR_
 
@@ -171,6 +164,6 @@ shim_set_file_size (Shim_File_t const file, size_t const new_size)
 void
 shim_enforce_set_file_size (Shim_File_t const file, size_t const new_size) {
 	if (shim_set_file_size(file, new_size))
-		SHIM_ERRX(ERROR_);
+		shim_errx(ERROR_);
 }
 #undef ERROR_

@@ -40,7 +40,7 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 void
 shim_enforce_map_memory (Shim_Map * map, bool const readonly) {
 	if (shim_map_memory(map, readonly))
-		SHIM_ERRX("Error: shim_enforce_map_memory failed!\n");
+		shim_errx("Error: shim_enforce_map_memory failed!\n");
 }
 
 int
@@ -68,7 +68,7 @@ shim_unmap_memory (Shim_Map * map) {
 void
 shim_enforce_unmap_memory (Shim_Map * map) {
 	if (shim_unmap_memory(map))
-		SHIM_ERRX("Error: shim_enforce_unmap_memory failed!\n");
+		shim_errx("Error: shim_enforce_unmap_memory failed!\n");
 }
 
 #ifndef SHIM_MAP_INLINE_SYNC_MAP
@@ -80,5 +80,5 @@ shim_sync_map (Shim_Map const * map)
 void
 shim_enforce_sync_map (Shim_Map const * map) {
 	if (shim_sync_map(map))
-		SHIM_ERRX("Error: shim_enforce_sync_map failed!\n");
+		shim_errx("Error: shim_enforce_sync_map failed!\n");
 }

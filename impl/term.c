@@ -40,7 +40,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 { /* Unixlike impl */
 	SHIM_ASSERT(buffer && prompt);
 	if (buffer_size < SECRET_STR_MIN_BUFSIZE_)
-		SHIM_ERRX("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_ (SECRET_STR_MIN_BUFSIZE_) ".\n");
+		shim_errx("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_ (SECRET_STR_MIN_BUFSIZE_) ".\n");
 	int const max_pw_size = buffer_size - 1;
 	cbreak();
 	noecho();
@@ -97,7 +97,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 { /* Windows impl */
 	SHIM_ASSERT(buffer && prompt);
 	if (buffer_size < SECRET_STR_MIN_BUFSIZE_)
-		SHIM_ERRX("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_(SECRET_STR_MIN_BUFSIZE_) ".\n");
+		shim_errx("Error: Buffer in shim_term_get_secret_string has buffer size less than " STR_(SECRET_STR_MIN_BUFSIZE_) ".\n");
 	int const max_pw_size = buffer_size - 1;
 	int index = 0;
 	bool repeat_ui, repeat_input;
@@ -106,7 +106,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 		memset(buffer, 0, buffer_size);
 		system("cls");
 		if (_cputs(prompt))
-			SHIM_ERRX("Failed to _cputs()!\n");
+			shim_errx("Failed to _cputs()!\n");
 		repeat_input = true;
 		while (repeat_input) {
 			int ch = _getch();
@@ -114,7 +114,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 				case '\b': {
 					if (index > 0) {
 						if (_cputs("\b \b"))
-							SHIM_ERRX("Failed to _cputs()!\n");
+							shim_errx("Failed to _cputs()!\n");
 						buffer[--index] = 0;
 					}
 				} break;
@@ -124,7 +124,7 @@ shim_term_get_secret_string (uint8_t *    SHIM_RESTRICT buffer,
 				default: {
 					if ((index < buffer_size) && (ch >= 32) && (ch <= 126)) {
 						if (_putch( '*' ) == EOF)
-							SHIM_ERRX("Failed to _putch()!\n");
+							shim_errx("Failed to _putch()!\n");
 						buffer[index++] = (uint8_t)ch;
 					}
 				} break;
@@ -149,7 +149,7 @@ shim_term_obtain_password (uint8_t *    SHIM_RESTRICT password_buf,
 {
 	SHIM_ASSERT(password_buf && entry_prompt);
 	if (buffer_size < (max_pw_size + 1))
-		SHIM_ERRX("Error: Buffer size in shim_term_obtain_password too small (%d) for max password size (%d).\n", buffer_size, max_pw_size);
+		shim_errx("Error: Buffer size in shim_term_obtain_password too small (%d) for max password size (%d).\n", buffer_size, max_pw_size);
 	int size;
 	while (1) {
 		size = shim_term_get_secret_string(password_buf, entry_prompt, buffer_size);
@@ -207,7 +207,7 @@ shim_term_notify (char const * notice) {
 #elif  defined (SHIM_OS_WINDOWS)
 	system("cls");
 	if (_cputs(notice))
-		SHIM_ERRX("Error: Failed to _cputs()\n");
+		shim_errx("Error: Failed to _cputs()\n");
 	system("pause");
 	system("cls");
 #else

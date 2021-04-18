@@ -56,7 +56,7 @@ void *
 shim_enforce_malloc (size_t num_bytes) {
 	void * mem = malloc(num_bytes);
 	if (!mem)
-		SHIM_ERRX(SHIM_ERR_STR_ALLOC_FAILURE);
+		shim_errx(SHIM_ERR_STR_ALLOC_FAILURE);
 	return mem;
 }
 
@@ -64,7 +64,7 @@ void *
 shim_enforce_calloc (size_t num_elements, size_t element_size) {
 	void * mem = calloc(num_elements, element_size);
 	if (!mem)
-		SHIM_ERRX(SHIM_ERR_STR_ALLOC_FAILURE);
+		shim_errx(SHIM_ERR_STR_ALLOC_FAILURE);
 	return mem;
 }
 
@@ -72,7 +72,7 @@ void *
 shim_enforce_realloc (void * SHIM_RESTRICT ptr, size_t size) {
 	void * mem = realloc(ptr, size);
 	if (!mem)
-		SHIM_ERRX(SHIM_ERR_STR_ALLOC_FAILURE);
+		shim_errx(SHIM_ERR_STR_ALLOC_FAILURE);
 	return mem;
 }
 

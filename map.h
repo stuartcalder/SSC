@@ -70,13 +70,13 @@ SHIM_END_DECLS
 
 #if    defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_MAP_SYNC_MAP_IMPL(map_ptr) { \
-		return msync( map_ptr->ptr, \
-			      map_ptr->size, \
-			      MS_SYNC ); \
+		return msync(map_ptr->ptr, \
+			     map_ptr->size, \
+			     MS_SYNC); \
 	}
 #elif  defined (SHIM_OS_WINDOWS)
 #	define SHIM_MAP_SYNC_MAP_IMPL(map_ptr) { \
-		if( FlushViewOfFile( (LPCVOID)map_ptr->ptr, map_ptr->size ) ) \
+		if (FlushViewOfFile((LPCVOID)map_ptr->ptr, map_ptr->size)) \
 			return 0; \
 		return -1; \
 	}
@@ -87,7 +87,7 @@ SHIM_END_DECLS
 #ifdef SHIM_MAP_INLINE_SYNC_MAP
 int
 shim_sync_map (Shim_Map const * map)
-	SHIM_MAP_SYNC_MAP_IMPL (map)
+	SHIM_MAP_SYNC_MAP_IMPL(map)
 #endif /* ~ SHIM_MAP_INLINE_SYNC_MAP */
 
 #endif /* ~ SHIM_MAP_H */

@@ -19,7 +19,7 @@ shim_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
 void
 shim_enforce_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
 	if (shim_lock_memory(address, size))
-		SHIM_ERRX("Error: shim_enforce_lock_memory failed!\n");
+		shim_errx("Error: shim_enforce_lock_memory failed!\n");
 }
 
 int
@@ -39,7 +39,7 @@ shim_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
 void
 shim_enforce_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
 	if (shim_unlock_memory(address, size))
-		SHIM_ERRX ("Error: shim_enforce_unlock_memory failed!\n");
+		shim_errx("Error: shim_enforce_unlock_memory failed!\n");
 }
 
 #endif /* ~ ifdef SHIM_HAS_MEMORYLOCKING */
