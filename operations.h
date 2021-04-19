@@ -160,7 +160,7 @@ SHIM_END_DECLS
 		{ \
 			Shim_File_t dev_random = shim_enforce_open_filepath( SHIM_OPERATIONS_DEV_RANDOM, true ); \
 			if( read( dev_random, ptr_v, size_v ) != ((ssize_t)size_v) ) \
-				SHIM_ERRX ("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
+				shim_errx("Error: Failed to read from " SHIM_OPERATIONS_DEV_RANDOM "\n"); \
 			shim_enforce_close_file( dev_random ); \
 		}
 #elif  defined (__gnu_linux__)
@@ -171,12 +171,12 @@ SHIM_END_DECLS
 	{ \
 		while( size_v > SHIM_OPERATIONS_GETRANDOM_MAX ) { \
 			if( getrandom( u8_ptr_v, SHIM_OPERATIONS_GETRANDOM_MAX, 0 ) != ((ssize_t)SHIM_OPERATIONS_GETRANDOM_MAX) ) \
-				SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", ((void *)u8_ptr_v), ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
+				shim_errx("Error: getrandom(%p, %zu) failed!\n", ((void *)u8_ptr_v), ((size_t)SHIM_OPERATIONS_GETRANDOM_MAX)); \
 			size_v   -= SHIM_OPERATIONS_GETRANDOM_MAX; \
 			u8_ptr_v += SHIM_OPERATIONS_GETRANDOM_MAX; \
 		} \
 		if( getrandom( u8_ptr_v, size_v, 0 ) != ((ssize_t)size_v) ) \
-			SHIM_ERRX ("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, size_v); \
+			shim_errx("Error: getrandom(%p, %zu) failed!\n", (void *)u8_ptr_v, size_v); \
 	}
 #elif  defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_OPERATIONS_GETENTROPY_MAX 256
@@ -184,23 +184,23 @@ SHIM_END_DECLS
 		{ \
 			while( size_v > SHIM_OPERATIONS_GETENTROPY_MAX ) { \
 				if( getentropy( u8_ptr_v, SHIM_OPERATIONS_GETENTROPY_MAX ) ) \
-					SHIM_ERRX ("Error: Failed to getentropy()\n"); \
+					shim_errx("Error: Failed to getentropy()\n"); \
 				size_v   -= SHIM_OPERATIONS_GETENTROPY_MAX; \
 				u8_ptr_v += SHIM_OPERATIONS_GETENTROPY_MAX; \
 			} \
 			if( getentropy( u8_ptr_v, size_v ) ) \
-				SHIM_ERRX ("Error: Failed to getentropy()\n"); \
+				shim_errx("Error: Failed to getentropy()\n"); \
 		}
 #elif  defined (SHIM_OS_WINDOWS)
 #	define SHIM_OPERATIONS_OBTAIN_OS_ENTROPY_IMPL(ptr_v, size_v) \
 		{ \
 			BCRYPT_ALG_HANDLE cng_h; \
 			if( BCryptOpenAlgorithmProvider( &cng_h, L"RNG", NULL, 0 ) != STATUS_SUCCESS ) \
-				SHIM_ERRX ("Error: BCryptOpenAlgorithmProvider() failed\n"); \
+				shim_errx("Error: BCryptOpenAlgorithmProvider() failed\n"); \
 			if( BCryptGenRandom( cng_h, ptr_v, size_v, 0 ) != STATUS_SUCCESS ) \
-				SHIM_ERRX ("Error: BCryptGenRandom() failed\n"); \
+				shim_errx("Error: BCryptGenRandom() failed\n"); \
 			if( BCryptCloseAlgorithmProvider( cng_h, 0 ) != STATUS_SUCCESS ) \
-				SHIM_ERRX ("Error: BCryptCloseAlgorithmProvider() failed\n"); \
+				shim_errx("Error: BCryptCloseAlgorithmProvider() failed\n"); \
 		}
 #else
 #	error "Unsupported OS."

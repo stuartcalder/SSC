@@ -9,36 +9,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-/* In general, when failing to allocate memory display this error string
- * as the default on stderr.
- */
-#define SHIM_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure!\n"
-
 #ifdef SHIM_OS_UNIXLIKE
-#	define SHIM_ERRORS_INLINE_ERRX_CODE_LIST
-/* Pretty sure all the Unixlike platforms have err.h
- */
 #	include <err.h>
-/* SHIM_ERRX_CODE(exit_code, message_string, additional params...)
- */
-#	define SHIM_ERRX_CODE(code, ...) \
-		errx(code, __VA_ARGS__)
+#	define SHIM_ERRORS_INLINE_ERRX_CODE_LIST
+#endif
 
-#else
-/* On any other platform we'll just do it ourselves with fprintf
- * and exit.
- */
-#	define SHIM_ERRX_CODE(code, ...) \
-		do { \
-			fprintf(stderr, __VA_ARGS__); \
-			exit(code); \
-		} while (0)
-
-#endif /* ~ #if defined (SHIM_OS_UNIXLIKE) ... */
-
-#define SHIM_ERRX(...) \
-	SHIM_ERRX_CODE(EXIT_FAILURE, __VA_ARGS__)
+#define SHIM_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure!\n"
 
 SHIM_API void
 shim_errx_code_vargs (int, char const * SHIM_RESTRICT, ...);
@@ -61,6 +37,7 @@ shim_errx_code_list (int, char const * SHIM_RESTRICT, va_list);
 #else
 #	define SHIM_ERRORS_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { \
 		vfprintf(stderr, fmt, arg_list); \
+		va_end(arg_list); \
 		exit(code); \
 	}
 #endif
