@@ -1,9 +1,12 @@
 #include "errors.h"
 
 void
-shim_assert_msg (bool b, char const * SHIM_RESTRICT msg) {
-	if (!b)
-		shim_errx(msg);
+shim_assert_msg (bool b, char const * SHIM_RESTRICT fmt, ...) {
+	if (!b) {
+		va_list vl;
+		va_start(vl, fmt);
+		shim_errx_code_list(EXIT_FAILURE, fmt, vl);
+	}
 }
 
 void

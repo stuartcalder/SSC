@@ -51,8 +51,8 @@ shim_errx_code_list (int code, char const * SHIM_RESTRICT fmt, va_list arg_list)
 SHIM_API void
 shim_errx (char const * SHIM_RESTRICT fmt, ...);
 
-SHIM_API void 
-shim_assert_msg (bool, char const * SHIM_RESTRICT);
+SHIM_API void
+shim_assert_msg (bool, char const * SHIM_RESTRICT, ...);
 
 static inline void
 shim_assert (bool b) {
