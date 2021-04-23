@@ -43,10 +43,10 @@
 #	include "errors.h"
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) \
 		if (pledge(promises, execpromises)) \
-			SHIM_ERRX("Failed to pledge()\n")
+			shim_errx("Failed to pledge()\n")
 #	define SHIM_OPENBSD_UNVEIL(path, permissions) \
 		if (unveil(path, permissions)) \
-			SHIM_ERRX("Failed to unveil()\n")
+			shim_errx("Failed to unveil()\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define SHIM_OPENBSD_PLEDGE(promises, execpromises) /* Nil */

@@ -4,10 +4,10 @@
 
 int
 shim_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	if (mlock(address, size))
 		return -1;
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	if (!VirtualLock(address, size))
 		return -1;
 #else
@@ -24,10 +24,10 @@ shim_enforce_lock_memory (void * SHIM_RESTRICT address, size_t const size) {
 
 int
 shim_unlock_memory (void * SHIM_RESTRICT address, size_t const size) {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	if (munlock(address, size))
 		return -1;
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	if (!VirtualUnlock(address, size))
 		return -1;
 #else

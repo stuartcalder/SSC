@@ -2,9 +2,11 @@
 #include "operations.h"
 #include <stdlib.h>
 
+#define AS_U8_PTR_(v)   ((uint8_t *)v)
+#define AS_U8C_PTR_(cv) ((uint8_t const *)cv)
+
 #define XOR_(v_ptr, vc_ptr, i) \
-	((uint8_t *)       v_ptr)[i] ^= \
-	((uint8_t const *)vc_ptr)[i]
+	AS_U8_PTR_(v_ptr)[i] ^= AS_U8C_PTR_(vc_ptr)[i]
 
 #define XOR_8_(v_ptr, vc_ptr, i) \
 	XOR_(v_ptr, vc_ptr, (i + 0)); \
@@ -94,22 +96,22 @@ shim_swap_64 (uint64_t u64)
 	SHIM_OPERATIONS_SWAP_64_IMPL(u64)
 #endif /* ~ ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS */
 
-size_t
+ssize_t
 shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 		    void const * SHIM_RESTRICT mem_1,
-		    size_t const               size)
+		    ssize_t const              size)
 {
 	SHIM_ASSERT(mem_0 && mem_1);
-	size_t unequal_count = 0;
-	for (size_t i = 0; i < size; ++i) {
-		uint8_t b = ((uint8_t const *)mem_0)[i] ^ ((uint8_t const *)mem_1)[i];
-		b |= ( (b >> 7) |
-		       (b >> 6) |
-		       (b >> 5) |
-		       (b >> 4) |
-		       (b >> 3) |
-		       (b >> 2) |
-		       (b >> 1) );
+	ssize_t unequal_count = 0;
+	for (ssize_t i = 0; i < size; ++i) {
+		uint8_t b = AS_U8C_PTR_(mem_0)[i] ^ AS_U8C_PTR_(mem_1)[i];
+		b |= ((b >> 7)|
+		      (b >> 6)|
+		      (b >> 5)|
+		      (b >> 4)|
+		      (b >> 3)|
+		      (b >> 2)|
+		      (b >> 1));
 		unequal_count += (b & 0x01);
 
 	}
@@ -118,11 +120,11 @@ shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
 
 bool
 shim_iszero (void const * SHIM_RESTRICT mem,
-             size_t const               num_bytes)
+             ssize_t const              num_bytes)
 {
 	SHIM_ASSERT(mem);
-	for (size_t i = 0; i < num_bytes; ++i) {
-		if (((uint8_t const *)mem)[i])
+	for (ssize_t i = 0; i < num_bytes; ++i) {
+		if (AS_U8C_PTR_(mem)[i])
 			return false;
 	}
 	return true;
@@ -130,11 +132,11 @@ shim_iszero (void const * SHIM_RESTRICT mem,
 
 bool
 shim_ctime_iszero (void const * SHIM_RESTRICT mem,
-		   size_t const               num_bytes)
+		   ssize_t const              num_bytes)
 {
 	SHIM_ASSERT(mem);
 	uint8_t zero_test = 0;
-	for (size_t i = 0; i < num_bytes; ++i) {
+	for (ssize_t i = 0; i < num_bytes; ++i) {
 		zero_test |= ((uint8_t const *)mem)[i];
 	}
 	return !zero_test;

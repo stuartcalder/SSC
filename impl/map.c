@@ -1,16 +1,18 @@
 #include "map.h"
 
+#define AS_SIZE_T_(v) ((size_t)v)
+
 int
 shim_map_memory (Shim_Map * map, bool const readonly) {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	int const rw_flag = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
 	map->ptr = (uint8_t *)mmap(NULL, map->size, rw_flag, MAP_SHARED, map->file, 0);
 	if (map->ptr == MAP_FAILED)
 		return -1;
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	DWORD page_rw   = PAGE_READWRITE;
 	DWORD map_rw    = (FILE_MAP_READ|FILE_MAP_WRITE);
-	DWORD high_bits = (DWORD)(map->size >> 32);
+	DWORD high_bits = (DWORD)(AS_SIZE_T_(map->size) >> 32);
 	DWORD low_bits  = (DWORD)map->size;
 	if (readonly) {
 		page_rw = PAGE_READONLY;
@@ -24,6 +26,7 @@ shim_map_memory (Shim_Map * map, bool const readonly) {
 	map->win_fmapping = CreateFileMappingA(map->file, NULL, page_rw, high_bits, low_bits, NULL);
 	if (map->win_fmapping == SHIM_NULL_FILE)
 		return -1;
+
 	map->ptr = (uint8_t *)MapViewOfFile(map->win_fmapping, map_rw, 0, 0, map->size);
 	if (!map->ptr) {
 		shim_close_file(map->win_fmapping);
@@ -45,11 +48,11 @@ shim_enforce_map_memory (Shim_Map * map, bool const readonly) {
 
 int
 shim_unmap_memory (Shim_Map * map) {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	int ret = munmap(map->ptr, map->size);
 	if (!ret)
 		map->ptr = NULL;
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	int ret = 0;
 	if (!UnmapViewOfFile((LPCVOID)map->ptr))
 		ret = -1;

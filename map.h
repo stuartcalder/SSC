@@ -7,7 +7,7 @@
 #include "errors.h"
 #include "files.h"
 #include "macros.h"
-#include <stdint.h>
+#include "types.h"
 
 #if    defined (SHIM_OS_UNIXLIKE)
 #	define SHIM_MAP_INLINE_SYNC_MAP
@@ -20,8 +20,8 @@
 #endif /* ~ if defined (SHIM_OS_UNIXLIKE) or defined (SHIM_OS_WINDOWS) */
 
 typedef struct {
-	uint8_t *    ptr;
-	uint64_t    size;
+	uint8_t *   ptr;
+	ssize_t     size;
 	Shim_File_t file;
 #ifdef SHIM_OS_WINDOWS
 	Shim_File_t win_fmapping;

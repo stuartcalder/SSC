@@ -115,18 +115,16 @@ shim_obtain_os_entropy (uint8_t * SHIM_RESTRICT, size_t);
 static inline void
 shim_secure_zero (void * SHIM_RESTRICT, size_t);
 
-SHIM_API size_t
-shim_ctime_memdiff (void const * SHIM_RESTRICT mem_0,
-		    void const * SHIM_RESTRICT mem_1,
-		    size_t const               num_bytes);
+SHIM_API ssize_t
+shim_ctime_memdiff (void const * SHIM_RESTRICT,
+		    void const * SHIM_RESTRICT,
+		    ssize_t const);
 
 SHIM_API bool
-shim_iszero (void const * SHIM_RESTRICT mem,
-             size_t const               num_bytes);
+shim_iszero (void const * SHIM_RESTRICT, ssize_t const);
 
 SHIM_API bool
-shim_ctime_iszero (void const * SHIM_RESTRICT mem,
-		   size_t const               num_bytes);
+shim_ctime_iszero (void const * SHIM_RESTRICT, ssize_t const);
 
 #ifdef SHIM_OPERATIONS_NO_INLINE_SWAP_FUNCTIONS
 #	define SWAP_API_ SHIM_API
@@ -294,14 +292,14 @@ shim_swap_64 (uint64_t u64)
 
 void
 shim_secure_zero (void * SHIM_RESTRICT buffer, size_t num_bytes) {
-#if    defined (SHIM_OS_MAC)
-	(void)memset_s( buffer, num_bytes, 0, num_bytes );
-#elif  defined (__NetBSD__)
-	(void)explicit_memset( buffer, 0, num_bytes );
-#elif  defined (SHIM_OS_UNIXLIKE)
-	explicit_bzero( buffer, num_bytes );
-#elif  defined (SHIM_OS_WINDOWS)
-	SecureZeroMemory( buffer, num_bytes );
+#if    defined(SHIM_OS_MAC)
+	memset_s(buffer, num_bytes, 0, num_bytes);
+#elif  defined(__NetBSD__)
+	explicit_memset(buffer, 0, num_bytes);
+#elif  defined(SHIM_OS_UNIXLIKE)
+	explicit_bzero(buffer, num_bytes);
+#elif  defined(SHIM_OS_WINDOWS)
+	SecureZeroMemory(buffer, num_bytes);
 #else
 #	error "Unsupported operating system."
 #endif /* ~ if defined (os's) ... */

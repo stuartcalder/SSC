@@ -6,7 +6,7 @@
 
 #include "macros.h"
 
-#if    (defined (SHIM_OS_UNIXLIKE) && !defined (__OpenBSD__)) || defined (SHIM_OS_WINDOWS)
+#if    (defined(SHIM_OS_UNIXLIKE) && !defined(__OpenBSD__)) || defined(SHIM_OS_WINDOWS)
 #	define ENABLE_MEMORYLOCKING_
 #endif /* ~ if defined (SHIM_OS_UNIXLIKE) and !defined (__OpenBSD__) or defined (SHIM_OS_WINDOWS) */
 
@@ -25,7 +25,6 @@
 #	else
 #		error "Unsupported operating system."
 #	endif /* ~ if defined (SHIM_OS_UNIXLIKE) elif defined (SHIM_OS_WINDOWS) */
-
 
 SHIM_BEGIN_DECLS
 

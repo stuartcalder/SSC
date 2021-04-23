@@ -1,39 +1,39 @@
 #include "files.h"
 
 int
-shim_get_file_size (Shim_File_t const file, size_t * SHIM_RESTRICT size_p) {
-#if    defined (SHIM_OS_UNIXLIKE)
+shim_get_file_size (Shim_File_t const file, ssize_t * SHIM_RESTRICT size_p) {
+#if    defined(SHIM_OS_UNIXLIKE)
 	struct stat s;
 	if (fstat(file, &s))
 		return -1;
-	*size_p = (size_t)s.st_size;
-#elif  defined (SHIM_OS_WINDOWS)
+	*size_p = (ssize_t)s.st_size;
+#elif  defined(SHIM_OS_WINDOWS)
 	LARGE_INTEGER li;
 	if (!GetFileSizeEx(file, &li))
 		return -1;
-	*size_p = (size_t)li.QuadPart;
+	*size_p = (ssize_t)li.QuadPart;
 #else
 #	error "Unsupported operating system."
 #endif
 	return 0;
 }
 
-size_t
+ssize_t
 shim_enforce_get_file_size (Shim_File_t const file) {
-	size_t size;
+	ssize_t size;
 	shim_assert_msg(!shim_get_file_size(file, &size), "Error: shim_enforce_get_file_size failed!\n");
 	return size;
 }
 
 int
 shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
-		   	size_t *     SHIM_RESTRICT size_p)
+		   	ssize_t *    SHIM_RESTRICT size_p)
 {
-#if    defined (SHIM_OS_UNIXLIKE)
+#ifdef SHIM_OS_UNIXLIKE
 	struct stat s;
 	if (stat(fpath, &s))
 		return -1;
-	*size_p = (size_t)s.st_size;
+	*size_p = (ssize_t)s.st_size;
 	return 0;
 #else /* Any other OS. */
 	Shim_File_t f;
@@ -47,9 +47,9 @@ shim_get_filepath_size (char const * SHIM_RESTRICT fpath,
 #endif
 }
 
-size_t
+ssize_t
 shim_enforce_get_filepath_size (char const * filepath) {
-	size_t size;
+	ssize_t size;
 	shim_assert_msg(!shim_get_filepath_size(filepath, &size), "Error: shim_get_filepath_size failed!\n");
 	return size;
 }
@@ -69,14 +69,10 @@ void
 shim_enforce_filepath_existence (char const * SHIM_RESTRICT filepath,
 				 bool const                 force_to_exist)
 {
-	if (shim_filepath_exists(filepath)) {
-		//TODO shim_assert_msg(shim_filepath_exists(filepath), 
-		if (!force_to_exist)
-			shim_errx("Error: The filepath '%s' seems to already exist.\n", filepath);
-	} else {
-		if (force_to_exist)
-			shim_errx("Error: The filepath '%s' does not seem to exist.\n", filepath);
-	}
+	if (force_to_exist)
+		shim_assert_msg(shim_filepath_exists(filepath), "Error: The filepath %s does not seem to exist.\n", filepath);
+	else
+		shim_assert_msg(!shim_filepath_exists(filepath), "Error: The filepath %s seems to already exist.\n", filepath);
 }
 
 int
@@ -84,10 +80,10 @@ shim_open_filepath (char const *  SHIM_RESTRICT filepath,
 		    bool const                  readonly,
 		    Shim_File_t * SHIM_RESTRICT file)
 {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	int const read_write_rights = readonly ? O_RDONLY : O_RDWR;
 	*file = open(filepath, read_write_rights, (mode_t)0600);
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	DWORD read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
 	*file = CreateFileA(filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 #else
@@ -112,9 +108,9 @@ int
 shim_create_filepath (char const *  SHIM_RESTRICT filepath,
 		      Shim_File_t * SHIM_RESTRICT file)
 {
-#if    defined (SHIM_OS_UNIXLIKE)
+#if    defined(SHIM_OS_UNIXLIKE)
 	*file = open(filepath, O_RDWR|O_TRUNC|O_CREAT, (mode_t)0600);
-#elif  defined (SHIM_OS_WINDOWS)
+#elif  defined(SHIM_OS_WINDOWS)
 	*file = CreateFileA(filepath, GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 #else
 #	error "Unsupported operating system."
@@ -152,7 +148,7 @@ shim_enforce_close_file (Shim_File_t const file) {
 
 #ifndef SHIM_FILES_INLINE_SET_FILE_SIZE
 int
-shim_set_file_size (Shim_File_t const file, size_t const new_size)
+shim_set_file_size (Shim_File_t const file, ssize_t const new_size)
 	SHIM_FILES_SET_FILE_SIZE_IMPL(file, new_size)
 #endif /* ~ SHIM_FILES_INLINE_SET_FILE_SIZE */
 
@@ -162,7 +158,7 @@ shim_set_file_size (Shim_File_t const file, size_t const new_size)
 #	define ERROR_	"Error: shim_enforce_set_file_size failed with size %zu.\n", new_size
 #endif
 void
-shim_enforce_set_file_size (Shim_File_t const file, size_t const new_size) {
+shim_enforce_set_file_size (Shim_File_t const file, ssize_t const new_size) {
 	if (shim_set_file_size(file, new_size))
 		shim_errx(ERROR_);
 }

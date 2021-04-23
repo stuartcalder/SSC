@@ -18,7 +18,7 @@ shim_shift_left_digits (char * SHIM_RESTRICT str, int const size) {
 }
 
 int
-shim_string_init (Shim_String * shim_s, char * SHIM_RESTRICT c_str, size_t size) {
+shim_string_init (Shim_String * shim_s, char * SHIM_RESTRICT c_str, ssize_t size) {
 	SHIM_ASSERT(shim_s);
 	shim_s->c_str = (char *)malloc(size + 1);
 	if (!shim_s->c_str)
@@ -32,7 +32,7 @@ shim_string_init (Shim_String * shim_s, char * SHIM_RESTRICT c_str, size_t size)
 }
 
 void
-shim_string_init_enforced (Shim_String * shim_s, char * SHIM_RESTRICT c_str, size_t size) {
+shim_string_init_enforced (Shim_String * shim_s, char * SHIM_RESTRICT c_str, ssize_t size) {
 	if (shim_string_init(shim_s, c_str, size))
 		shim_errx("ERROR: shim_string_init failed!\n");
 }
