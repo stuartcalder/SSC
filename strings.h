@@ -1,32 +1,25 @@
 /* Copyright (c) 2020 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
-#ifndef SHIM_STRINGS_H
-#define SHIM_STRINGS_H
+#ifndef BASE_STRINGS_H
+#define BASE_STRINGS_H
 
 #include "errors.h"
 #include "macros.h"
 #include "types.h"
 
-SHIM_BEGIN_DECLS
-
-SHIM_API int 
-shim_shift_left_digits (char * SHIM_RESTRICT, int const);
-
 typedef struct {
-	char *  c_str;
-	ssize_t size;
-} Shim_String;
+	char*  c_str;
+	size_t size;
+} Base_String;
 
-SHIM_API int
-shim_string_init (Shim_String *, char * SHIM_RESTRICT, ssize_t);
-
-SHIM_API void
-shim_string_init_enforced (Shim_String *, char * SHIM_RESTRICT, ssize_t);
-
-SHIM_API void
-shim_string_del (Shim_String *);
-
-SHIM_END_DECLS
+#define R_(ptr) ptr BASE_RESTRICT
+BASE_BEGIN_DECLS
+BASE_API int  Base_shift_left_digits (R_(char*), int);
+BASE_API int  Base_String_init (Base_String*, R_(char*), size_t);
+BASE_API void Base_String_init_or_die (Base_String*, R_(char*), size_t);
+BASE_API void Base_String_del (Base_String*);
+BASE_END_DECLS
+#undef R_
 
 #endif

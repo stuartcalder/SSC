@@ -1,17 +1,22 @@
-#ifndef SHIM_TYPES_H
-#define SHIM_TYPES_H
+#ifndef BASE_TYPES_H
+#define BASE_TYPES_H
 
-#include "macros.h"
-#include <stdint.h>
 #include <limits.h>
+#include <stdint.h>
+#include "macros.h"
 
-#ifdef SHIM_OS_UNIXLIKE
+#ifdef BASE_OS_UNIXLIKE
 #	include <sys/types.h>
 #else
 #	ifndef SSIZE_MAX
+#		if !defined(INT64_MAX) || !defined(INT64_MIN)
+#			error "We need these defined!"
+#		endif
 		typedef int64_t ssize_t;
 #		define SSIZE_MAX INT64_MAX
+#		define SSIZE_MIN INT64_MIN
+#		define PRINT_SSIZE PRIi64
 #	endif
 #endif
 
-#endif /* ~ifndef SHIM_TYPES_H */
+#endif /* ~ifndef BASE_TYPES_H */

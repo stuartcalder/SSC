@@ -1,132 +1,75 @@
 /* Copyright (c) 2020 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
-#ifndef SHIM_FILES_H
-#define SHIM_FILES_H
+#ifndef BASE_FILES_H
+#define BASE_FILES_H
 
-#include "errors.h"
-#include "macros.h"
-#include "types.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "errors.h"
+#include "macros.h"
+#include "types.h"
 
-#if    defined(SHIM_OS_UNIXLIKE)
-#	define SHIM_FILES_INLINE_CLOSE_FILE
-#	define SHIM_FILES_INLINE_SET_FILE_SIZE
+#if    defined(BASE_OS_UNIXLIKE)
+#	define BASE_CLOSE_FILE_IMPL_F close
+#	define BASE_CLOSE_FILE_IMPL(f) { return BASE_CLOSE_FILE_IMPL_F(f); }
+#	define BASE_CLOSE_FILE_INLINE
+#	define BASE_SET_FILE_SIZE_IMPL_F ftruncate
+#	define BASE_SET_FILE_SIZE_IMPL(f, n) { return BASE_SET_FILE_SIZE_IMPL_F(f, n); }
+#	define BASE_SET_FILE_SIZE_INLINE
 #	include <fcntl.h>
 #	include <unistd.h>
 #	include <sys/stat.h>
 #	include <sys/types.h>
 /* On Unix-like systems, files are managed through handles, represented by integers. */
-typedef int	Shim_File_t;
-#	define SHIM_NULL_FILE (-1)
-#elif  defined(SHIM_OS_WINDOWS)
+typedef int Base_File_t;
+#	define BASE_NULL_FILE (-1)
+#elif  defined(BASE_OS_WINDOWS)
+#	define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
+#	define BASE_SET_FILE_SIZE_IMPL(f, n) { \
+		LARGE_INTEGER i; \
+		i.QuadPart = n; \
+		if (!SetFilePointerEx(f, i, NULL, FILE_BEGIN) || \
+		    !SetEndOfFile(f)) \
+			return -1; \
+		return 0; \
+	}
 #	include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
-typedef HANDLE	Shim_File_t;
-#	define SHIM_NULL_FILE INVALID_HANDLE_VALUE
+typedef HANDLE Base_File_t;
+#	define BASE_NULL_FILE INVALID_HANDLE_VALUE
 #else
 #	error "Unsupported operating system."
-#endif /* ~ if defined (SHIM_OS_UNIXLIKE) or defined (SHIM_OS_WINDOWS) */
+#endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
-SHIM_BEGIN_DECLS
-
-SHIM_API int
-shim_get_file_size (Shim_File_t const, ssize_t * SHIM_RESTRICT);
-
-SHIM_API ssize_t
-shim_enforce_get_file_size (Shim_File_t const);
-
-SHIM_API int
-shim_get_filepath_size (char const * SHIM_RESTRICT, ssize_t * SHIM_RESTRICT);
-
-SHIM_API ssize_t
-shim_enforce_get_filepath_size (char const *);
-
-SHIM_API bool
-shim_filepath_exists (char const *);
-
-SHIM_API void
-shim_enforce_filepath_existence (char const * SHIM_RESTRICT, bool const);
-
-SHIM_API int
-shim_open_filepath (char const * SHIM_RESTRICT, bool const, Shim_File_t * SHIM_RESTRICT);
-
-SHIM_API Shim_File_t
-shim_enforce_open_filepath (char const * SHIM_RESTRICT, bool const);
-
-SHIM_API int
-shim_create_filepath (char const * SHIM_RESTRICT, Shim_File_t * SHIM_RESTRICT);
-
-SHIM_API Shim_File_t
-shim_enforce_create_filepath (char const *);
-
-#ifdef SHIM_FILES_INLINE_CLOSE_FILE
-#	define API_ static inline
+#define R_(ptr) ptr BASE_RESTRICT
+BASE_BEGIN_DECLS
+BASE_API int         Base_get_file_size (Base_File_t, R_(size_t*));
+BASE_API size_t      Base_get_file_size_or_die (Base_File_t);
+BASE_API int         Base_get_filepath_size (R_(const char*), R_(size_t*));
+BASE_API size_t      Base_get_filepath_size_or_die (const char*);
+BASE_API bool        Base_filepath_exists (const char*);
+BASE_API void        Base_force_filepath_existence_or_die (R_(const char*), bool);
+BASE_API int         Base_open_filepath (R_(const char*), bool, R_(Base_File_t*));
+BASE_API Base_File_t Base_open_filepath_or_die (R_(const char*), bool);
+BASE_API int         Base_create_filepath (R_(const char*), R_(Base_File_t*));
+BASE_API Base_File_t Base_create_filepath_or_die (const char*);
+#ifdef BASE_CLOSE_FILE_INLINE
+BASE_INLINE int Base_close_file (Base_File_t f) BASE_CLOSE_FILE_IMPL(f)
 #else
-#	define API_ SHIM_API
+BASE_API    int Base_close_file (Base_File_t);
 #endif
-API_ int
-shim_close_file (Shim_File_t const);
-#undef API_
-
-SHIM_API void
-shim_enforce_close_file (Shim_File_t const);
-
-#ifdef SHIM_FILES_INLINE_SET_FILE_SIZE
-#	define API_ static inline
+BASE_API   void Base_close_file_or_die (Base_File_t);
+#ifdef BASE_SET_FILE_SIZE_INLINE
+BASE_INLINE int Base_set_file_size (Base_File_t f, size_t s) BASE_SET_FILE_SIZE_IMPL(f, s)
 #else
-#	define API_ SHIM_API
-#endif /* ~ ifdef SHIM_FILES_INLINE_SET_FILE_SIZE */
-API_ int
-shim_set_file_size (Shim_File_t const, ssize_t const);
-#undef API_
+BASE_API    int Base_set_file_size (Base_File_t, size_t);
+#endif
+BASE_API void Base_set_file_size_or_die (Base_File_t, size_t);
+BASE_END_DECLS
+#undef R_
 
-SHIM_API void
-shim_enforce_set_file_size (Shim_File_t const, ssize_t const);
-
-SHIM_END_DECLS
-
-/* Inline/non-inline API function implementations */
-#if    defined(SHIM_OS_UNIXLIKE)
-#	define SHIM_FILES_CLOSE_FILE_IMPL(file_const) { \
-		return close(file_const); \
-	}
-#	define SHIM_FILES_SET_FILE_SIZE_IMPL(file, new_size) { \
-		return ftruncate(file, new_size); \
-	}
-#elif  defined(SHIM_OS_WINDOWS)
-#	define SHIM_FILES_CLOSE_FILE_IMPL(file_const) { \
-		if(!CloseHandle(file_const))\
-			return -1; \
-		return 0; \
-	}
-#	define SHIM_FILES_SET_FILE_SIZE_IMPL(file, new_size) { \
-		LARGE_INTEGER li; \
-		li.QuadPart = new_size; \
-		if(!SetFilePointerEx(file, li, NULL, FILE_BEGIN)) \
-			return -1; \
-		if(!SetEndOfFile(file)) \
-			return -1; \
-		return 0; \
-	}
-#else
-#	error "Unsupported OS."
-#endif /* ~ if defined (SHIM_OS_UNIXLIKE) or defined (SHIM_OS_WINDOWS) */
-
-#ifdef SHIM_FILES_INLINE_CLOSE_FILE
-int
-shim_close_file (Shim_File_t const file)
-	SHIM_FILES_CLOSE_FILE_IMPL(file)
-#endif /* ~ ifdef SHIM_FILES_INLINE_CLOSE_FILE */
-
-#ifdef SHIM_FILES_INLINE_SET_FILE_SIZE
-int
-shim_set_file_size (Shim_File_t const file, ssize_t const new_size)
-	SHIM_FILES_SET_FILE_SIZE_IMPL(file, new_size)
-#endif /* ~ ifdef SHIM_FILES_INLINE_SET_FILE_SIZE */
-
-#endif /* ~ SHIM_FILES_H */
+#endif /* ~ BASE_FILES_H */

@@ -1,8 +1,6 @@
-project('shim',
-	'c',
-	default_options: ['c_std=c17', 'optimization=3', 'buildtype=release', 'strip=true'])
+project('Base', 'c', default_options: ['c_std=c17', 'optimization=3', 'buildtype=release', 'strip=true'])
 # Project / Language
-_PROJECT  = 'shim'
+_PROJECT  = 'Base'
 _LANG = 'c'
 # Operating Systems & Compilers
 _UNIXLIKE_OPERATING_SYSTEMS  = ['openbsd', 'freebsd', 'netbsd', 'darwin', 'linux']
@@ -30,17 +28,20 @@ else
 	_D_PREFIX = '-D'
 endif
 # Source Code Files
-src = [
-  'impl/operations.c',
-  'impl/files.c',
-  'impl/map.c',
-  'impl/args.c',
-  'impl/term.c',
-  'impl/print.c',
-  'impl/strings.c',
-  'impl/mlock.c',
-  'impl/errors.c'
-  ]
+src =  [
+'impl/args.c',
+'impl/errors.c',
+'impl/files.c',
+'impl/mem.c',
+'impl/mlock.c',
+'impl/mmap.c',
+'impl/operations.c',
+'impl/print.c',
+'impl/random.c',
+'impl/strings.c',
+'impl/swap.c',
+'impl/term.c'
+]
 lib_deps     = []
 lang_flags   = []
 include_dirs = []
@@ -48,14 +49,14 @@ include_dirs = []
 if not get_option('debug_build')
   lang_flags += _D_PREFIX + 'NDEBUG'
 else
-  lang_flags += _D_PREFIX + 'SHIM_EXT_DEBUG'
+  lang_flags += _D_PREFIX + 'BASE_EXTERN_DEBUG'
   lang_flags += _D_PREFIX + 'YDEBUG'
 endif
-# We're building Shim
+# We're building GcL 
 if static
-  lang_flags += _D_PREFIX + 'SHIM_EXT_STATIC_LIB'
+  lang_flags += _D_PREFIX + 'BASE_EXTERN_STATIC_LIB'
 else
-  lang_flags += _D_PREFIX + 'SHIM_EXT_BUILD_DYNAMIC_LIB'
+  lang_flags += _D_PREFIX + 'BASE_EXTERN_BUILD_DYNAMIC_LIB'
 endif
 # MacOS Requires __STDC_WANT_LIB_EXT1__ == 1
 if os == 'darwin'
@@ -68,6 +69,11 @@ if os in _UNIXLIKE_OPERATING_SYSTEMS
       lang_flags += '-march=native'
     endif
     lang_flags += _GCC_COMPATIBLE_FLAGS
+  endif
+  if get_option('lua') # Lua support
+    lang_flags += _D_PREFIX + 'BASE_EXTERN_LUA'
+    src += 'impl/lua.c'
+    lib_deps += compiler.find_library('lua5.4')
   endif
 endif
 
@@ -92,21 +98,21 @@ elif os == 'windows'
 endif
 
 include_dirs += '..'
-# Install the shim folder into the system header directory
-install_subdir('../shim', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
+# Install the base folder into the system header directory
+install_subdir('../Base', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
 
 if static
   if os == 'windows'
-    static_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+    static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
       name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:/lib')
   else
-    static_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
   endif
 else
   if os == 'windows'
-    shared_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+    shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
       name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:/lib')
   else
-    shared_library('shim', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
   endif
 endif

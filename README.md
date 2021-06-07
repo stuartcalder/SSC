@@ -1,8 +1,9 @@
-# shim
-OS Abstraction C Library
+# gcl 
+# General C Library.
+C Wrapper Library, and miscellaneous general-purpose utilities.
 ## Purpose
 Provide a simple, generalized interface between operating systems for file manipulation,
-memory-mapping, memory-locking, and other such features.
+memory-mapping, memory-locking, etc.
 ## Dependencies
 -	[meson](https://mesonbuild.com) Build System
 ## Linux, MacOS, BSDs
@@ -11,9 +12,9 @@ memory-mapping, memory-locking, and other such features.
 ## Win64
 -	Minimum __Windows Vist/Server 2008__
 -	Minimum Visual Studio 2019
-### Building Shim with meson
+### Building SCS with meson
 #### MacOS, BSD OSs
-1. git clone [shim](https://github.com/stuartcalder/shim) and cd into it.
+1. git clone [gcl](https://github.com/stuartcalder/gcl) and cd into it.
 2. Execute the following:
 ```
 	$ mkdir builddir
@@ -23,8 +24,8 @@ memory-mapping, memory-locking, and other such features.
 	# ninja install
 ```
 #### Windows OSs
-1. git clone [shim](https://github.com/stuartcalder/shim) and cd into it.
-2. Open a __"x64 Native Tools Command Prompt for VS 2019"__ cmd prompt, then cd into the cloned shim project directory.
+1. git clone [gcl](https://github.com/stuartcalder/gcl) and cd into it.
+2. Open a __"x64 Native Tools Command Prompt for VS 2019"__ cmd prompt, then cd into the cloned gcl project directory.
 3. Execute the following:
 ```
 	mkdir builddir

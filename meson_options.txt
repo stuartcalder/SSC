@@ -1,3 +1,4 @@
 option('native_optimize', type: 'boolean', value: false)
 option('static', type: 'boolean', value: false)
 option('debug_build', type: 'boolean', value: false)
+option('lua', type: 'boolean', value: false)

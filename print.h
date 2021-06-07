@@ -1,19 +1,16 @@
 /* Copyright (c) 2020 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
-#ifndef SHIM_PRINT_H
-#define SHIM_PRINT_H
+#ifndef BASE_PRINT_H
+#define BASE_PRINT_H
 
-#include "errors.h"
-#include "macros.h"
 #include <stdint.h>
 #include <stdio.h>
+#include "errors.h"
+#include "macros.h"
 
-SHIM_BEGIN_DECLS
+BASE_BEGIN_DECLS
+BASE_API void Base_print_bytes (uint8_t* BASE_RESTRICT, size_t);
+BASE_END_DECLS
 
-SHIM_API void 
-shim_print_byte_buffer (uint8_t * SHIM_RESTRICT, size_t const);
-
-SHIM_END_DECLS
-
-#endif // ~ SHIM_PRINT_H
+#endif // ~ BASE_PRINT_H

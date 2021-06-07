@@ -1,7 +1,7 @@
-#ifndef SHIM_FUNCS
-#define SHIM_FUNCS
+#ifndef BASE_FUNCS
+#define BASE_FUNCS
 
-typedef void Shim_Func_f ();
-typedef Shim_Func_f * Shim_Fptr_t;
+typedef void Base_Func_f ();
+typedef Base_Func_f * Base_Fptr_t;
 
-#endif /* ~ifndef SHIM_FUNCS */
+#endif /* ~ifndef BASE_FUNCS */
