@@ -9,9 +9,8 @@
 #include "files.h"
 #include "operations.h"
 
-#define BASE_LUA_PROCS_KEY   "Procs"
-#define BASE_LUA_PROCS_MT    "Base." BASE_LUA_PROCS_KEY
-#define BASE_LUA_FILE_MT     "Base.File"
+#define BASE_LUA_PROCS_KEY          "procs"
+#define BASE_LUA_PROCS_MT           "Base.Procs"
 #define BASE_LUA_FILE_NEW(s)        (Base_Lua_File*)lua_newuserdatauv(s, sizeof(Base_Lua_File), 0)
 #define BASE_LUA_FILE_CHECK(s, idx) (Base_Lua_File*)lua_checkudata(s, idx, BASE_LUA_FILE_MT)
 #define BASE_LUA_FILE_TEST(s, idx)  (Base_Lua_File*)luaL_testudata(s, idx, BASE_LUA_FILE_MT)

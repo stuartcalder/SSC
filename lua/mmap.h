@@ -7,8 +7,8 @@
 #include "mmap.h"
 #include "operations.h"
 
-#define BASE_LUA_MMAP_KEY           "Mmap"
-#define BASE_LUA_MMAP_MT            "Base." BASE_LUA_MMAP_KEY
+#define BASE_LUA_MMAP_KEY           "mmap"
+#define BASE_LUA_MMAP_MT            "Base.MMap"
 #define BASE_LUA_MMAP_NEW(s)        (Base_Lua_MMap*)lua_newuserdatauv(s, sizeof(Base_Lua_MMap), 0)
 #define BASE_LUA_MMAP_CHECK(s, idx) (Base_Lua_MMap*)luaL_checkudata(s, idx, BASE_LUA_MMAP_MT)
 #define BASE_LUA_MMAP_TEST(s, idx)  (Base_Lua_MMap*)luaL_testudata(s, idx, BASE_LUA_MMAP_MT)

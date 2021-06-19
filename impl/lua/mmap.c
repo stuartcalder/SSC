@@ -34,7 +34,6 @@ static int new_mmap (lua_State* s) {
 		    Base_MMap_map(m, ronly))
 		{
 			lua_pushnil(s);
-			return 1;
 		}
 	} else {
 		m->file = BASE_NULL_FILE;
@@ -47,13 +46,13 @@ static int new_mmap (lua_State* s) {
 
 static int is_mapped (lua_State* s) {
 	SFAIL_(s, 1);
-	LMMap_t* lmap = MMAP_CHECK_(s, 1);
+	LMMap_t* lmap = MMAP_CHECK_(s, 1); /* LMMap */
 	lua_pushboolean(s, lmap->valid && lmap->m.ptr);
 	return 1;
 }
 
 static int del_mmap (lua_State* s) {
-	LMMap_t* lmap = MMAP_CHECK_(s, 1);
+	LMMap_t* lmap = MMAP_CHECK_(s, 1); /* LMMap */
 	if (lmap->valid && lmap->m.ptr) {
 		lmap->valid = 0;
 		if (!Base_MMap_unmap(&lmap->m))
@@ -62,23 +61,22 @@ static int del_mmap (lua_State* s) {
 	return 0;
 }
 
-static int call_mmap (lua_State* s) {
-	
-}
-
 static const luaL_Reg mmap_procs[] = {
 	{"new", &new_mmap},
 	{"is_mapped", &is_mapped},
 	{"del", &del_mmap},
-	{"map", &call_mmap},
 	{NULL, NULL}
 }
 
 int luaopen_Base_MMap (lua_State* s) {
-	SFAIL_(s, 2);
-	luaL_newmetatable(s, MMAP_MT_);
-	lua_pushcfunction(s, &del_mmap);
-	lua_setfield(s, -2, "__gc");
-	luaL_newlib(s, mmap_procs);
+	SFAIL_(s, 3);
+	luaL_newlib(s, mmap_procs);       /* Lib */
+	luaL_newmetatable(s, MMAP_MT_);   /* Lib, MT */
+	lua_pushcfunction(s, &del_mmap);  /* Lib, MT, CFunction */
+	lua_setfield(s, -2, "__gc");      /* Lib, MT */
+	lua_pushnil(s);                   /* Lib, MT, Nil */
+	lua_copy(s, -3, -1);              /* Lib, MT, Lib */
+	lua_setfield(s, -2, "__index");   /* Lib, MT */
+	lua_pop(s);                       /* Lib */
 	return 1;
 }

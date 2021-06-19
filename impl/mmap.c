@@ -7,7 +7,7 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 	if (map->ptr == MAP_FAILED)
 		return -1;
 #elif  defined(BASE_OS_WINDOWS)
-	const DWORD high_32 = (DWORD)(((uint64_t)map->size) >> 32);
+	const DWORD high_32 = (DWORD)((uint64_t)map->size >> 32);
 	const DWORD low_32  = (DWORD)map->size;
 	DWORD page_rw = PAGE_READWRITE;
 	DWORD map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);

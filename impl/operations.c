@@ -22,21 +22,6 @@ void  Base_xor_16  (R_(void*) base, R_(const void*) add) {  XOR_16_(base, add, 0
 void  Base_xor_32  (R_(void*) base, R_(const void*) add) {  XOR_32_(base, add, 0); }
 void  Base_xor_64  (R_(void*) base, R_(const void*) add) {  XOR_64_(base, add, 0); }
 void  Base_xor_128 (R_(void*) base, R_(const void*) add) { XOR_128_(base, add, 0); }
-void* Base_malloc_or_die (size_t num_bytes) {
-	void* mem = malloc(num_bytes);
-	Base_assert_msg(mem, BASE_ERR_STR_ALLOC_FAILURE);
-	return mem;
-}
-void* Base_calloc_or_die (size_t n_elem, size_t elem_size) {
-	void* mem = calloc(n_elem, elem_size);
-	Base_assert_msg(mem, BASE_ERR_STR_ALLOC_FAILURE);
-	return mem;
-}
-void* Base_realloc_or_die (R_(void*) ptr, size_t size) {
-	void* mem = realloc(ptr, size);
-	Base_assert_msg(mem, BASE_ERR_STR_ALLOC_FAILURE);
-	return mem;
-}
 
 size_t Base_ctime_memdiff (R_(const void*) m_0, R_(const void*) m_1, size_t size) {
 	BASE_ASSERT(m_0 && m_1);

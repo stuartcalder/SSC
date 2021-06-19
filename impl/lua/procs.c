@@ -8,7 +8,7 @@
 #define FILE_NEW_(s)        BASE_LUA_FILE_NEW(s)
 #define FILE_CHECK_(s, idx) BASE_LUA_FILE_CHECK(s, idx)
 
-typedef Base_Lua_File File_t;
+typedef Base_Lua_File LFile_t;
 /*
  * File procedures.
  */
@@ -16,7 +16,7 @@ static int open_filepath (lua_State* s) {
 	SFAIL_(s, 2);
 	const char* fpath = luaL_checkstring(s, 1);
 	const bool ronly = lua_isboolean(s, 2) ? lua_toboolean(s, 2) : true;
-	File_t* lf = FILE_NEW_(s);
+	LFile_t* lf = FILE_NEW_(s);
 	if (Base_open_filepath(fpath, ronly, &lf->f)) {
 		lf->valid = 0;
 		lua_pushnil(s);
@@ -31,7 +31,7 @@ static int open_filepath (lua_State* s) {
 static int create_filepath (lua_State* s) {
 	SFAIL_(s, 2);
 	const char* fpath = luaL_checkstring(s, 1);
-	File_t* file = FILE_NEW_(s);
+	LFile_t* file = FILE_NEW_(s);
 	if (Base_create_filepath(fpath, &(file->f))) {
 		file->valid = 0;
 		lua_pushnil(s);
@@ -56,7 +56,7 @@ static int get_filepath_size (lua_State* s) {
 
 static int get_file_size (lua_State* s) {
 	SFAIL_(s, 1);
-	File_t* file = FILE_CHECK_(s, 1);
+	LFile_t* file = FILE_CHECK_(s, 1);
 	size_t sz;
 	if (!file->valid || Base_get_file_size(&file->f, &sz))
 		lua_pushnil(s);
@@ -67,7 +67,7 @@ static int get_file_size (lua_State* s) {
 
 static int close_file (lua_State* s) {
 	SFAIL_(s, 1);
-	File_t* file = FILE_CHECK_(s, 1);
+	LFile_t* file = FILE_CHECK_(s, 1);
 	if (!file->valid || Base_close_file(&file->f))
 		lua_pushnil(s);
 	else {
@@ -86,7 +86,7 @@ static int filepath_exists (lua_State* s) {
 
 static int file_is_open (lua_State* s) {
 	SFAIL_(s, 1);
-	File_t* file = FILE_CHECK_(s, 1);
+	LFile_t* file = FILE_CHECK_(s, 1);
 	lua_pushboolean(s, file->valid && file->f != BASE_NULL_FILE);
 	return 1;
 }

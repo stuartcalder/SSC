@@ -37,7 +37,7 @@ static int new_sbuffer (lua_State* s) {
 	if (!(sb->p = (uint8_t*)malloc(sb->n)))
 		return MFAIL_(s);
 #endif
-	lua_getmetatable(s, MT_);
+	luaL_getmetatable(s, MT_);
 	lua_setmetatable(s, -2);
 	return 1;
 }
