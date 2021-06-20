@@ -4,8 +4,8 @@
 #include <stdarg.h>
 
 /* Flags to indicate support for restricting pointers. */
-#define BASE_RESTRICT_IMPL_C    (1UL << 0) /*   restrict */
-#define BASE_RESTRICT_IMPL_CPP  (1UL << 1) /* __restrict */
+#define BASE_RESTRICT_IMPL_C	(1u << 0) /*   restrict */
+#define BASE_RESTRICT_IMPL_CPP	(1u << 1) /* __restrict */
 
 /* Operating System Macros */
 #if    defined(__APPLE__) && defined(__MACH__)
@@ -32,7 +32,7 @@
 #		define BASE_OS_WIN32
 #	endif /* ~ ifdef _WIN64 */
 #else
-#	error "Unsupported OS"
+#	error "Unsupported."
 #endif /* ~ if defined (unixlike os's ...) */
 
 /* OpenBSD-specific mitigations */
@@ -40,7 +40,7 @@
 #	include <unistd.h>
 #	include "errors.h"
 #	define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()\n")
-#	define BASE_OPENBSD_UNVEIL(path, permissions)      Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
+#	define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
@@ -89,7 +89,7 @@
 #			endif
 #		else
 #			ifndef BASE_RESTRICT_IMPL
-#				define BASE_RESTRICT_IMPL 0
+#				define BASE_RESTRICT_IMPL 0u
 #			endif
 #		endif
 #		if    (BASE_LANG_C >= BASE_C_11)
@@ -107,9 +107,9 @@
 #			define BASE_ALIGNOF(align_of)		/* Nil */
 #		endif
 #	else
-#		define BASE_LANG_C 0
+#		define BASE_LANG_C 0L
 #		ifndef BASE_RESTRICT_IMPL
-#			define BASE_RESTRICT_IMPL 0
+#			define BASE_RESTRICT_IMPL 0u
 #		endif
 #		define BASE_STATIC_ASSERT(boolean, msg) /* Nil */
 #		define BASE_ALIGNAS(align_as)		/* Nil */

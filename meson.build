@@ -19,8 +19,10 @@ static = get_option('static')
 if os != 'netbsd' and compiler.get_id() != 'clang'
   _GCC_COMPATIBLE_FLAGS += '-flto'
 endif
-assert (os in _SUPPORTED_OPERATING_SYSTEMS, 'You are trying to build ' + _PROJECT + ' using an unsupported operating system!')
-assert (compiler.get_id() in _SUPPORTED_COMPILERS, 'You are trying to build ' + _PROJECT + ' using an unsupported compiler!')
+assert(os in _SUPPORTED_OPERATING_SYSTEMS,
+  'You are trying to build ' + _PROJECT + ' using an unsupported operating system!')
+assert(compiler.get_id() in _SUPPORTED_COMPILERS,
+  'You are trying to build ' + _PROJECT + ' using an unsupported compiler!')
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
 	_D_PREFIX = '/D'
@@ -52,7 +54,7 @@ else
   lang_flags += _D_PREFIX + 'BASE_EXTERN_DEBUG'
   lang_flags += _D_PREFIX + 'YDEBUG'
 endif
-# We're building GcL 
+# We're building Base
 if static
   lang_flags += _D_PREFIX + 'BASE_EXTERN_STATIC_LIB'
 else
@@ -64,14 +66,20 @@ if os == 'darwin'
 endif
 # Unixlike options
 if os in _UNIXLIKE_OPERATING_SYSTEMS
-  if compiler.get_id() in _GCC_COMPATIBLE_COMPILERS
-    if get_option('native_optimize')
+  if compiler.get_id() in _GCC_COMPATIBLE_COMPILERS # GCC, Clang
+    if get_option('native_optimize') # -march=native
       lang_flags += '-march=native'
     endif
     lang_flags += _GCC_COMPATIBLE_FLAGS
   endif
   if get_option('lua') # Lua support
     lang_flags += _D_PREFIX + 'BASE_EXTERN_LUA'
+	src += [
+	  'impl/lua.c',		  # luaopen_Base
+	  'impl/lua/mmap.c',  # luaopen_Base_MMap
+	  'impl/lua/procs.c', # luaopen_Base_Procs
+	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
+	]
     src += 'impl/lua.c'
     lib_deps += compiler.find_library('lua5.4')
   endif
