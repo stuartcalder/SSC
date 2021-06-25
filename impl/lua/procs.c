@@ -1,3 +1,4 @@
+#include "lua.h"
 #include "lua/macros.h"
 #include "lua/procs.h"
 
@@ -9,7 +10,7 @@
 
 typedef Base_Lua_File F_t;
 
-static int open_fpath (lua_State* L) {
+static int fpath_open (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
 	const size_t fpath_n = strlen(fpath);
 	const bool  ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true;
@@ -41,7 +42,7 @@ static int open_fpath (lua_State* L) {
 	return 1;
 }
 
-static int create_fpath (lua_State* L) {
+static int fpath_create (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
 	const size_t fpath_n = strlen(fpath);
 	F_t* f = FILE_NEW_(L);
@@ -70,7 +71,7 @@ static int create_fpath (lua_State* L) {
 	return 1;
 }
 
-static int get_fpath_size (lua_State* L) {
+static int fpath_size (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
 	size_t sz;
 	if (Base_get_filepath_size(fpath, &sz))
@@ -138,6 +139,15 @@ static int file_is_open (lua_State* L) {
 	return 1;
 }
 
+static int file_fpath (lua_State* L) {
+	F_t* f = FILE_CHECK_(L, 1);
+	if (f->fpath)
+		lua_pushlstring(L, f->fpath);
+	else
+		lua_pushnil(L);
+	return 1;
+}
+
 static int fpath_del (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
 	if (!Base_filepath_exists(fpath) || remove(fpath))
@@ -147,21 +157,50 @@ static int fpath_del (lua_State* L) {
 	return 1;
 }
 
+#define UDATA_FAIL_(L, idx, f) luaL_error(L, "%s: Invalid pointer for arg %d", f, idx)
+
+static int std_memcpy (lua_State* L) {
+	void *dest, *src;
+	size_t n;
+	if (!(dest = lua_touserdata(s, 1)))
+		return UDATA_FAIL_(s, 1, "memcpy");
+	if (!(src = lua_touserdata(s, 2)))
+		return UDATA_FAIL_(s, 2, "memcpy");
+	n = (size_t)luaL_checkunsigned(s, 3);
+	memcpy(dest, src, n);
+	return 0;
+}
+
+static int std_memset (lua_State* L) {
+	void*  p;
+	int    b;
+	size_t n;
+	if (!(p = lua_touserdata(s, 1)))
+		return UDATA_FAIL_(s, 1, "memset");
+	b = (int)(luaL_checkunsigned(s, 2) & (lua_Unsigned)0xffu);
+	n = (size_t)luaL_checkunsigned(s, 3);
+	memset(p, b, n);
+	return 0;
+}
+
 static const luaL_Reg file_mt[] = {
 	{"size"   , &get_file_size},
 	{"close"  , &close_file},
 	{"__close", &close_file},
 	{"__gc"   , &close_file},
 	{"is_open", &file_is_open},
+	{"fpath"  , &file_fpath},
 	{NULL, NULL}
 }
 
 static const luaL_Reg procedures[] = {
-	{"fpath_open"  , &open_fpath},
-	{"fpath_create", &create_fpath},
-	{"fpath_size"  , &get_fpath_size},
+	{"fpath_open"  , &fpath_open},
+	{"fpath_create", &fpath_create},
+	{"fpath_size"  , &fpath_size},
 	{"fpath_exists", &fpath_exists},
 	{"fpath_del"   , &fpath_del},
+	{"memcpy"      , &std_memcpy},
+	{"memset"      , &std_memset},
 	{NULL, NULL}
 };
 

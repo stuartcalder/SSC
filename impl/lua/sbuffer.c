@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include "lua.h"
 #include "lua/sbuffer.h"
 
 typedef Base_Lua_SBuffer SBuf_t;
@@ -13,13 +14,13 @@ static int new_sbuffer (lua_State* s) {
 	 * @lock:	Whether to memorylock the buffer.	*
 	 * @sb:		Newly created SBuffer.				*/
 	const size_t n = (size_t)luaL_checkunsigned(s, 1);
-#ifdef BASE_HAS_MEMORYLOCKING
+#ifdef BASE_MLOCK_H
 	const bool lock = lua_isboolean(s, 2) ? lua_toboolean(s, 2) : false;
 #endif
 	SBuf_t* sb = NEW_(s);
 	sb->n = n;
 	sb->f = BASE_LUA_SBUFFER_ISVALID;
-#ifdef BASE_HAS_MEMORYLOCKING
+#ifdef BASE_MLOCK_H
 	if (lock) {
 	#if 1
 	/*TODO*/

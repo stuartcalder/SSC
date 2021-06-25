@@ -1,3 +1,4 @@
+#include "lua.h"
 #include "lua/mmap.h"
 #include "lua/procs.h"
 
