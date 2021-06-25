@@ -11,22 +11,53 @@ typedef Base_Lua_File F_t;
 
 static int open_fpath (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
+	const size_t fpath_n = strlen(fpath);
 	const bool  ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true;
 	F_t* f = FILE_NEW_(L);
+	#if 1
+	if (Base_open_filepath(fpath, ronly, &f->file)) {
+		f->file = BASE_NULL_FILE;
+		f->fpath = NULL;
+		f->fpath_n = 0;
+		lua_pushnil(L);
+	} else {
+		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
+			return luaL_error(L, "malloc failed.");
+		memcpy(f->fpath, fpath, fpath_n + 1);
+		f->fpath_n = fpath_n;
+		luaL_getmetatable(L, FILE_MT_);
+		lua_setmetatable(L, -2);
+	}
+	#else
 	if (Base_open_filepath(fpath, ronly, &f ->f)) {
-		f ->valid = 0;
+		f->valid = 0;
 		lua_pushnil(L);
 	} else {
 		f ->valid = 1;
 		luaL_getmetatable(L, FILE_MT_);
 		lua_setmetatable(L, -2);
 	}
+	#endif
 	return 1;
 }
 
 static int create_fpath (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
+	const size_t fpath_n = strlen(fpath);
 	F_t* f = FILE_NEW_(L);
+	#if 1
+	if (Base_create_filepath(fpath, &f->file)) {
+		f->file = BASE_NULL_FILE;
+		f->fpath = NULL;
+		f->fpath_n = 0;
+		lua_pushnil(L);
+	} else {
+		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
+			return luaL_error(L, "malloc failed.");
+		memcpy(f->fpath, fpath, fpath_n + 1);
+		f->fpath_n = fpath_n;
+	}
+	#else
 	if (Base_create_filepath(fpath, &f->f)) {
 		f->valid = 0;
 		lua_pushnil(L);
@@ -35,6 +66,7 @@ static int create_fpath (lua_State* L) {
 		luaL_getmetatable(L, FILE_MT_);
 		lua_setmetatable(L, -2);
 	}
+	#endif
 	return 1;
 }
 
@@ -51,15 +83,34 @@ static int get_fpath_size (lua_State* L) {
 static int get_file_size (lua_State* L) {
 	F_t* f = FILE_CHECK_(L, 1);
 	size_t sz;
+	#if 1
+	if (f->file == BASE_NULL_FILE || Base_get_file_size(f->file, &sz))
+		lua_pushnil(L);
+	else
+		lua_pushunsigned(L, (lua_Unsigned)sz);
+	#else
 	if (!f->valid || Base_get_file_size(f->f, &sz))
 		lua_pushnil(L);
 	else
 		lua_pushunsigned(L, (lua_Unsigned)sz);
+	#endif
 	return 1;
 }
 
 static int close_file (lua_State* L) {
 	F_t* f = FILE_CHECK_(L, 1);
+	#if 1
+	if (f->file == BASE_NULL_FILE || Base_close_file(f->file))
+		lua_pushnil(L);
+	else {
+		f->file = BASE_NULL_FILE;
+		Base_secure_zero(f->fpath, f->fpath_n);
+		free(f->fpath);
+		f->fpath = NULL;
+		f->fpath_n = 0;
+		lua_pushinteger(L, 1);
+	}
+	#else
 	if (!f->valid || Base_close_file(f->f))
 		lua_pushnil(L);
 	else {
@@ -67,6 +118,7 @@ static int close_file (lua_State* L) {
 		f->f = BASE_NULL_FILE;
 		lua_pushinteger(L, 1);
 	}
+	#endif
 	return 1;
 }
 
@@ -78,7 +130,11 @@ static int fpath_exists (lua_State* L) {
 
 static int file_is_open (lua_State* L) {
 	F_t* f = FILE_CHECK_(L, 1);
+	#if 1
+	lua_pushboolean(L, f->file != BASE_NULL_FILE);
+	#else
 	lua_pushboolean(L, f->valid && (f->f != BASE_NULL_FILE));
+	#endif
 	return 1;
 }
 
