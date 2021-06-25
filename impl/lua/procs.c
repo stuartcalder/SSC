@@ -1,9 +1,11 @@
 #include "macros.h"
 #include "files.h"
 #include "lua/macros.h"
+#include "lua/procs.h"
 
 #define MFAIL_(s)           BASE_LUA_MALLOC_FAIL(s)
 #define FILE_MT_            BASE_LUA_FILE_MT
+#define FILE_KEY_			BASE_LAU_FILE_KEY
 #define FILE_NEW_(s)        BASE_LUA_FILE_NEW(s)
 #define FILE_CHECK_(s, idx) BASE_LUA_FILE_CHECK(s, idx)
 
@@ -20,8 +22,13 @@ static int open_filepath (lua_State* s) {
 		lua_pushnil(s);
 	} else {
 		lf->valid = 1;
+		#if 1 /* The table will be its own metatable. */
+		lua_pushvalue(s, -1);
+		lua_setmetatable(s, -2);
+		#else /* The metatable will be set to a registry constant FILE_MT_ */
 		luaL_getmetatable(s, FILE_MT_);
 		lua_setmetatable(s, -2);
+		#endif
 	}
 	return 1;
 }

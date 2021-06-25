@@ -1,7 +1,7 @@
 #include "mlock.h"
 #include "mem.h"
 #include "error.h"
-#ifdef BASE_HAS_MEMORYLOCKING
+#ifdef BASE_MLOCK_H /* When memorylocking is disabled, the entire header is discarded. */
 #if    defined(BASE_OS_UNIXLIKE)
 #  include <sys/types.h>
 #  include <sys/time.h>
@@ -24,6 +24,9 @@ Base_MLock Base_MLock_g;
 
 static uint64_t num_locked_bytes_ (uint64_t, uint64_t);
 
+/* Initialize a Base_MLock struct.
+ * This must be called on a Base_MLock structure before using it.
+ */
 int Base_MLock_init (Base_MLock* ml) {
 	ml->page_size = (uint64_t)Base_get_pagesize();
 #if    defined(BASE_OS_UNIXLIKE)
@@ -44,6 +47,8 @@ int Base_MLock_init (Base_MLock* ml) {
 		SIZE_T minimum, maximum;
 		if (!GetProcessWorkingSetSize(proc, &minimum, &maximum))
 			return BASE_MLOCK_ERR_GET_LIMIT;
+		/* FIXME: The win32 documentation is vague about how much memory
+		 * precisely is allowed to be locked at once. */
 		ml->limit = (uint64_t)minimum - ml->page_size;
 	}
 #else
@@ -68,7 +73,7 @@ void Base_MLock_init_handled (Base_MLock* ml) {
 	case BASE_MLOCK_ERR_GET_LIMIT:
 		Base_errx(ERR_, "Failed to get memory limit.");
 		return;
-#ifdef BASE_OS_UNIXLIKE
+#ifdef BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
 	case BASE_MLOCK_ERR_SET_LIMIT:
 		Base_errx(ERR_, "Failed to increase memory limit.");
 		return;
@@ -86,21 +91,21 @@ void Base_MLock_init_handled (Base_MLock* ml) {
 #  define LOCK_N_MTX_(ml_p) do { \
 	if (pthread_mutex_lock(&ml_p->n_mtx)) \
 		return BASE_MLOCK_ERR_MTX_OP; \
-	} while (0)
+} while (0)
 #  define UNLOCK_N_MTX_(ml_p) do { \
 	if (pthread_mutex_unlock(&ml_p->n_mtx)) \
 		return BASE_MLOCK_ERR_MTX_OP; \
-	} while (0)
+} while (0)
 #else
 #  define LOCK_N_MTX_(ml_p)		/* Nil */
 #  define UNLOCK_N_MTX_(ml_p)	/* Nil */
 #endif
 
 uint64_t num_locked_bytes_ (uint64_t n, uint64_t page_size) {
-	uint64_t locked = n / page_size;
-	if (n % page_size)
-		++locked;
-	return locked * page_size;
+	uint64_t locked = n / page_size; /* Floor division. The number of whole pages. */
+	if (n % page_size) /* If n is not evenly divisible into pages. */
+		++locked; /* We lock all pages along the covered boundaries. */
+	return locked * page_size; /* Number pages x Size of each page in bytes. */
 }
 
 int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
@@ -110,12 +115,12 @@ int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
 		UNLOCK_N_MTX_(ctx);
 		return BASE_MLOCK_ERR_OVER_MEMLIMIT;
 	}
-#if   defined(BASE_OS_UNIXLIKE)
+#if    defined(BASE_OS_UNIXLIKE)
 	if (mlock(p, n)) {
 		UNLOCK_N_MTX_(ctx);
 		return BASE_MLOCK_ERR_LOCK_OP;
 	}
-#elif defined(BASE_OS_WINDOWS)
+#elif  defined(BASE_OS_WINDOWS)
 	if (!VirtualLock((LPVOID)p, (SIZE_T)n)) {
 		UNLOCK_N_MTX_(ctx);
 		return BASE_MLOCK_ERR_LOCK_OP;
@@ -205,4 +210,4 @@ void Base_munlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, uns
 	Base_errx(ERR_, "Invalid Base_munlock_ctx return code.");
 }
 
-#endif /* ~ ifdef BASE_HAS_MEMORYLOCKING */
+#endif /* ~ ifdef BASE_MLOCK_H */

@@ -84,6 +84,13 @@ if os in _UNIXLIKE_OPERATING_SYSTEMS
     lib_deps += compiler.find_library('lua5.4')
   endif
 endif
+# MLock options
+if get_option('mlock') and os != 'openbsd'
+  lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK'
+  if get_option('mlock_threadsafe')
+	lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK_THREADSAFE'
+  endif
+endif
 
 # On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']

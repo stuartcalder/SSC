@@ -44,7 +44,7 @@
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
-#	define BASE_OPENBSD_UNVEIL(path    , permissions ) /* Nil */
+#	define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
 #endif /* ~ ifdef __OpenBSD__ */
 
 #define BASE_C_89        199409L
@@ -59,7 +59,8 @@
 /* Simplification Macros */
 
 #ifdef __cplusplus
-#	define BASE_LANG_CPP __cplusplus
+#	define BASE_LANG_CPP	__cplusplus
+#	define BASE_LANG		BASE_LANG_CPP
 /* C++ doesn't support "restrict". Use the non-standard "__restrict" compiler extension. */
 #	ifndef BASE_RESTRICT_IMPL
 #		define BASE_RESTRICT_IMPL BASE_RESTRICT_IMPL_CPP
@@ -78,10 +79,11 @@
 #	define BASE_ALIGNAS(v) alignas(v)
 #	define BASE_ALIGNOF(v) alignof(v)
 #else
+#	define BASE_LANG BASE_LANG_C
 #	define BASE_BEGIN_DECLS /* Nil */
 #	define BASE_END_DECLS   /* Nil */
 #	ifdef __STDC_VERSION__
-#		define BASE_LANG_C __STDC_VERSION__
+#		define BASE_LANG_C	__STDC_VERSION__
 		/* We need at least C99 to support the "restrict" qualifier . */
 #		if    (BASE_LANG_C >= BASE_C_99)
 #			ifndef BASE_RESTRICT_IMPL
@@ -107,7 +109,7 @@
 #			define BASE_ALIGNOF(align_of)		/* Nil */
 #		endif
 #	else
-#		define BASE_LANG_C 0L
+#		define BASE_LANG_C	0L
 #		ifndef BASE_RESTRICT_IMPL
 #			define BASE_RESTRICT_IMPL 0u
 #		endif

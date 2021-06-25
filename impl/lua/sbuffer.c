@@ -2,42 +2,47 @@
 #include "lua/sbuffer.h"
 
 typedef Base_Lua_SBuffer SBuf_t;
-#define MT_            BASE_LUA_SBUFFER_MT
-#define NEW_(s)        BASE_LUA_SBUFFER_NEW(s)
-#define CHECK_(s, idx) BASE_LUA_SBUFFER_CHECK(s, idx)
-#define TEST_(s, idx)  BASE_LUA_SBUFFER_TEST(s, idx)
-#define MFAIL_(s)      BASE_LUA_MALLOC_FAIL(s)
-#define SFAIL_(s, n)   BASE_LUA_STACK_FAIL(s, n)
-
-#ifdef BASE_HAS_MEMORYLOCKING
-static size_t os_page_size = 0;
-#endif
+#define KEY_			BASE_LUA_SBUFFER_KEY
+#define NEW_(s)			BASE_LUA_SBUFFER_NEW(s)
+#define CHECK_(s, idx)	BASE_LUA_SBUFFER_CHECK(s, idx)
+#define TEST_(s, idx)	BASE_LUA_SBUFFER_TEST(s, idx)
+#define MALLOC_FAIL_(s)	BASE_LUA_MALLOC_FAIL(s)
 
 static int new_sbuffer (lua_State* s) {
+	/* @n:		The size of the new SBuffer.		*
+	 * @lock:	Whether to memorylock the buffer.	*
+	 * @sb:		Newly created SBuffer.				*/
 	const size_t n = (size_t)luaL_checkunsigned(s, 1);
 #ifdef BASE_HAS_MEMORYLOCKING
 	const bool lock = lua_isboolean(s, 2) ? lua_toboolean(s, 2) : false;
 #endif
-	lua_settop(s, 0);
 	SBuf_t* sb = NEW_(s);
 	sb->n = n;
 	sb->f = BASE_LUA_SBUFFER_ISVALID;
 #ifdef BASE_HAS_MEMORYLOCKING
 	if (lock) {
+	#if 1
+	/*TODO*/
+	#else
 		if (!(sb->p = (uint8_t*)Base_aligned_malloc(os_page_size, sb->n)))
 			return luaL_error(s, "Base_aligned_malloc failed.");
 		if (Base_mlock(sb->p, sb->n))
 			return luaL_error(s, "Base_mlock failed.");
 		sb->f |= BASE_LUA_SBUFFER_MLOCK;
+	#endif
 	} else {
 		if (!(sb->p = (uint8_t*)malloc(sb->n)))
-			return MFAIL_(s);
+			return MALLOC_FAIL_(s);
 	}
 #else
 	if (!(sb->p = (uint8_t*)malloc(sb->n)))
-		return MFAIL_(s);
+		return MALLOC_FAIL_(s);
 #endif
+	#if 1
+	/*TODO*/
+	#else
 	luaL_getmetatable(s, MT_);
+	#endif
 	lua_setmetatable(s, -2);
 	return 1;
 }
@@ -64,7 +69,6 @@ static int del_sbuffer (lua_State* s) {
 
 static int get_sbuffer (lua_State* s) {
 	SBuf_t* sb = CHECK_(s, 1);
-	SFAIL_(s, 2);
 	if (sb->f & BASE_LUA_SBUFFER_ISVALID) {
 		lua_pushlightuserdata(s, sb->p);
 		lua_pushunsigned(s, (lua_Unsigned)sb->n);
@@ -76,7 +80,6 @@ static int get_sbuffer (lua_State* s) {
 }
 
 static int has_mlock (lua_State* s) {
-	SFAIL_(s, 1);
 #ifdef BASE_HAS_MEMORYLOCKING
 	lua_pushboolean(s, true);
 #else
@@ -85,21 +88,33 @@ static int has_mlock (lua_State* s) {
 	return 1;
 }
 
-static const luaL_Reg sbuffer[] = {
-	{"new"      , &new_sbuffer},
-	{"del"      , &del_sbuffer},
-	{"get"      , &get_sbuffer},
-	{"has_mlock", &has_mlock},
-	{NULL, NULL}
+static int is_mlocked (lua_State* s) {
+#ifdef BASE_HAS_MEMORYLOCKING
+	SBuf_t* sb = CHECK_(s, 1);
+	lua_pushboolean(s, (sb->f & BASE_LUA_SBUFFER_ISVALID) &&
+					   (sb->f & BASE_LUA_SBUFFER_MLOCK));
+#else
+	lua_pushboolean(s, false);
+#endif
+	return 1;
 }
 
+static const luaL_Reg sbuffer[] = {
+	{"new"       , &new_sbuffer},
+	{"del"       , &del_sbuffer},
+	{"get"       , &get_sbuffer},
+	{"has_mlock" , &has_mlock},
+	{"is_mlocked", &is_mlocked},
+	{"__gc"      , &del_sbuffer},
+	{NULL		 , NULL}
+};
+
 int luaopen_Base_SBuffer (lua_State *s) {
-#ifdef BASE_HAS_MEMORYLOCKING
-	if (!os_page_size)
-		os_page_size = Base_get_pagesize();
-#endif
-	SFAIL_(s, 2);
+	#if 1
+	/*TODO*/
+	#else
 	luaL_newmetatable(s, MT_);
+	#endif
 	lua_pushcfunction(s, &del_sbuffer);
 	lua_setfield(s, -2, "__gc");
 	luaL_newlib(s, sbuffer);
