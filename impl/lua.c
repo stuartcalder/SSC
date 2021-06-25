@@ -5,10 +5,10 @@
 #define NUM_MODULES_ 2
 
 #define LOAD_MODULE_(s, module) do { \
-		lua_pushcfunction(s, &luaopen_Base_##module); \
-		if (lua_pcall(s, 0, 1, 0) != LUA_OK) \
-			return luaL_error(s, "Failed to load " BASE_STRINGIFY(module) "."); \
-	} while (0)
+	lua_pushcfunction(s, &luaopen_Base_##module); \
+	if (lua_pcall(s, 0, 1, 0) != LUA_OK) \
+		return luaL_error(s, "Failed to load " BASE_STRINGIFY(module) "."); \
+} while (0)
 
 int luaopen_Base (lua_State *s) {
 	lua_createtable(s, 0, NUM_MODULES_);

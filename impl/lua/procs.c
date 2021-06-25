@@ -1,145 +1,123 @@
-#include "macros.h"
-#include "files.h"
 #include "lua/macros.h"
 #include "lua/procs.h"
 
-#define MFAIL_(s)           BASE_LUA_MALLOC_FAIL(s)
+#define MFAIL_(L)           BASE_LUA_MALLOC_FAIL(L)
 #define FILE_MT_            BASE_LUA_FILE_MT
-#define FILE_KEY_			BASE_LAU_FILE_KEY
-#define FILE_NEW_(s)        BASE_LUA_FILE_NEW(s)
-#define FILE_CHECK_(s, idx) BASE_LUA_FILE_CHECK(s, idx)
+#define FILE_NEW_(L)        BASE_LUA_FILE_NEW(L)
+#define FILE_CHECK_(L, idx) BASE_LUA_FILE_CHECK(L, idx)
+#define FILE_TEST_(L, idx)	BASE_LUA_FILE_TEST(L, idx)
 
-typedef Base_Lua_File LFile_t;
-/*
- * File procedures.
- */
-static int open_filepath (lua_State* s) {
-	const char* fpath = luaL_checkstring(s, 1);
-	const bool ronly = lua_isboolean(s, 2) ? lua_toboolean(s, 2) : true;
-	LFile_t* lf = FILE_NEW_(s);
-	if (Base_open_filepath(fpath, ronly, &lf->f)) {
-		lf->valid = 0;
-		lua_pushnil(s);
+typedef Base_Lua_File F_t;
+
+static int open_fpath (lua_State* L) {
+	const char* fpath = luaL_checkstring(L, 1);
+	const bool  ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true;
+	F_t* f = FILE_NEW_(L);
+	if (Base_open_filepath(fpath, ronly, &f ->f)) {
+		f ->valid = 0;
+		lua_pushnil(L);
 	} else {
-		lf->valid = 1;
-		#if 1 /* The table will be its own metatable. */
-		lua_pushvalue(s, -1);
-		lua_setmetatable(s, -2);
-		#else /* The metatable will be set to a registry constant FILE_MT_ */
-		luaL_getmetatable(s, FILE_MT_);
-		lua_setmetatable(s, -2);
-		#endif
+		f ->valid = 1;
+		luaL_getmetatable(L, FILE_MT_);
+		lua_setmetatable(L, -2);
 	}
 	return 1;
 }
 
-static int create_filepath (lua_State* s) {
-	const char* fpath = luaL_checkstring(s, 1);
-	LFile_t* file = FILE_NEW_(s);
-	if (Base_create_filepath(fpath, &(file->f))) {
-		file->valid = 0;
-		lua_pushnil(s);
+static int create_fpath (lua_State* L) {
+	const char* fpath = luaL_checkstring(L, 1);
+	F_t* f = FILE_NEW_(L);
+	if (Base_create_filepath(fpath, &f->f)) {
+		f->valid = 0;
+		lua_pushnil(L);
 	} else {
-		file->valid = 1;
-		luaL_getmetatable(s, FILE_MT_);
-		lua_setmetatable(s, -2);
+		f->valid = 1;
+		luaL_getmetatable(L, FILE_MT_);
+		lua_setmetatable(L, -2);
 	}
 	return 1;
 }
 
-static int get_filepath_size (lua_State* s) {
-	const char* fpath = luaL_checkstring(s, 1);
+static int get_fpath_size (lua_State* L) {
+	const char* fpath = luaL_checkstring(L, 1);
 	size_t sz;
 	if (Base_get_filepath_size(fpath, &sz))
-		lua_pushnil(s);
+		lua_pushnil(L);
 	else
-		lua_pushunsigned(s, (lua_Unsigned)sz);
+		lua_pushunsigned(L, (lua_Unsigned)sz);
 	return 1;
 }
 
-static int get_file_size (lua_State* s) {
-	LFile_t* file = FILE_CHECK_(s, 1);
+static int get_file_size (lua_State* L) {
+	F_t* f = FILE_CHECK_(L, 1);
 	size_t sz;
-	if (!file->valid || Base_get_file_size(&file->f, &sz))
-		lua_pushnil(s);
+	if (!f->valid || Base_get_file_size(f->f, &sz))
+		lua_pushnil(L);
 	else
-		lua_pushunsigned(s, (lua_Unsigned)sz);
+		lua_pushunsigned(L, (lua_Unsigned)sz);
 	return 1;
 }
 
-static int close_file (lua_State* s) {
-	LFile_t* file = FILE_CHECK_(s, 1);
-	if (!file->valid || Base_close_file(&file->f))
-		lua_pushnil(s);
+static int close_file (lua_State* L) {
+	F_t* f = FILE_CHECK_(L, 1);
+	if (!f->valid || Base_close_file(f->f))
+		lua_pushnil(L);
 	else {
-		file->valid = 0;
-		lua_pushinteger(s, 1);
+		f->valid = 0;
+		f->f = BASE_NULL_FILE;
+		lua_pushinteger(L, 1);
 	}
 	return 1;
 }
 
-static int filepath_exists (lua_State* s) {
-	const char* fpath  = luaL_checkstring(s, 1);
-	lua_pushboolean(s, Base_filepath_exists(fpath));
+static int fpath_exists (lua_State* L) {
+	const char* fpath = luaL_checkstring(L, 1);
+	lua_pushboolean(L, Base_filepath_exists(fpath));
 	return 1;
 }
 
-static int file_is_open (lua_State* s) {
-	LFile_t* file = FILE_CHECK_(s, 1);
-	lua_pushboolean(s, file->valid && file->f != BASE_NULL_FILE);
+static int file_is_open (lua_State* L) {
+	F_t* f = FILE_CHECK_(L, 1);
+	lua_pushboolean(L, f->valid && (f->f != BASE_NULL_FILE));
 	return 1;
 }
 
-#define UDATA_FAIL_(s, idx, f) luaL_error(s, "%s: Invalid pointer for arg %d", f, idx)
-
-/*
- * C std library.
- */
-static int base_memcpy (lua_State* s) {
-	void*   dest;
-	void*   src;
-	size_t  n;
-	if (!(dest = lua_touserdata(s, 1)))
-		return UDATA_FAIL_(s, 1, "memcpy");
-	if (!(src = lua_touserdata(s, 2)))
-		return UDATA_FAIL_(s, 2, "memcpy");
-	n = (size_t)luaL_checkunsigned(s, 3);
-	memcpy(dest, src, n);
-	return 0;
+static int fpath_del (lua_State* L) {
+	const char* fpath = luaL_checkstring(L, 1);
+	if (!Base_filepath_exists(fpath) || remove(fpath))
+		lua_pushnil(L);
+	else
+		lua_pushnumber(L, 1);
+	return 1;
 }
 
-static int base_memset (lua_State* s) {
-	void*  p;
-	int    b;
-	size_t n;
-	if (!(p = lua_touserdata(s, 1)))
-		return UDATA_FAIL_(s, 1, "memset");
-	b = (int)(luaL_checkunsigned(s, 2) & 0xff);
-	n = (size_t)luaL_checkunsigned(s, 3);
-	memset(p, b, n);
-	return 0;
+static const luaL_Reg file_mt[] = {
+	{"size"   , &get_file_size},
+	{"close"  , &close_file},
+	{"__close", &close_file},
+	{"__gc"   , &close_file},
+	{"is_open", &file_is_open},
+	{NULL, NULL}
 }
 
-static const luaL_Reg procs[] = {
-/* File procedures. */
-	{"open_filepath"    , &open_filepath},
-	{"create_filepath"  , &create_filepath},
-	{"get_filepath_size", &get_filepath_size},
-	{"get_file_size"    , &get_file_size},
-	{"set_file_size"    , &set_file_size},
-	{"close_file"       , &close_file},
-	{"filepath_exists"  , &filepath_exists},
-	{"file_is_open"     , &file_is_open},
-/* C std library. */
-	{"memcpy"           , &base_memcpy},
-	{"memset"           , &base_memset},
+static const luaL_Reg procedures[] = {
+	{"fpath_open"  , &open_fpath},
+	{"fpath_create", &create_fpath},
+	{"fpath_size"  , &get_fpath_size},
+	{"fpath_exists", &fpath_exists},
+	{"fpath_del"   , &fpath_del},
 	{NULL, NULL}
 };
 
-int luaopen_Base_Procs (lua_State* s) {
-	luaL_newmetatable(s, FILE_MT_);
-	lua_pushcfunction(s, &close_file);
-	lua_setfield(s, -2, "__gc");
-	luaL_newlib(s, procs);
+int luaopen_Base_Procs (lua_State* L) {
+	/* Create file metatable. */
+	luaL_newmetatable(L, FILE_MT_);
+	/* Populate it with metamethods. */
+	luaL_setfuncs(L, file_mt, 0);
+	/* File metatable's __index points to itself. */
+	lua_pushvalue(L, -1);
+	lua_setfield(L, -2, "__index");
+	/* Create a table for our free procedures. */
+	luaL_newlib(L, procedures);
 	return 1;
 }
