@@ -1,7 +1,7 @@
 #if !defined(BASE_LUA_H) && defined(BASE_EXTERN_LUA)
 #define BASE_LUA_H
 
-#include "macros.h"
+#include <Base/macros.h>
 #include "lua/macros.h"
 
 BASE_BEGIN_DECLS

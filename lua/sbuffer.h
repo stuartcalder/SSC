@@ -2,11 +2,11 @@
 #define BASE_LUA_SBUFFER_H
 
 #include <stdbool.h>
-#include "errors.h"
-#include "macros.h"
-#include "mlock.h"
-#include "operations.h"
-#include "lua/macros.h"
+#include <Base/errors.h>
+#include <Base/macros.h>
+#include <Base/mlock.h>
+#include <Base/operations.h>
+#include <Base/lua/macros.h>
 
 /* Base_Lua_SBuffer convenience macros. */
 #define BASE_LUA_SBUFFER_KEY			"Base.SBuffer" /*FIXME: Deprecated. */
@@ -22,10 +22,14 @@
 #define BASE_LUA_SBUFFER_UNLOCK     (~BASE_LUA_SBUFFER_MLOCK)
 
 typedef struct {
-	uint8_t* p; /* Points to data. */
+	uint8_t* p; /* Data. */
 	size_t   n; /* Number of bytes of data. */
-	uint8_t  f; /* Flags. */
+#ifdef BASE_MLOCK_H
+	uint8_t  lck; /* Boolean: Is the pointer memory locked? */
+#endif
 } Base_Lua_SBuffer;
+
+#define BASE_LUA_SBUFFER_NULL_LITERAL (Base_Lua_SBuffer){NULL, 0, 0}
 
 BASE_BEGIN_DECLS
 BASE_API int luaopen_Base_SBuffer (lua_State *s);

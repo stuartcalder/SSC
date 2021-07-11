@@ -8,11 +8,11 @@
 #  include <stdlib.h>
 /* Base_aligned_malloc */
 #  define BASE_ALIGNED_MALLOC_IMPL(alignment, size) { \
-       void* p; \
-       if (posix_memalign(&p, alignment, size)) \
-           return NULL; \
-       return p; \
-   }
+	void* p; \
+	if (posix_memalign(&p, alignment, size)) \
+		return NULL; \
+	return p; \
+}
 /* Base_aligned_free */
 #  define BASE_ALIGNED_FREE_IMPL(ptr) { free(ptr); }
 /* Base_get_pagesize */
@@ -29,11 +29,10 @@
 #  define BASE_ALIGNED_FREE_IMPL(ptr) { _aligned_free(ptr); }
 /* Base_get_pagesize */
 #  define BASE_GET_PAGESIZE_IMPL { \
-       SYSTEM_INFO si; \
-       GetSystemInfo(&si); \
-       return (size_t)si.dwPageSize; \
-   }
-
+	SYSTEM_INFO si; \
+	GetSystemInfo(&si); \
+	return (size_t)si.dwPageSize; \
+}
 #else
 #  error "Unsupported."
 #endif

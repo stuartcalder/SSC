@@ -1,28 +1,28 @@
 project('Base', 'c', default_options: ['c_std=c17', 'optimization=3', 'buildtype=release', 'strip=true'])
 # Project / Language
-_PROJECT  = 'Base'
-_LANG = 'c'
+PROJECT  = 'Base'
+LANG = 'c'
 # Operating Systems & Compilers
-_UNIXLIKE_OPERATING_SYSTEMS  = ['openbsd', 'freebsd', 'netbsd', 'darwin', 'linux']
-_SUPPORTED_OPERATING_SYSTEMS = _UNIXLIKE_OPERATING_SYSTEMS + ['windows']
-_GCC_COMPATIBLE_COMPILERS    = ['gcc', 'clang']
-_SUPPORTED_COMPILERS         = _GCC_COMPATIBLE_COMPILERS + ['msvc']
-_GCC_COMPATIBLE_FLAGS = [
+UNIXLIKE_OPERATING_SYSTEMS  = ['openbsd', 'freebsd', 'netbsd', 'darwin', 'linux']
+SUPPORTED_OPERATING_SYSTEMS = UNIXLIKE_OPERATING_SYSTEMS + ['windows']
+GCC_COMPATIBLE_COMPILERS		= ['gcc', 'clang']
+SUPPORTED_COMPILERS			= GCC_COMPATIBLE_COMPILERS + ['msvc']
+GCC_COMPATIBLE_FLAGS = [
   '-fvisibility=hidden',
   '-fstrict-aliasing',
   '-Wall',
   '-funroll-loops'
 ]
-compiler = meson.get_compiler(_LANG)
+compiler = meson.get_compiler(LANG)
 os = host_machine.system()
 static = get_option('static')
 if os != 'netbsd' and compiler.get_id() != 'clang'
-  _GCC_COMPATIBLE_FLAGS += '-flto'
+  GCC_COMPATIBLE_FLAGS += '-flto'
 endif
-assert(os in _SUPPORTED_OPERATING_SYSTEMS,
-  'You are trying to build ' + _PROJECT + ' using an unsupported operating system!')
-assert(compiler.get_id() in _SUPPORTED_COMPILERS,
-  'You are trying to build ' + _PROJECT + ' using an unsupported compiler!')
+assert(os in SUPPORTED_OPERATING_SYSTEMS,
+  'You are trying to build ' + PROJECT + ' using an unsupported operating system!')
+assert(compiler.get_id() in SUPPORTED_COMPILERS,
+  'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
 	_D_PREFIX = '/D'
@@ -64,26 +64,6 @@ endif
 if os == 'darwin'
   lang_flags += _D_PREFIX + '__STDC_WANT_LIB_EXT1__=1'
 endif
-# Unixlike options
-if os in _UNIXLIKE_OPERATING_SYSTEMS
-  if compiler.get_id() in _GCC_COMPATIBLE_COMPILERS # GCC, Clang
-    if get_option('native_optimize') # -march=native
-      lang_flags += '-march=native'
-    endif
-    lang_flags += _GCC_COMPATIBLE_FLAGS
-  endif
-  if get_option('lua') # Lua support
-    lang_flags += _D_PREFIX + 'BASE_EXTERN_LUA'
-	src += [
-	  'impl/lua.c',		  # luaopen_Base
-	  'impl/lua/mmap.c',  # luaopen_Base_MMap
-	  'impl/lua/procs.c', # luaopen_Base_Procs
-	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
-	]
-    src += 'impl/lua.c'
-    lib_deps += compiler.find_library('lua5.4')
-  endif
-endif
 # MLock options
 if get_option('mlock') and os != 'openbsd'
   lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK'
@@ -91,7 +71,25 @@ if get_option('mlock') and os != 'openbsd'
 	lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK_THREADSAFE'
   endif
 endif
-
+# Unixlike options
+if os in UNIXLIKE_OPERATING_SYSTEMS
+  if compiler.get_id() in GCC_COMPATIBLE_COMPILERS # GCC, Clang
+    if get_option('native_optimize') # -march=native
+      lang_flags += '-march=native'
+    endif
+    lang_flags += GCC_COMPATIBLE_FLAGS
+  endif
+  if get_option('lua') # Lua support
+    lang_flags += _D_PREFIX + 'BASE_EXTERN_LUA'
+	src += [
+	  'impl/lua/lua.c',	  # luaopen_Base
+	  'impl/lua/mmap.c',  # luaopen_Base_MMap
+	  'impl/lua/procs.c', # luaopen_Base_Procs
+	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
+	]
+    lib_deps += compiler.find_library('lua5.4')
+  endif
+endif
 # On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']
   include_install = '/usr/local/include'

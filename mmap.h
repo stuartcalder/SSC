@@ -28,7 +28,14 @@ typedef struct {
 #ifdef BASE_OS_WINDOWS
 	Base_File_t win_fmapping;
 #endif /* ~ ifdef BASE_OS_WINDOWS */
+	uint8_t     readonly;
 } Base_MMap;
+
+#ifdef BASE_OS_WINDOWS
+#	define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0}
+#else
+#	define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, 0}
+#endif
 
 BASE_BEGIN_DECLS
 BASE_API    int  Base_MMap_map (Base_MMap*, bool);

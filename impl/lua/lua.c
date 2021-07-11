@@ -1,9 +1,15 @@
-#include "lua.h"
-#include "lua/procs.h"		/* Mod 1 */
-#include "lua/sbuffer.h"	/* Mod 2 */
-#include "lua/mmap.h"		/* Mod 3 */
+/* Copyright 2021 Stuart Calder */
+#include <Base/macros.h>
+#include <Base/lua/lua.h>
+#include <Base/lua/macros.h>
+#include <Base/lua/procs.h>   /* Module 1 */
+#include <Base/lua/sbuffer.h> /* Module 2 */
+#include <Base/lua/mmap.h>    /* Module 3 */
 #define NUM_MODULES_ 3
 
+/* We load in the other modules of the table we
+ * created on the stack.
+ */
 #define LOAD_MODULE_(L, module) do { \
 	lua_pushcfunction(L, &luaopen_Base_##module); \
 	if (lua_pcall(L, 0, 1, 0) != LUA_OK) \
