@@ -97,7 +97,7 @@ void Base_MLock_init_handled (Base_MLock* ml) {
 		return BASE_MLOCK_ERR_MTX_OP; \
 } while (0)
 #else
-#  define LOCK_N_MTX_(ml_p)		/* Nil */
+#  define LOCK_N_MTX_(ml_p)	/* Nil */
 #  define UNLOCK_N_MTX_(ml_p)	/* Nil */
 #endif
 

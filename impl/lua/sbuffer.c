@@ -4,11 +4,11 @@
 #include <Base/lua/sbuffer.h>
 
 typedef Base_Lua_SBuffer SBuf_t;
-#define MT_				BASE_LUA_SBUFFER_MT
-#define NEW_(s)			BASE_LUA_SBUFFER_NEW(s)
-#define CHECK_(s, idx)	BASE_LUA_SBUFFER_CHECK(s, idx)
-#define TEST_(s, idx)	BASE_LUA_SBUFFER_TEST(s, idx)
-#define MALLOC_FAIL_(s)	BASE_LUA_MALLOC_FAIL(s)
+#define MT_			BASE_LUA_SBUFFER_MT
+#define NEW_(L)			BASE_LUA_SBUFFER_NEW(L)
+#define CHECK_(L, idx)		BASE_LUA_SBUFFER_CHECK(L, idx)
+#define TEST_(L, idx)		BASE_LUA_SBUFFER_TEST(L, idx)
+#define MALLOC_FAIL_(L)		BASE_LUA_MALLOC_FAIL(L)
 
 static int new_sbuffer (lua_State* L) {
 	/* @n:		The size of the new SBuffer.	*
@@ -106,13 +106,13 @@ static const luaL_Reg sbuffer_methods[] = {
 	{"is_mlocked", &is_mlocked},
 	{"__gc"      , &del_sbuffer},
 	{"__close"   , &del_sbuffer},
-	{NULL		 , NULL}
+	{NULL        , NULL}
 };
 
 static const luaL_Reg free_procs[] = {
 	{"new"      , &new_sbuffer},
 	{"has_mlock", &has_mlock},
-	{NULL, NULL}
+	{NULL       , NULL}
 };
 
 int luaopen_Base_SBuffer (lua_State *L) {
@@ -130,9 +130,10 @@ int luaopen_Base_SBuffer (lua_State *L) {
 #	endif
 	}
 #endif
-	luaL_newmetatable(L, MT_);
-	luaL_setfuncs(L, sbuffer_methods, 0);
-	BASE_LUA_MT_SELF_INDEX(L);
+	if (luaL_newmetatable(L, MT_)) {
+		luaL_setfuncs(L, sbuffer_methods, 0);
+		BASE_LUA_MT_SELF_INDEX(L);
+	}
 	luaL_newlib(L, free_procs);
 	return 1;
 }

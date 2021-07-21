@@ -44,7 +44,9 @@
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
+#	define BASE_OPENBSD_PLEDGE_IS_NIL
 #	define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
+#	define BASE_OPENBSD_UNVEIL_IS_NIL
 #endif /* ~ ifdef __OpenBSD__ */
 
 #define BASE_C_89        199409L
@@ -59,7 +61,7 @@
 /* Simplification Macros */
 
 #ifdef __cplusplus
-#	define BASE_LANG_CPP	__cplusplus
+#	define BASE_LANG_CPP		__cplusplus
 #	define BASE_LANG		BASE_LANG_CPP
 /* C++ doesn't support "restrict". Use the non-standard "__restrict" compiler extension. */
 #	ifndef BASE_RESTRICT_IMPL
@@ -81,7 +83,9 @@
 #else
 #	define BASE_LANG BASE_LANG_C
 #	define BASE_BEGIN_DECLS /* Nil */
+#	define BASE_BEGIN_DECLS_IS_NIL
 #	define BASE_END_DECLS   /* Nil */
+#	define BASE_END_DECLS_IS_NIL
 #	ifdef __STDC_VERSION__
 #		define BASE_LANG_C	__STDC_VERSION__
 		/* We need at least C99 to support the "restrict" qualifier . */
@@ -123,13 +127,12 @@
 #	error "BASE_RESTRICT_IMPL undefined!"
 #endif
 #if    (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP)
-#	define BASE_HAS_RESTRICT
 #	define BASE_RESTRICT __restrict
 #elif  (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
-#	define BASE_HAS_RESTRICT
 #	define BASE_RESTRICT restrict
 #else
 #	define BASE_RESTRICT /* Nil */
+#	define BASE_RESTRICT_IS_NIL
 #endif
 
 /* Symbol Visibility, Export/Import Macros */
@@ -139,7 +142,9 @@
 #		define BASE_IMPORT BASE_EXPORT
 #	else
 #		define BASE_EXPORT /* Nil */
+#		define BASE_EXPORT_IS_NIL
 #		define BASE_IMPORT /* Nil */
+#		define BASE_IMPORT_IS_NIL
 #	endif /* ~ if defined (__GNUC__) and (__GNUC__ >= 4) */
 #elif  defined(BASE_OS_WINDOWS) || defined(__CYGWIN__)
 #	ifdef __GNUC__
@@ -153,17 +158,26 @@
 #	error "Unsupported operating system."
 #endif
 
-#define BASE_INLINE static inline
+#define BASE_INLINE		static inline
 #define BASE_STRINGIFY_IMPL(s)  #s
 #define BASE_STRINGIFY(s)	BASE_STRINGIFY_IMPL(s)
 
 #ifdef BASE_EXTERN_STATIC_LIB
 #	define BASE_API /* Nil */
+#	define BSAE_API_IS_NIL
 #else
 #	ifdef BASE_EXTERN_BUILD_DYNAMIC_LIB
 #		define BASE_API BASE_EXPORT
+#		define BASE_API_IS_EXPORT
+#		ifdef BASE_EXPORT_IS_NIL
+#			define BASE_API_IS_NIL
+#		endif
 #	else /* Assume that Base is being imported as a dynamic library. */
 #		define BASE_API BASE_IMPORT
+#		define BASE_API_IS_IMPORT
+#		ifdef BASE_IMPORT_IS_NIL
+#			define BASE_API_IS_NIL
+#		endif
 #	endif /* ~ ifdef BASE_EXTERN_BUILD_DYNAMIC_LIB */
 #endif /* ~ ifdef BASE_EXTERN_STATIC_LIB */
 
