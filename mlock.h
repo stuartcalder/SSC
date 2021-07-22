@@ -1,6 +1,7 @@
 #if !defined(BASE_MLOCK_H) && defined(BASE_EXTERN_MLOCK)
 #define BASE_MLOCK_H
 #define BASE_HAS_MEMORYLOCKING /* TODO: Remove references to this macro, as it is now only here for compatability. */
+
 #ifdef BASE_EXTERN_MLOCK_THREADSAFE
 #  include <pthread.h>
 #endif

@@ -25,9 +25,9 @@ assert(compiler.get_id() in SUPPORTED_COMPILERS,
   'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
-	_D_PREFIX = '/D'
+	_D = '/D'
 else
-	_D_PREFIX = '-D'
+	_D = '-D'
 endif
 # Source Code Files
 src =  [
@@ -49,26 +49,26 @@ lang_flags   = []
 include_dirs = []
 # Debug Build?
 if not get_option('debug_build')
-  lang_flags += _D_PREFIX + 'NDEBUG'
+  lang_flags += _D + 'NDEBUG'
 else
-  lang_flags += _D_PREFIX + 'BASE_EXTERN_DEBUG'
-  lang_flags += _D_PREFIX + 'YDEBUG'
+  lang_flags += _D + 'BASE_EXTERN_DEBUG'
+  lang_flags += _D + 'YDEBUG'
 endif
 # We're building Base
 if static
-  lang_flags += _D_PREFIX + 'BASE_EXTERN_STATIC_LIB'
+  lang_flags += _D + 'BASE_EXTERN_STATIC_LIB'
 else
-  lang_flags += _D_PREFIX + 'BASE_EXTERN_BUILD_DYNAMIC_LIB'
+  lang_flags += _D + 'BASE_EXTERN_BUILD_DYNAMIC_LIB'
 endif
 # MacOS Requires __STDC_WANT_LIB_EXT1__ == 1
 if os == 'darwin'
-  lang_flags += _D_PREFIX + '__STDC_WANT_LIB_EXT1__=1'
+  lang_flags += _D + '__STDC_WANT_LIB_EXT1__=1'
 endif
 # MLock options
 if get_option('mlock') and os != 'openbsd'
-  lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK'
+  lang_flags += _D + 'BASE_EXTERN_MLOCK'
   if get_option('mlock_threadsafe')
-	lang_flags += _D_PREFIX + 'BASE_EXTERN_MLOCK_THREADSAFE'
+	lang_flags += _D + 'BASE_EXTERN_MLOCK_THREADSAFE'
   endif
 endif
 # Unixlike options
@@ -80,7 +80,7 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
     lang_flags += GCC_COMPATIBLE_FLAGS
   endif
   if get_option('lua') # Lua support
-    lang_flags += _D_PREFIX + 'BASE_EXTERN_LUA'
+    lang_flags += _D + 'BASE_EXTERN_LUA'
 	src += [
 	  'impl/lua/lua.c',	  # luaopen_Base
 	  'impl/lua/mmap.c',  # luaopen_Base_MMap

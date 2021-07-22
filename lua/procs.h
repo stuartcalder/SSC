@@ -1,10 +1,11 @@
 #if !defined(BASE_LUA_PROCS_H) && defined(BASE_EXTERN_LUA)
 #define BASE_LUA_PROCS_H
 
-#include <Base/macros.h>
 #include <Base/errors.h>
 #include <Base/files.h>
+#include <Base/macros.h>
 #include <Base/operations.h>
+
 #include <Base/lua/macros.h>
 
 /* Base_Lua_File convenience macros. */

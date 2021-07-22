@@ -5,6 +5,7 @@
 #include <Base/macros.h>
 #include <Base/mlock.h>
 #include <Base/operations.h>
+
 #include <Base/lua/macros.h>
 
 /* Base_Lua_SBuffer convenience macros. */
@@ -13,18 +14,15 @@
 #define BASE_LUA_SBUFFER_NEW(L)		BASE_LUA_NEW_UD(L, Base_Lua_SBuffer)
 #define BASE_LUA_SBUFFER_CHECK(L, idx)	BASE_LUA_CHECK_UD(L, idx, Base_Lua_SBuffer, BASE_LUA_SBUFFER_MT)
 #define BASE_LUA_SBUFFER_TEST(L, idx)	BASE_LUA_TEST_UD(L, idx, Base_Lua_SBuffer, BASE_LUA_SBUFFER_MT)
-/* Flags */
-#define BASE_LUA_SBUFFER_ISVALID    UINT8_C(0x01)
-#define BASE_LUA_SBUFFER_MLOCK      UINT8_C(0x02)
-/* Masks */
-#define BASE_LUA_SBUFFER_INVALIDATE (~BASE_LUA_SBUFFER_ISVALID)
-#define BASE_LUA_SBUFFER_UNLOCK     (~BASE_LUA_SBUFFER_MLOCK)
+
+#define BASE_LUA_SBUFFER_MEM_IS_ALIGNED UINT8_C(0x01)
+#define BASE_LUA_SBUFFER_MEM_IS_LOCKED	UINT8_C(0x02)
 
 typedef struct {
 	uint8_t* p; /* Data. */
 	size_t   n; /* Number of bytes of data. */
 #ifdef BASE_MLOCK_H
-	uint8_t  lck; /* Boolean: Is the pointer memory locked? */
+	uint8_t  f; /* Flags. */
 #endif
 } Base_Lua_SBuffer;
 

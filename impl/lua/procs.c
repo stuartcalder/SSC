@@ -1,25 +1,27 @@
 /* Copyright 2021 Stuart Calder */
+#include <stdbool.h>
+#include <Base/print.h>
 #include <Base/lua/lua.h>
 #include <Base/lua/macros.h>
 #include <Base/lua/procs.h>
 
-#define FILE_MT_		BASE_LUA_FILE_KEY
-#define FILE_NEW_(L)		BASE_LUA_FILE_NEW(L)
-#define FILE_CHECK_(L, idx)	BASE_LUA_FILE_CHECK(L, idx)
-#define FILE_TEST_(L, idx)	BASE_LUA_FILE_TEST(L, idx)
-#define FILE_NULL_		BASE_LUA_FILE_NULL_LITERAL
+#define MT_		BASE_LUA_FILE_MT
+#define NEW_(L)		BASE_LUA_FILE_NEW(L)
+#define CHECK_(L, idx)	BASE_LUA_FILE_CHECK(L, idx)
+#define TEST_(L, idx)	BASE_LUA_FILE_TEST(L, idx)
+#define NULL_		BASE_LUA_FILE_NULL_LITERAL
 
-#define MFAIL_(L)		BASE_LUA_MALLOC_FAIL(L)
+#define MFAIL_(L)	BASE_LUA_MALLOC_FAIL(L)
 
-typedef Base_Lua_File F_t;
+typedef Base_Lua_File File_t;
 
 static int fpath_open (lua_State* L) {
-	const char* fpath = luaL_checkstring(L, 1);
-	const size_t fpath_n = strlen(fpath);
+	size_t fpath_n;
+	const char* const fpath = luaL_checklstring(L, 1, &fpath_n);
 	const bool ronly = (bool)(lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true);
-	F_t* f = FILE_NEW_(L);
+	File_t* f = NEW_(L);
 	if (Base_open_filepath(fpath, ronly, &f->file)) {
-		*f = FILE_NULL_;
+		*f = NULL_;
 		lua_pushnil(L);
 	} else {
 		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
@@ -27,7 +29,7 @@ static int fpath_open (lua_State* L) {
 		memcpy(f->fpath, fpath, fpath_n + 1);
 		f->fpath_n = fpath_n;
 		f->readonly = (uint8_t)ronly;
-		luaL_getmetatable(L, FILE_MT_);
+		luaL_getmetatable(L, MT_);
 		lua_setmetatable(L, -2);
 	}
 	return 1;
@@ -36,9 +38,9 @@ static int fpath_open (lua_State* L) {
 static int fpath_create (lua_State* L) {
 	const char* fpath = luaL_checkstring(L, 1);
 	const size_t fpath_n = strlen(fpath);
-	F_t* f = FILE_NEW_(L);
+	File_t* f = NEW_(L);
 	if (Base_create_filepath(fpath, &f->file)) {
-		*f = FILE_NULL_;
+		*f = NULL_;
 		lua_pushnil(L);
 	} else {
 		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
@@ -46,7 +48,7 @@ static int fpath_create (lua_State* L) {
 		memcpy(f->fpath, fpath, fpath_n + 1);
 		f->fpath_n = fpath_n;
 		f->readonly = UINT8_C(0);
-		luaL_getmetatable(L, FILE_MT_);
+		luaL_getmetatable(L, MT_);
 		lua_setmetatable(L, -2);
 	}
 	return 1;
@@ -63,7 +65,7 @@ static int fpath_size (lua_State* L) {
 }
 
 static int get_file_size (lua_State* L) {
-	F_t* f = FILE_CHECK_(L, 1);
+	File_t* f = CHECK_(L, 1);
 	size_t sz;
 	if (f->file == BASE_NULL_FILE || Base_get_file_size(f->file, &sz))
 		lua_pushnil(L);
@@ -73,17 +75,22 @@ static int get_file_size (lua_State* L) {
 }
 
 static int close_file (lua_State* L) {
-	int err = 0;
-	F_t* f = FILE_CHECK_(L, 1);
-	if (f->file != BASE_NULL_FILE) {
-		err = Base_close_file(f->file);
-	}
+	File_t* f = CHECK_(L, 1);
+	int ok = 1;
+	if ((f->file != BASE_NULL_FILE) && Base_close_file(f->file))
+		ok = 0;
+	/* Do not assume that if (f->file == BASE_NULL_FILE)
+	 * that f->fpath is invalid data. It is possible for
+	 * other code to take ownership over the file handle,
+	 * and they will set f->file to BASE_NULL_FILE when
+	 * they do so.
+	 */
 	if (f->fpath) {
-		Base_secure_zero(f->fpath, f->fpath_n);
+		memset(f->fpath, 0, f->fpath_n);
 		free(f->fpath);
-		*f = FILE_NULL_;
 	}
-	lua_pushboolean(L, err);
+	*f = NULL_;
+	lua_pushboolean(L, ok);
 	return 1;
 }
 
@@ -94,13 +101,13 @@ static int fpath_exists (lua_State* L) {
 }
 
 static int file_is_open (lua_State* L) {
-	F_t* f = FILE_CHECK_(L, 1);
+	File_t* f = CHECK_(L, 1);
 	lua_pushboolean(L, f->file != BASE_NULL_FILE);
 	return 1;
 }
 
 static int file_fpath (lua_State* L) {
-	F_t* f = FILE_CHECK_(L, 1);
+	File_t* f = CHECK_(L, 1);
 	if (f->fpath)
 		lua_pushlstring(L, f->fpath, f->fpath_n);
 	else
@@ -109,7 +116,7 @@ static int file_fpath (lua_State* L) {
 }
 
 static int file_readonly (lua_State* L) {
-	F_t* f = FILE_CHECK_(L, 1);
+	File_t* f = CHECK_(L, 1);
 	lua_pushboolean(L, f->readonly);
 	return 1;
 }
@@ -149,30 +156,52 @@ static int std_memset (lua_State* L) {
 	return 0;
 }
 
+static int print_bytes (lua_State* L) {
+	uint8_t* p;
+	size_t   n;
+	if (!(p = (uint8_t*)lua_touserdata(L, 1)))
+		return UDATA_FAIL_(L, 1, "print_bytes");
+	n = (size_t)luaL_checkinteger(L, 2);
+	Base_print_bytes(p, n);
+	return 0;
+}
+
+static int ptr_arithmetic (lua_State* L) {
+	uint8_t*    p;
+	lua_Integer n;
+	if (!(p = (uint8_t*)lua_touserdata(L, 1)))
+		return UDATA_FAIL_(L, 1, "ptr_arithmetic");
+	n = luaL_checkinteger(L, 2);
+	lua_pushlightuserdata(L, p + n);
+	return 1;
+}
+
 static const luaL_Reg file_methods[] = {
-	{"size"    , &get_file_size},
-	{"close"   , &close_file},
-	{"__close" , &close_file},
-	{"__gc"    , &close_file},
-	{"is_open" , &file_is_open},
-	{"fpath"   , &file_fpath},
-	{"readonly", &file_readonly},
-	{NULL, NULL}
+	{"size"    , get_file_size},
+	{"close"   , close_file},
+	{"__close" , close_file},
+	{"__gc"    , close_file},
+	{"is_open" , file_is_open},
+	{"fpath"   , file_fpath},
+	{"readonly", file_readonly},
+	{NULL      , NULL}
 };
 
 static const luaL_Reg free_procs[] = {
-	{"fpath_open"      , &fpath_open},
-	{"fpath_create"    , &fpath_create},
-	{"fpath_size"      , &fpath_size},
-	{"fpath_exists"    , &fpath_exists},
-	{"fpath_del"       , &fpath_del},
-	{"memcpy"          , &std_memcpy},
-	{"memset"          , &std_memset},
-	{NULL, NULL}
+	{"fpath_open"      , fpath_open},
+	{"fpath_create"    , fpath_create},
+	{"fpath_size"      , fpath_size},
+	{"fpath_exists"    , fpath_exists},
+	{"fpath_del"       , fpath_del},
+	{"memcpy"          , std_memcpy},
+	{"memset"          , std_memset},
+	{"print_bytes"     , print_bytes},
+	{"ptr_arithmetic"  , ptr_arithmetic},
+	{NULL              , NULL}
 };
 
 int luaopen_Base_Procs (lua_State* L) {
-	if (luaL_newmetatable(L, FILE_MT_)) {
+	if (luaL_newmetatable(L, MT_)) {
 		luaL_setfuncs(L, file_methods, 0);
 		BASE_LUA_MT_SELF_INDEX(L);
 	}

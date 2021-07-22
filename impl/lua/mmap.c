@@ -1,6 +1,7 @@
 /* Copyright 2021 Stuart Calder */
+#include <stdbool.h>
+
 #include <Base/lua/lua.h>
-#include <Base/mmap.h>
 #include <Base/lua/mmap.h>
 #include <Base/lua/procs.h>
 
@@ -17,13 +18,13 @@
 #define MMAP_NULL_		BASE_LUA_MMAP_NULL_LITERAL
 
 typedef Base_Lua_File File_t; /* Base Lua File Userdata. */
-typedef Base_MMap     MMap_t; /* Base MMap     Userdata. */
+typedef Base_Lua_MMap MMap_t; /* Base Lua MMap Userdata. */
 
 static int new_mmap (lua_State* L) {
 	File_t* f = FILE_TEST_(L, 1); /* Initial file is optional. */
 	if (f && (f->file == BASE_NULL_FILE))
 		return luaL_error(L, "Tried to create new MMap with invalid file!");
-	const int ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : 1; /* Defaults to readonly. */
+	const bool ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true; /* Defaults to readonly. */
 	MMap_t* map = MMAP_NEW_(L);
 	*map = MMAP_NULL_;
 	if (f) {
@@ -33,8 +34,8 @@ static int new_mmap (lua_State* L) {
 		{
 			lua_pushnil(L);
 			return 1;
-		} else
-			f->file = BASE_NULL_FILE;
+		} 
+		f->file = BASE_NULL_FILE;
 	}
 	luaL_getmetatable(L, MMAP_MT_);
 	lua_setmetatable(L, -2);
@@ -55,13 +56,13 @@ static int size_mmap (lua_State* L) {
 
 static int is_mapped (lua_State* L) {
 	MMap_t* map = MMAP_CHECK_(L, 1);
-	lua_pushboolean(L, (int)map->ptr);
+	lua_pushboolean(L, map->ptr != NULL);
 	return 1;
 }
 
-static int readonly_mmap (lua_State* L) {
+static int mmap_readonly (lua_State* L) {
 	MMap_t* map = MMAP_CHECK_(L, 1);
-	lua_pushboolean(L, (int)map->readonly);
+	lua_pushboolean(L, map->readonly);
 	return 1;
 }
 
@@ -70,25 +71,27 @@ static int del_mmap (lua_State* L) {
 	if (map->ptr) {
 		if (Base_MMap_unmap(map))
 			return luaL_error(L, "Base_MMap_unmap failed!");
+		if (Base_close_file(map->file))
+			return luaL_error(L, "Base_close_file failed!");
 		*map = MMAP_NULL_;
 	}
 	return 0;
 }
 
 static const luaL_Reg mmap_methods[] = {
-	{"ptr", &ptr_mmap},
-	{"size", &size_mmap},
-	{"is_mapped", &is_mapped},
-	{"del", &del_mmap},
-	{"readonly", &readonly_mmap},
-	{"__gc", &del_mmap},
-	{"__close", &del_mmap},
-	{NULL, NULL}
+	{"ptr"      , ptr_mmap},
+	{"size"     , size_mmap},
+	{"is_mapped", is_mapped},
+	{"readonly" , mmap_readonly},
+	{"del"      , del_mmap},
+	{"__gc"     , del_mmap},
+	{"__close"  , del_mmap},
+	{NULL       , NULL}
 };
 
 static const luaL_Reg free_procs[] = {
-	{"new", &new_mmap},
-	{NULL, NULL}
+	{"new", new_mmap},
+	{NULL , NULL}
 };
 
 int luaopen_Base_MMap (lua_State* L) {

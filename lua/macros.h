@@ -2,6 +2,7 @@
 #define BASE_LUA_MACROS_H
 
 #include <Base/macros.h>
+
 #include <lua5.4/lua.h>
 #include <lua5.4/lualib.h>
 #include <lua5.4/lauxlib.h>

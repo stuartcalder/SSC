@@ -2,6 +2,7 @@
 #define BASE_LUA_H
 
 #include <Base/macros.h>
+
 #include <Base/lua/macros.h>
 
 BASE_BEGIN_DECLS

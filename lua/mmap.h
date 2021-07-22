@@ -2,9 +2,10 @@
 #define BASE_LUA_MMAP_H
 
 #include <Base/macros.h>
-#include <Base/lua/macros.h>
 #include <Base/mmap.h>
 #include <Base/operations.h>
+
+#include <Base/lua/macros.h>
 
 /* Base_Lua_MMap convenience macros. */
 #define BASE_LUA_MMAP_MT		"Base.MMap"
