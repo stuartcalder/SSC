@@ -9,20 +9,22 @@
 #define FILE_CHECK_(L, idx)	BASE_LUA_FILE_CHECK(L, idx)
 #define FILE_TEST_(L, idx)	BASE_LUA_FILE_TEST(L, idx)
 #define FILE_NULL_		BASE_LUA_FILE_NULL_LITERAL
+
 #define MMAP_MT_		BASE_LUA_MMAP_MT
 #define MMAP_NEW_(L)		BASE_LUA_MMAP_NEW(L)
 #define MMAP_CHECK_(L, idx)	BASE_LUA_MMAP_CHECK(L, idx)
 #define MMAP_TEST_(L, idx)	BASE_LUA_MMAP_TEST(L, idx)
-#define MMAP_NULL_		BASE_MMAP_NULL_LITERAL
-typedef Base_Lua_File File_t_; /* Base Lua File Userdata. */
-typedef Base_MMap     MMap_t_; /* Base MMap     Userdata. */
+#define MMAP_NULL_		BASE_LUA_MMAP_NULL_LITERAL
+
+typedef Base_Lua_File File_t; /* Base Lua File Userdata. */
+typedef Base_MMap     MMap_t; /* Base MMap     Userdata. */
 
 static int new_mmap (lua_State* L) {
-	File_t_* f = FILE_TEST_(L, 1); /* Initial file is optional. */
+	File_t* f = FILE_TEST_(L, 1); /* Initial file is optional. */
 	if (f && (f->file == BASE_NULL_FILE))
 		return luaL_error(L, "Tried to create new MMap with invalid file!");
-	const bool ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true; /* Defaults readonly. */
-	MMap_t_* map = MMAP_NEW_(L);
+	const int ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : 1; /* Defaults to readonly. */
+	MMap_t* map = MMAP_NEW_(L);
 	*map = MMAP_NULL_;
 	if (f) {
 		map->file = f->file;
@@ -31,9 +33,8 @@ static int new_mmap (lua_State* L) {
 		{
 			lua_pushnil(L);
 			return 1;
-		} else {
+		} else
 			f->file = BASE_NULL_FILE;
-		}
 	}
 	luaL_getmetatable(L, MMAP_MT_);
 	lua_setmetatable(L, -2);
@@ -41,31 +42,31 @@ static int new_mmap (lua_State* L) {
 }
 
 static int ptr_mmap (lua_State* L) {
-	MMap_t_* map = MMAP_CHECK_(L, 1);
+	MMap_t* map = MMAP_CHECK_(L, 1);
 	lua_pushlightuserdata(L, map->ptr);
 	return 1;
 }
 
 static int size_mmap (lua_State* L) {
-	MMap_t_* map = MMAP_CHECK_(L, 1);
+	MMap_t* map = MMAP_CHECK_(L, 1);
 	lua_pushinteger(L, (lua_Integer)map->size);
 	return 1;
 }
 
 static int is_mapped (lua_State* L) {
-	MMap_t_* map = MMAP_CHECK_(L, 1);
-	lua_pushboolean(L, (bool)map->ptr);
+	MMap_t* map = MMAP_CHECK_(L, 1);
+	lua_pushboolean(L, (int)map->ptr);
 	return 1;
 }
 
 static int readonly_mmap (lua_State* L) {
-	MMap_t_* map = MMAP_CHECK_(L, 1);
-	lua_pushboolean(L, (bool)map->readonly);
+	MMap_t* map = MMAP_CHECK_(L, 1);
+	lua_pushboolean(L, (int)map->readonly);
 	return 1;
 }
 
 static int del_mmap (lua_State* L) {
-	MMap_t_* map = MMAP_CHECK_(L, 1);
+	MMap_t* map = MMAP_CHECK_(L, 1);
 	if (map->ptr) {
 		if (Base_MMap_unmap(map))
 			return luaL_error(L, "Base_MMap_unmap failed!");

@@ -44,9 +44,7 @@
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #	define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
-#	define BASE_OPENBSD_PLEDGE_IS_NIL
 #	define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
-#	define BASE_OPENBSD_UNVEIL_IS_NIL
 #endif /* ~ ifdef __OpenBSD__ */
 
 #define BASE_C_89        199409L
@@ -74,9 +72,6 @@
 #	if (BASE_LANG_CPP < BASE_CPP_11)
 #		error "We need to have C++11 at minimum."
 #	endif
-#	define BASE_HAS_STATIC_ASSERT
-#	define BASE_HAS_ALIGNAS
-#	define BASE_HAS_ALIGNOF
 #	define BASE_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
 #	define BASE_ALIGNAS(v) alignas(v)
 #	define BASE_ALIGNOF(v) alignof(v)
@@ -101,25 +96,28 @@
 #		if    (BASE_LANG_C >= BASE_C_11)
 #			include <inttypes.h>
 #			include <stdalign.h>
-#			define BASE_HAS_STATIC_ASSERT
-#			define BASE_HAS_ALIGNAS
-#			define BASE_HAS_ALIGNOF
 #			define BASE_STATIC_ASSERT(boolean, msg) _Static_assert(boolean, msg)
 #			define BASE_ALIGNAS(align_as) _Alignas(align_as)
 #			define BASE_ALIGNOF(align_of) _Alignof(align_of)
 #		else
 #			define BASE_STATIC_ASSERT(boolean, msg)	/* Nil */
+#			define BASE_STATIC_ASSERT_IS_NIL
 #			define BASE_ALIGNAS(align_as)		/* Nil */
+#			define BASE_ALIGNAS_IS_NIL
 #			define BASE_ALIGNOF(align_of)		/* Nil */
+#			define BASE_ALIGNOF_IS_NIL
 #		endif
 #	else
 #		define BASE_LANG_C	0L
 #		ifndef BASE_RESTRICT_IMPL
 #			define BASE_RESTRICT_IMPL 0u
 #		endif
-#		define BASE_STATIC_ASSERT(boolean, msg) /* Nil */
+#		define BASE_STATIC_ASSERT(boolean, msg)	/* Nil */
+#		define BASE_STATIC_ASSERT_IS_NIL
 #		define BASE_ALIGNAS(align_as)		/* Nil */
+#		define BASE_ALIGNAS_IS_NIL
 #		define BASE_ALIGNOF(align_of)		/* Nil */
+#		define BASE_ALIGNOF_IS_NIL
 #	endif /* ~ #ifdef __STDC_VERSION__ */
 #endif
 

@@ -3,12 +3,13 @@
 #include <Base/lua/macros.h>
 #include <Base/lua/procs.h>
 
-#define MFAIL_(L)		BASE_LUA_MALLOC_FAIL(L)
 #define FILE_MT_		BASE_LUA_FILE_KEY
 #define FILE_NEW_(L)		BASE_LUA_FILE_NEW(L)
 #define FILE_CHECK_(L, idx)	BASE_LUA_FILE_CHECK(L, idx)
 #define FILE_TEST_(L, idx)	BASE_LUA_FILE_TEST(L, idx)
 #define FILE_NULL_		BASE_LUA_FILE_NULL_LITERAL
+
+#define MFAIL_(L)		BASE_LUA_MALLOC_FAIL(L)
 
 typedef Base_Lua_File F_t;
 
@@ -41,7 +42,7 @@ static int fpath_create (lua_State* L) {
 		lua_pushnil(L);
 	} else {
 		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
-			return luaL_error(L, "malloc failed.");
+			return BASE_LUA_MALLOC_FAIL(L);
 		memcpy(f->fpath, fpath, fpath_n + 1);
 		f->fpath_n = fpath_n;
 		f->readonly = UINT8_C(0);
