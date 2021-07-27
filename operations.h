@@ -41,16 +41,16 @@ BASE_API    void    Base_xor_32  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_64  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_128 (R_(void*), R_(const void*));
 BASE_INLINE void    Base_secure_zero (R_(void*) buffer, size_t size) {
-#if    defined(BASE_OS_MAC)
+#if defined(BASE_OS_MAC)
 	memset_s(buffer, size, 0, size);
-#elif  defined(__NetBSD__)
+#elif defined(__NetBSD__)
 	explicit_memset(buffer, 0, size);
-#elif  defined(BASE_OS_UNIXLIKE)
+#elif defined(BASE_OS_UNIXLIKE)
 	explicit_bzero(buffer, size);
-#elif  defined(BASE_OS_WINDOWS)
+#elif defined(BASE_OS_WINDOWS)
 	SecureZeroMemory(buffer, size);
 #else
-#	error "Unsupported operating system."
+#  error "Unsupported operating system."
 #endif
 }/* ~ Base_secure_zero */
 BASE_API    size_t  Base_ctime_memdiff (R_(const void*), R_(const void*), size_t);

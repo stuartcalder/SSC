@@ -8,17 +8,17 @@
 #include "files.h"
 #include "macros.h"
 #include "types.h"
-#if    defined(BASE_OS_UNIXLIKE)
-#	define BASE_MMAP_SYNC_IMPL_F msync
-#	define BASE_MMAP_SYNC_IMPL(m) { return BASE_MMAP_SYNC_IMPL_F(m->ptr, m->size, MS_SYNC); }
-#	define BASE_MMAP_SYNC_INLINE
-#	include <sys/mman.h>
-#elif  defined(BASE_OS_WINDOWS)
-#	define BASE_MMAP_SYNC_IMPL(m) { if (FlushViewOfFile((LPCVOID)m->ptr, m->size)) return 0; return -1; }
-#	include <memoryapi.h>
-#	include <windows.h>
+#if defined(BASE_OS_UNIXLIKE)
+#  define BASE_MMAP_SYNC_IMPL_F msync
+#  define BASE_MMAP_SYNC_IMPL(m) { return BASE_MMAP_SYNC_IMPL_F(m->ptr, m->size, MS_SYNC); }
+#  define BASE_MMAP_SYNC_INLINE
+#  include <sys/mman.h>
+#elif defined(BASE_OS_WINDOWS)
+#  define BASE_MMAP_SYNC_IMPL(m) { if (FlushViewOfFile((LPCVOID)m->ptr, m->size)) return 0; return -1; }
+#  include <memoryapi.h>
+#  include <windows.h>
 #else
-#	error "Unsupported operating system."
+#  error "Unsupported operating system."
 #endif /* ~ if defined(BASE_OS_UNIXLIKE) or defined(BASE_OS_WINDOWS) */
 
 typedef struct {
@@ -32,9 +32,9 @@ typedef struct {
 } Base_MMap;
 
 #ifdef BASE_OS_WINDOWS
-#	define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0}
+#  define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0}
 #else
-#	define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, 0}
+#  define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, 0}
 #endif
 
 BASE_BEGIN_DECLS

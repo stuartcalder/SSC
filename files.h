@@ -13,36 +13,37 @@
 #include "macros.h"
 #include "types.h"
 
+#define BASE_FILES_DEFAULT_NEWFILE_SIZE 0
+
 #if    defined(BASE_OS_UNIXLIKE)
-#	define BASE_CLOSE_FILE_IMPL_F close
-#	define BASE_CLOSE_FILE_IMPL(f) { return BASE_CLOSE_FILE_IMPL_F(f); }
-#	define BASE_CLOSE_FILE_INLINE
-#	define BASE_SET_FILE_SIZE_IMPL_F ftruncate
-#	define BASE_SET_FILE_SIZE_IMPL(f, n) { return BASE_SET_FILE_SIZE_IMPL_F(f, n); }
-#	define BASE_SET_FILE_SIZE_INLINE
-#	include <fcntl.h>
-#	include <unistd.h>
-#	include <sys/stat.h>
-#	include <sys/types.h>
+#  define BASE_CLOSE_FILE_IMPL_F close
+#  define BASE_CLOSE_FILE_IMPL(f) { return BASE_CLOSE_FILE_IMPL_F(f); }
+#  define BASE_CLOSE_FILE_INLINE
+#  define BASE_SET_FILE_SIZE_IMPL_F ftruncate
+#  define BASE_SET_FILE_SIZE_IMPL(f, n) { return BASE_SET_FILE_SIZE_IMPL_F(f, n); }
+#  define BASE_SET_FILE_SIZE_INLINE
+#  include <fcntl.h>
+#  include <unistd.h>
+#  include <sys/stat.h>
+#  include <sys/types.h>
 /* On Unix-like systems, files are managed through handles, represented by integers. */
 typedef int Base_File_t;
-#	define BASE_NULL_FILE (-1)
+#  define BASE_NULL_FILE (-1)
 #elif  defined(BASE_OS_WINDOWS)
-#	define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
-#	define BASE_SET_FILE_SIZE_IMPL(f, n) { \
-		LARGE_INTEGER i; \
-		i.QuadPart = n; \
-		if (!SetFilePointerEx(f, i, NULL, FILE_BEGIN) || \
-		    !SetEndOfFile(f)) \
-			return -1; \
-		return 0; \
-	}
-#	include <windows.h>
+#  define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
+#  define BASE_SET_FILE_SIZE_IMPL(f, n) { \
+     LARGE_INTEGER i; \
+     i.QuadPart = n; \
+     if (!SetFilePointerEx(f, i, NULL, FILE_BEGIN) || !SetEndOfFile(f)) \
+       return -1; \
+     return 0; \
+   }
+#  include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
-#	define BASE_NULL_FILE INVALID_HANDLE_VALUE
+#  define BASE_NULL_FILE INVALID_HANDLE_VALUE
 #else
-#	error "Unsupported operating system."
+#  error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
 #define R_(ptr) ptr BASE_RESTRICT

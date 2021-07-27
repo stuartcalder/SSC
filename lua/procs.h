@@ -17,12 +17,13 @@
 
 typedef struct {
 	Base_File_t	file;
+	size_t          file_n;
 	char*		fpath;
 	size_t		fpath_n;
 	uint8_t		readonly;
 } Base_Lua_File;
 
-#define BASE_LUA_FILE_NULL_LITERAL (Base_Lua_File){BASE_NULL_FILE, NULL, 0, 0}
+#define BASE_LUA_FILE_NULL_LITERAL (Base_Lua_File){BASE_NULL_FILE, 0, NULL, 0, 0}
 
 BASE_BEGIN_DECLS
 BASE_API int luaopen_Base_Procs (lua_State* L);

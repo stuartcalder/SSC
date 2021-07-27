@@ -13,15 +13,15 @@
 #define BASE_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure.\n"
 
 #ifdef BASE_OS_UNIXLIKE
-#	include <err.h>
-#	define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { verrx(code, fmt, arg_list); }
-#	define BASE_ERRX_CODE_LIST_INLINE
+#  include <err.h>
+#  define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { verrx(code, fmt, arg_list); }
+#  define BASE_ERRX_CODE_LIST_INLINE
 #else
-#	define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { \
-		vfprintf(stderr, fmt, arg_list); \
-		va_end(arg_list); \
-		exit(code); \
-	}
+#  define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { \
+     vfprintf(stderr, fmt, arg_list); \
+     va_end(arg_list); \
+     exit(code); \
+   }
 #endif
 
 #define R_(ptr) ptr BASE_RESTRICT
@@ -39,11 +39,11 @@ BASE_END_DECLS
 #undef R_
 
 #ifdef BASE_EXTERN_DEBUG
-#	define BASE_ASSERT(boolean) Base_assert(boolean)
-#	define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
+#  define BASE_ASSERT(boolean) Base_assert(boolean)
+#  define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
 #else
-#	define BASE_ASSERT(boolean) /* Nil */
-#	define BASE_ASSERT_MSG(...) /* Nil */
+#  define BASE_ASSERT(boolean) /* Nil */
+#  define BASE_ASSERT_MSG(...) /* Nil */
 #endif
 
 #endif /* ~ BASE_ERRORS_H */

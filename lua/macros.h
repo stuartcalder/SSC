@@ -28,4 +28,5 @@
 #define BASE_LUA_NEW_UD(L, type)		(type*)lua_newuserdatauv(L, sizeof(type), 0)
 #define BASE_LUA_CHECK_UD(L, idx, type, mt)	(type*)luaL_checkudata(L, idx, mt)
 #define BASE_LUA_TEST_UD(L,  idx, type, mt)	(type*)luaL_testudata(L, idx, mt)
+#define BASE_LUA_UD_FAIL(L, idx, func)		luaL_error(L, "%s: Invalid pointer for arg %d", func, idx)
 #endif

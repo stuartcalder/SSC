@@ -24,8 +24,14 @@ static int fpath_open (lua_State* L) {
 		*f = NULL_;
 		lua_pushnil(L);
 	} else {
-		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
+		if (Base_get_file_size(f->file, &f->file_n)) {
+			*f = NULL_;
+			return luaL_error(L, "Base_get_file_size failed.");
+		}
+		if (!(f->fpath = (char*)malloc(fpath_n + 1))) {
+			*f = NULL_;
 			return luaL_error(L, "malloc failed.");
+		}
 		memcpy(f->fpath, fpath, fpath_n + 1);
 		f->fpath_n = fpath_n;
 		f->readonly = (uint8_t)ronly;
@@ -35,14 +41,18 @@ static int fpath_open (lua_State* L) {
 	return 1;
 }
 
+/* Lua Args: (char*)fpath
+ * Returns: File_t*, or nil on failure.
+ */
 static int fpath_create (lua_State* L) {
-	const char* fpath = luaL_checkstring(L, 1);
-	const size_t fpath_n = strlen(fpath);
-	File_t* f = NEW_(L);
+	size_t fpath_n;
+	const char* const fpath = luaL_checklstring(L, 1, &fpath_n);
+	File_t* const f = NEW_(L);
 	if (Base_create_filepath(fpath, &f->file)) {
 		*f = NULL_;
 		lua_pushnil(L);
 	} else {
+		f->file_n = BASE_FILES_DEFAULT_NEWFILE_SIZE;
 		if (!(f->fpath = (char*)malloc(fpath_n + 1)))
 			return BASE_LUA_MALLOC_FAIL(L);
 		memcpy(f->fpath, fpath, fpath_n + 1);
@@ -54,8 +64,11 @@ static int fpath_create (lua_State* L) {
 	return 1;
 }
 
+/* Lua Args: (char*)fpath
+ * Returns: the size of the file described by `fpath`, or nil on failure.
+ */
 static int fpath_size (lua_State* L) {
-	const char* fpath = luaL_checkstring(L, 1);
+	const char* const fpath = luaL_checkstring(L, 1);
 	size_t sz;
 	if (Base_get_filepath_size(fpath, &sz))
 		lua_pushnil(L);
@@ -64,18 +77,23 @@ static int fpath_size (lua_State* L) {
 	return 1;
 }
 
+/* Lua Args: (File_t*)f
+ * Returns: the size of the file, or nil on failure.
+ */
 static int get_file_size (lua_State* L) {
-	File_t* f = CHECK_(L, 1);
-	size_t sz;
-	if (f->file == BASE_NULL_FILE || Base_get_file_size(f->file, &sz))
-		lua_pushnil(L);
+	File_t* const f = CHECK_(L, 1);
+	if (f->file != BASE_NULL_FILE)
+		lua_pushinteger(L, (lua_Integer)f->file_n);
 	else
-		lua_pushinteger(L, (lua_Integer)sz);
+		lua_pushnil(L);
 	return 1;
 }
 
+/* Lua Args: (File_t*)f
+ * Returns: true if the file is successfully closed, or if it was already closed.
+ */
 static int close_file (lua_State* L) {
-	File_t* f = CHECK_(L, 1);
+	File_t* const f = CHECK_(L, 1);
 	int ok = 1;
 	if ((f->file != BASE_NULL_FILE) && Base_close_file(f->file))
 		ok = 0;
@@ -94,20 +112,45 @@ static int close_file (lua_State* L) {
 	return 1;
 }
 
+/* Lua Args: (char*)fpath
+ * Returns: true when the filepath exists, false otherwise.
+ */
 static int fpath_exists (lua_State* L) {
-	const char* fpath = luaL_checkstring(L, 1);
+	const char* const fpath = luaL_checkstring(L, 1);
 	lua_pushboolean(L, Base_filepath_exists(fpath));
 	return 1;
 }
 
+/* Lua Args: (File_t*)f
+ * Return: true when file is valid and open, false otherwise.
+ */
 static int file_is_open (lua_State* L) {
-	File_t* f = CHECK_(L, 1);
+	File_t* const f = CHECK_(L, 1);
 	lua_pushboolean(L, f->file != BASE_NULL_FILE);
 	return 1;
 }
 
+/* Lua Args: (File_t*)f, (lua_Integer)n
+ * Return: true on success; false on failure.
+ */
+static int file_set_size (lua_State* L) {
+	File_t* const f = CHECK_(L, 1);
+	if (f->file == BASE_NULL_FILE) {
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	const size_t n = (size_t)luaL_checkinteger(L, 2);
+	if (Base_set_file_size(f->file, n)) {
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	f->file_n = n;
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 static int file_fpath (lua_State* L) {
-	File_t* f = CHECK_(L, 1);
+	File_t* const f = CHECK_(L, 1);
 	if (f->fpath)
 		lua_pushlstring(L, f->fpath, f->fpath_n);
 	else
@@ -116,24 +159,25 @@ static int file_fpath (lua_State* L) {
 }
 
 static int file_readonly (lua_State* L) {
-	File_t* f = CHECK_(L, 1);
+	File_t* const f = CHECK_(L, 1);
 	lua_pushboolean(L, f->readonly);
 	return 1;
 }
 
 static int fpath_del (lua_State* L) {
-	const char* fpath = luaL_checkstring(L, 1);
-	if (!Base_filepath_exists(fpath) || remove(fpath))
-		lua_pushnil(L);
+	const char* const fpath = luaL_checkstring(L, 1);
+	if ((!Base_filepath_exists(fpath)) || remove(fpath))
+		lua_pushboolean(L, 0);
 	else
-		lua_pushnumber(L, 1);
+		lua_pushboolean(L, 1);
 	return 1;
 }
 
 #define UDATA_FAIL_(L, idx, f) luaL_error(L, "%s: Invalid pointer for arg %d", f, idx)
 
 static int std_memcpy (lua_State* L) {
-	void *dest, *src;
+	void *dest;
+	void *src;
 	size_t n;
 	if (!(dest = lua_touserdata(L, 1)))
 		return UDATA_FAIL_(L, 1, "memcpy");
@@ -184,6 +228,7 @@ static const luaL_Reg file_methods[] = {
 	{"is_open" , file_is_open},
 	{"fpath"   , file_fpath},
 	{"readonly", file_readonly},
+	{"set_size", file_set_size},
 	{NULL      , NULL}
 };
 

@@ -36,7 +36,7 @@ enum {
 #define R_(p) p BASE_RESTRICT
 BASE_BEGIN_DECLS
 #ifdef BASE_OS_UNIXLIKE
-#	define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
+#  define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
 #endif
 /* Initialize a Base_MLock struct. */
 BASE_API int Base_MLock_init (Base_MLock*);

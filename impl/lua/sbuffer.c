@@ -22,26 +22,27 @@ static int sbuffer_new (lua_State* L) {
 	const size_t n = (size_t)luaL_checkinteger(L, 1);
 	SB_t* sb = NEW_(L);
 #ifdef BASE_MLOCK_H
-	*sb = (SB_t){NULL, n, 0};
+	sb->n = n;
+	sb->f = UINT8_C(0);
 	if (lua_isboolean(L, 2) ? lua_toboolean(L, 2) : 0) {
 		SET_BITS_(sb->f, IS_ALIGNED_);
 		if (!(sb->p = (uint8_t*)Base_aligned_malloc(Base_MLock_g.page_size, sb->n)))
 			return luaL_error(L, "%s failed!", "Base_aligned_malloc");
 		switch (Base_mlock(sb->p, sb->n)) {
-			case 0:
-				SET_BITS_(sb->f, IS_LOCKED_);
-				break;
-			case BASE_MLOCK_ERR_OVER_MEMLIMIT:
-				/* Fail to lock silently when we cannot lock anymore. */
-				break;
-			case BASE_MLOCK_ERR_LOCK_OP:
-				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "MLock Op");
-#	ifdef BASE_EXTERN_MLOCK_THREADSAFE
-			case BASE_MLOCK_ERR_MTX_OP:
-				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Mutex Op");
-#	endif
-			default:
-				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Invalid Base_mlock Retcode");
+		case 0:
+			SET_BITS_(sb->f, IS_LOCKED_);
+			break;
+		case BASE_MLOCK_ERR_OVER_MEMLIMIT:
+			/* Fail to lock silently when we cannot lock anymore. */
+			break;
+		case BASE_MLOCK_ERR_LOCK_OP:
+			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "MLock Op");
+#  ifdef BASE_EXTERN_MLOCK_THREADSAFE
+		case BASE_MLOCK_ERR_MTX_OP:
+			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Mutex Op");
+#  endif
+		default:
+			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Invalid Base_mlock Retcode");
 		}
 	} else {
 		if (!(sb->p = (uint8_t*)malloc(sb->n)))
@@ -170,10 +171,10 @@ int luaopen_Base_SBuffer (lua_State *L) {
 		return luaL_error(L, "%s failed! Error: %s", "Base_MLock_g_init", "GET_LIMIT");
 	case BASE_MLOCK_ERR_SET_LIMIT:
 		return luaL_error(L, "%s failed! Error: %s", "Base_MLock_g_init", "SET_LIMIT");
-#	ifdef BASE_EXTERN_MLOCK_THREADSAFE
+#  ifdef BASE_EXTERN_MLOCK_THREADSAFE
 	case BASE_MLOCK_ERR_MTX_INIT:
 		return luaL_error(L, "%s failed! Error: %s", "Base_MLock_g_init", "MTX_INIT");
-#	endif
+#  endif
 	}
 #endif
 	if (luaL_newmetatable(L, MT_)) {
