@@ -35,18 +35,6 @@
 #	error "Unsupported."
 #endif /* ~ if defined (unixlike os's ...) */
 
-/* OpenBSD-specific mitigations */
-#ifdef	__OpenBSD__
-#  include <unistd.h>
-#  include "errors.h"
-#  define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()\n")
-#  define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
-#else
-/* These macros define to nothing on non-OpenBSD operating systems. */
-#  define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
-#  define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
-#endif /* ~ ifdef __OpenBSD__ */
-
 #define BASE_C_89        199409L
 #define BASE_C_99        199901L
 #define BASE_C_11        201112L
@@ -94,15 +82,15 @@
 #    endif
 #    if (BASE_LANG_C >= BASE_C_11)
 #      define BASE_STATIC_ASSERT(boolean, msg)	_Static_assert(boolean, msg)
-#      define BASE_ALIGNAS(align_as)		_Alignas(align_as)
-#      define BASE_ALIGNOF(align_of)		_Alignof(align_of)
+#      define BASE_ALIGNAS(as)			_Alignas(as)
+#      define BASE_ALIGNOF(of)			_Alignof(of)
 #    else
        /* Nil macros. */
 #      define BASE_STATIC_ASSERT(boolean, msg)
 #      define BASE_STATIC_ASSERT_IS_NIL
-#      define BASE_ALIGNAS(align_as)
+#      define BASE_ALIGNAS(as)
 #      define BASE_ALIGNAS_IS_NIL
-#      define BASE_ALIGNOF(align_of)
+#      define BASE_ALIGNOF(of)
 #      define BASE_ALIGNOF_IS_NIL
 #    endif
 #  else
@@ -131,7 +119,7 @@
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 #  define BASE_RESTRICT restrict
 #else
-#  define BASE_RESTRICT /* Nil */
+#  define BASE_RESTRICT
 #  define BASE_RESTRICT_IS_NIL
 #endif
 
@@ -141,9 +129,9 @@
 #    define BASE_EXPORT __attribute__ ((visibility ("default")))
 #    define BASE_IMPORT BASE_EXPORT
 #  else
-#    define BASE_EXPORT /* Nil */
+#    define BASE_EXPORT
 #    define BASE_EXPORT_IS_NIL
-#    define BASE_IMPORT /* Nil */
+#    define BASE_IMPORT
 #    define BASE_IMPORT_IS_NIL
 #  endif /* ~ if defined (__GNUC__) and (__GNUC__ >= 4) */
 #elif defined(BASE_OS_WINDOWS)
@@ -180,5 +168,17 @@
 #    endif
 #  endif /* ~ ifdef BASE_EXTERN_BUILD_DYNAMIC_LIB */
 #endif /* ~ ifdef BASE_EXTERN_STATIC_LIB */
+
+/* OpenBSD-specific mitigations */
+#ifdef	__OpenBSD__
+#  include <unistd.h>
+#  include "error.h"
+#  define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()\n")
+#  define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
+#else
+/* These macros define to nothing on non-OpenBSD operating systems. */
+#  define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
+#  define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
+#endif /* ~ ifdef __OpenBSD__ */
 
 #endif /* ~ ifndef BASE_MACROS_H */
