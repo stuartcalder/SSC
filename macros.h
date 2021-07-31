@@ -172,7 +172,7 @@
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
 #  include <unistd.h>
-#  include "error.h"
+#  include "errors.h"
 #  define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()\n")
 #  define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
 #else
