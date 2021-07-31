@@ -60,4 +60,4 @@ BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 BASE_END_DECLS
 #undef R_
 
-#endif
+#endif /* ! */

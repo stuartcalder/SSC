@@ -21,7 +21,7 @@ typedef void Base_Arg_Handler_f (char**, const int, R_(void*));
 typedef Base_Arg_Handler_f* Base_Arg_Parser_f (const char*);
 /* Argument Processors determine what Argument Parsers will be dispatched for some string.
  * 	If there is no valid parser, return a NULL pointer. */
-typedef Base_Arg_Parser_f* Base_Arg_Processor_f (const char*, R_(void *));
+typedef Base_Arg_Parser_f* Base_Arg_Processor_f (const char*, R_(void*));
 
 enum {
 	BASE_ARGTYPE_NONE,
@@ -42,4 +42,4 @@ BASE_API void Base_process_args (const int argc, char** argv, Base_Arg_Processor
 BASE_END_DECLS
 		   
 #undef R_
-#endif /* ~ BASE_ARGS_H */
+#endif /* ! */
