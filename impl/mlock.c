@@ -1,6 +1,6 @@
 #include "mlock.h"
 #include "mem.h"
-#include "error.h"
+#include "errors.h"
 #ifdef BASE_MLOCK_H /* When memorylocking is disabled, the entire header is discarded. */
 #if    defined(BASE_OS_UNIXLIKE)
 #  include <sys/types.h>
