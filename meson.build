@@ -15,6 +15,16 @@ GCC_COMPATIBLE_FLAGS = [
   '-funroll-loops'
 ]
 
+compiler = meson.get_compiler(LANG)
+os = host_machine.system()
+if os != 'netbsd' and compiler.get_id() != 'clang'
+  GCC_COMPATIBLE_FLAGS += '-flto'
+endif
+assert(os in SUPPORTED_OPERATING_SYSTEMS,
+  'You are trying to build ' + PROJECT + ' using an unsupported operating system!')
+assert(compiler.get_id() in SUPPORTED_COMPILERS,
+  'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
+
 lib_dirs = {
   'bsd':   ['/usr/lib', '/usr/local/lib'],
   'linux': ['/usr/lib', '/usr/lib64'],
@@ -29,15 +39,6 @@ else
   assert(false, 'Unsupported OS.')
 endif
 
-compiler = meson.get_compiler(LANG)
-os = host_machine.system()
-if os != 'netbsd' and compiler.get_id() != 'clang'
-  GCC_COMPATIBLE_FLAGS += '-flto'
-endif
-assert(os in SUPPORTED_OPERATING_SYSTEMS,
-  'You are trying to build ' + PROJECT + ' using an unsupported operating system!')
-assert(compiler.get_id() in SUPPORTED_COMPILERS,
-  'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
 
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
