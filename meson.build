@@ -91,6 +91,7 @@ endif
 # On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']
   include_install = '/usr/local/include'
+  include_dirs += '/usr/local/include'
   lib_deps += compiler.find_library('ncurses')
 # On NetBSD...
 elif os == 'netbsd'
