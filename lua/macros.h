@@ -7,17 +7,32 @@
 #  error "Only supporting Lua5.3-5.4!"
 #endif
 
-#if BASE_EXTERN_LUA_MINOR == 4
-#  include <lua5.4/lua.h>
-#  include <lua5.4/lualib.h>
-#  include <lua5.4/lauxlib.h>
-#else
-#  if BASE_EXTERN_LUA_MINOR != 3
-#    error "Only supporting Lua5.3-5.4!"
+#ifdef __OpenBSD__
+#  if BASE_EXTERN_LUA_MINOR == 4
+#    include <lua-5.4/lua.h>
+#    include <lua-5.4/lualib.h>
+#    include <lua-5.4/lauxlib.h>
+#  else
+#    if BASE_EXTERN_LUA_MINOR != 3
+#      error "Only supporting Lua5.3 through Lua5.4!"
+#    endif
+#    include <lua-5.3/lua.h>
+#    include <lua-5.3/lualib.h>
+#    include <lua-5.3/lauxlib.h>
 #  endif
-#  include <lua5.3/lua.h>
-#  include <lua5.3/lualib.h>
-#  include <lua5.3/lauxlib.h>
+#else
+#  if BASE_EXTERN_LUA_MINOR == 4
+#    include <lua5.4/lua.h>
+#    include <lua5.4/lualib.h>
+#    include <lua5.4/lauxlib.h>
+#  else
+#    if BASE_EXTERN_LUA_MINOR != 3
+#      error "Only supporting Lua5.3-5.4!"
+#    endif
+#    include <lua5.3/lua.h>
+#    include <lua5.3/lualib.h>
+#    include <lua5.3/lauxlib.h>
+#  endif
 #endif
 
 #define BASE_LUA_MALLOC_FAIL(L)      	luaL_error(L, "malloc failed.")

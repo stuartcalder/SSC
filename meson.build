@@ -98,7 +98,7 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
       lib_deps += compiler.find_library('lua5.3')
       lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=3'
     endif
-  endif
+  endif # ! if get_option('lua')
 endif
 # On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']
