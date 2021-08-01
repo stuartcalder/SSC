@@ -81,7 +81,7 @@ static int fpath_size (lua_State* L) {
  * Returns: the size of the file, or nil on failure.
  */
 static int get_file_size (lua_State* L) {
-	File_t* const f = CHECK_(L, 1);
+	const File_t* const f = CHECK_(L, 1);
 	if (f->file != BASE_NULL_FILE)
 		lua_pushinteger(L, (lua_Integer)f->file_n);
 	else
@@ -125,7 +125,7 @@ static int fpath_exists (lua_State* L) {
  * Return: true when file is valid and open, false otherwise.
  */
 static int file_is_open (lua_State* L) {
-	File_t* const f = CHECK_(L, 1);
+	const File_t* const f = CHECK_(L, 1);
 	lua_pushboolean(L, f->file != BASE_NULL_FILE);
 	return 1;
 }
@@ -150,7 +150,7 @@ static int file_set_size (lua_State* L) {
 }
 
 static int file_fpath (lua_State* L) {
-	File_t* const f = CHECK_(L, 1);
+	const File_t* const f = CHECK_(L, 1);
 	if (f->fpath)
 		lua_pushlstring(L, f->fpath, f->fpath_n);
 	else
@@ -159,14 +159,14 @@ static int file_fpath (lua_State* L) {
 }
 
 static int file_readonly (lua_State* L) {
-	File_t* const f = CHECK_(L, 1);
+	const File_t* const f = CHECK_(L, 1);
 	lua_pushboolean(L, f->readonly);
 	return 1;
 }
 
 static int fpath_del (lua_State* L) {
 	const char* const fpath = luaL_checkstring(L, 1);
-	if ((!Base_filepath_exists(fpath)) || remove(fpath))
+	if (!Base_filepath_exists(fpath) || remove(fpath))
 		lua_pushboolean(L, 0);
 	else
 		lua_pushboolean(L, 1);

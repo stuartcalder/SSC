@@ -17,7 +17,6 @@ GCC_COMPATIBLE_FLAGS = [
 
 compiler = meson.get_compiler(LANG)
 os = host_machine.system()
-static = get_option('static')
 if os != 'netbsd' and compiler.get_id() != 'clang'
   GCC_COMPATIBLE_FLAGS += '-flto'
 endif
@@ -58,7 +57,7 @@ else
   lang_flags += _D + 'YDEBUG'
 endif
 # We're building Base
-if static
+if get_option('static')
   lang_flags += _D + 'BASE_EXTERN_STATIC_LIB'
 else
   lang_flags += _D + 'BASE_EXTERN_BUILD_DYNAMIC_LIB'
@@ -90,7 +89,15 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
 	  'impl/lua/procs.c', # luaopen_Base_Procs
 	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
 	]
-    lib_deps += compiler.find_library('lua5.4')
+    lua_dep = compiler.find_library('lua5.4', required: false)
+    lang_flags += _D + 'BASE_EXTERN_LUA_MAJOR=5'
+    if lua_dep.found() # We are using Lua5.4
+      lib_deps += lua_dep
+      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=4'
+    else # We will try using Lua5.3
+      lib_deps += compiler.find_library('lua5.3')
+      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=3'
+    endif
   endif
 endif
 # On {Open,Free}BSD and MacOS...
@@ -117,7 +124,7 @@ include_dirs += '..'
 # Install the base folder into the system header directory
 install_subdir('../Base', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
 
-if static
+if get_option('static')
   if os == 'windows'
     static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
       name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:/lib')
