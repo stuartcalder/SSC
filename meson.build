@@ -15,6 +15,20 @@ GCC_COMPATIBLE_FLAGS = [
   '-funroll-loops'
 ]
 
+lib_dirs = {
+  'bsd':   ['/usr/lib', '/usr/local/lib'],
+  'linux': ['/usr/lib', '/usr/lib64'],
+  'windows': ['C:\lib']
+}
+
+if os in ['openbsd', 'freebsd', 'netbsd', 'darwin']
+  lib_dir = lib_dirs.get('bsd')
+elif os in ['linux', 'windows']
+  lib_dir = lib_dirs.get(os)
+else
+  assert(false, 'Unsupported OS.')
+endif
+
 compiler = meson.get_compiler(LANG)
 os = host_machine.system()
 if os != 'netbsd' and compiler.get_id() != 'clang'
@@ -73,33 +87,6 @@ if get_option('mlock') and os != 'openbsd'
 	lang_flags += _D + 'BASE_EXTERN_MLOCK_THREADSAFE'
   endif
 endif
-# Unixlike options
-if os in UNIXLIKE_OPERATING_SYSTEMS
-  if compiler.get_id() in GCC_COMPATIBLE_COMPILERS # GCC, Clang
-    if get_option('native_optimize') # -march=native
-      lang_flags += '-march=native'
-    endif
-    lang_flags += GCC_COMPATIBLE_FLAGS
-  endif
-  if get_option('lua') # Lua support
-    lang_flags += _D + 'BASE_EXTERN_LUA'
-	src += [
-	  'impl/lua/lua.c',   # luaopen_Base
-	  'impl/lua/mmap.c',  # luaopen_Base_MMap
-	  'impl/lua/procs.c', # luaopen_Base_Procs
-	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
-	]
-    lua_dep = compiler.find_library('lua5.4', required: false)
-    lang_flags += _D + 'BASE_EXTERN_LUA_MAJOR=5'
-    if lua_dep.found() # We are using Lua5.4
-      lib_deps += lua_dep
-      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=4'
-    else # We will try using Lua5.3
-      lib_deps += compiler.find_library('lua5.3')
-      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=3'
-    endif
-  endif # ! if get_option('lua')
-endif
 # On {Open,Free}BSD and MacOS...
 if os in ['openbsd', 'freebsd', 'darwin']
   include_install = '/usr/local/include'
@@ -118,6 +105,33 @@ elif os == 'linux'
 elif os == 'windows'
   lib_deps += compiler.find_library('bcrypt')
   include_install = 'C:/include'
+endif
+# Unixlike options
+if os in UNIXLIKE_OPERATING_SYSTEMS
+  if compiler.get_id() in GCC_COMPATIBLE_COMPILERS # GCC, Clang
+    if get_option('native_optimize') # -march=native
+      lang_flags += '-march=native'
+    endif
+    lang_flags += GCC_COMPATIBLE_FLAGS
+  endif
+  if get_option('lua') # Lua support
+    lang_flags += _D + 'BASE_EXTERN_LUA'
+	src += [
+	  'impl/lua/lua.c',   # luaopen_Base
+	  'impl/lua/mmap.c',  # luaopen_Base_MMap
+	  'impl/lua/procs.c', # luaopen_Base_Procs
+	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
+	]
+    lang_flags += _D + 'BASE_EXTERN_LUA_MAJOR=5'
+    lua_dep = compiler.find_library('lua5.4', required: false, static: false, dirs: lib_dirs)
+    if lua_dep.found() # We are using Lua5.4
+      lib_deps += lua_dep
+      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=4'
+    else # We will try using Lua5.3
+      lib_deps += compiler.find_library('lua5.3', static: false, dirs: lib_dirs)
+      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=3'
+    endif
+  endif # ! if get_option('lua')
 endif
 
 include_dirs += '..'
