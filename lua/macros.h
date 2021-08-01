@@ -8,30 +8,28 @@
 #endif
 
 #ifdef __OpenBSD__
-#  if BASE_EXTERN_LUA_MINOR == 4
+#  if defined(BASE_EXTERN_LUA_5_4)
 #    include <lua-5.4/lua.h>
 #    include <lua-5.4/lualib.h>
 #    include <lua-5.4/lauxlib.h>
-#  else
-#    if BASE_EXTERN_LUA_MINOR != 3
-#      error "Only supporting Lua5.3 through Lua5.4!"
-#    endif
+#  elif defined(BASE_EXTERN_LUA_5_3)
 #    include <lua-5.3/lua.h>
 #    include <lua-5.3/lualib.h>
 #    include <lua-5.3/lauxlib.h>
+#  else
+#    error "Unsupported Lua version!"
 #  endif
 #else
-#  if BASE_EXTERN_LUA_MINOR == 4
+#  if defined(BASE_EXTERN_LUA_5_4)
 #    include <lua5.4/lua.h>
 #    include <lua5.4/lualib.h>
 #    include <lua5.4/lauxlib.h>
-#  else
-#    if BASE_EXTERN_LUA_MINOR != 3
-#      error "Only supporting Lua5.3-5.4!"
-#    endif
+#  elif defined(BASE_EXTERN_LUA_5_3)
 #    include <lua5.3/lua.h>
 #    include <lua5.3/lualib.h>
 #    include <lua5.3/lauxlib.h>
+#  else
+#    error "Unsupported Lua version!"
 #  endif
 #endif
 

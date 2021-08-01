@@ -28,7 +28,7 @@ assert(compiler.get_id() in SUPPORTED_COMPILERS,
 lib_dirs = {
   'bsd':   ['/usr/lib', '/usr/local/lib'],
   'linux': ['/usr/lib', '/usr/lib64'],
-  'windows': ['C:\lib']
+  'windows': 'C:\lib'
 }
 
 if os in ['openbsd', 'freebsd', 'netbsd', 'darwin']
@@ -124,14 +124,13 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
 	  'impl/lua/procs.c', # luaopen_Base_Procs
 	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
 	]
-    lang_flags += _D + 'BASE_EXTERN_LUA_MAJOR=5'
     lua_dep = compiler.find_library('lua5.4', required: false, static: false, dirs: lib_dir)
     if lua_dep.found() # We are using Lua5.4
       lib_deps += lua_dep
-      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=4'
+      lang_flags += _D + 'BASE_EXTERN_LUA_5_4'
     else # We will try using Lua5.3
       lib_deps += compiler.find_library('lua5.3', static: false, dirs: lib_dir)
-      lang_flags += _D + 'BASE_EXTERN_LUA_MINOR=3'
+      lang_flags += _D + 'BASE_EXTERN_LUA_5_3'
     endif
   endif # ! if get_option('lua')
 endif
