@@ -2,6 +2,7 @@ project('Base', 'c', default_options: ['c_std=c17', 'optimization=3', 'buildtype
 # Project / Language
 PROJECT  = 'Base'
 LANG = 'c'
+
 # Operating Systems & Compilers
 UNIXLIKE_OPERATING_SYSTEMS  = ['openbsd', 'freebsd', 'netbsd', 'darwin', 'linux']
 SUPPORTED_OPERATING_SYSTEMS = UNIXLIKE_OPERATING_SYSTEMS + ['windows']
@@ -13,6 +14,7 @@ GCC_COMPATIBLE_FLAGS = [
   '-Wall',
   '-funroll-loops'
 ]
+
 compiler = meson.get_compiler(LANG)
 os = host_machine.system()
 static = get_option('static')
@@ -23,6 +25,7 @@ assert(os in SUPPORTED_OPERATING_SYSTEMS,
   'You are trying to build ' + PROJECT + ' using an unsupported operating system!')
 assert(compiler.get_id() in SUPPORTED_COMPILERS,
   'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
+
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
 	_D = '/D'
@@ -82,7 +85,7 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
   if get_option('lua') # Lua support
     lang_flags += _D + 'BASE_EXTERN_LUA'
 	src += [
-	  'impl/lua/lua.c',	  # luaopen_Base
+	  'impl/lua/lua.c',   # luaopen_Base
 	  'impl/lua/mmap.c',  # luaopen_Base_MMap
 	  'impl/lua/procs.c', # luaopen_Base_Procs
 	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer

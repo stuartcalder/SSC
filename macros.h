@@ -169,6 +169,10 @@
 #  endif /* ~ ifdef BASE_EXTERN_BUILD_DYNAMIC_LIB */
 #endif /* ~ ifdef BASE_EXTERN_STATIC_LIB */
 
+/* We conditionally include `errors.h' below, but `errors.h' depends upon some macros defined here in `macros.h'.
+ * The following macros must remain at the end of `macros.h' to avoid circular dependence problems.
+ */
+
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
 #  include <unistd.h>
