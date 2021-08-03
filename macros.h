@@ -104,9 +104,9 @@
      /* Nil macros. */
 #    define BASE_STATIC_ASSERT(boolean, msg)
 #    define BASE_STATIC_ASSERT_IS_NIL
-#    define BASE_ALIGNAS(align_as)
+#    define BASE_ALIGNAS(as)
 #    define BASE_ALIGNAS_IS_NIL
-#    define BASE_ALIGNOF(align_of)
+#    define BASE_ALIGNOF(of)
 #    define BASE_ALIGNOF_IS_NIL
 #  endif /* ~ #ifdef __STDC_VERSION__ */
 #endif
@@ -146,9 +146,9 @@
 #	error "Unsupported operating system."
 #endif
 
-#define BASE_INLINE static inline
-#define BASE_STRINGIFY_IMPL(s) #s
-#define BASE_STRINGIFY(s)      BASE_STRINGIFY_IMPL(s)
+#define BASE_INLINE		static inline
+#define BASE_STRINGIFY_IMPL(s)	#s
+#define BASE_STRINGIFY(s)	BASE_STRINGIFY_IMPL(s)
 
 #ifdef BASE_EXTERN_STATIC_LIB
 #  define BASE_API /* Nil */
