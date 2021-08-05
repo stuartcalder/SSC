@@ -8,7 +8,7 @@
 #include <Base/lua/macros.h>
 
 /* Base_Lua_MMap convenience macros. */
-#define BASE_LUA_MMAP_MT		"Base.MMap"
+#define BASE_LUA_MMAP_MT		"Base_MMap"
 #define BASE_LUA_MMAP_KEY		BASE_LUA_MMAP_MT /* FIXME: Deprecated. */
 #define BASE_LUA_MMAP_NEW(L)		BASE_LUA_NEW_UD(L, Base_MMap)
 #define BASE_LUA_MMAP_CHECK(L, idx)	BASE_LUA_CHECK_UD(L, idx, Base_MMap, BASE_LUA_MMAP_MT)

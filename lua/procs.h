@@ -9,7 +9,7 @@
 #include <Base/lua/macros.h>
 
 /* Base_Lua_File convenience macros. */
-#define BASE_LUA_FILE_MT		"Base.File"
+#define BASE_LUA_FILE_MT		"Base_File"
 #define BASE_LUA_FILE_KEY		BASE_LUA_FILE_MT /* FIXME: Deprecated. */
 #define BASE_LUA_FILE_NEW(L)		BASE_LUA_NEW_UD(L, Base_Lua_File)
 #define BASE_LUA_FILE_CHECK(L, idx)	BASE_LUA_CHECK_UD(L, idx, Base_Lua_File, BASE_LUA_FILE_MT)

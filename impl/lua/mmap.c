@@ -85,7 +85,9 @@ static const luaL_Reg mmap_methods[] = {
 	{"readonly" , mmap_readonly},
 	{"del"      , del_mmap},
 	{"__gc"     , del_mmap},
+#if BASE_LUA >= BASE_LUA_5_4
 	{"__close"  , del_mmap},
+#endif
 	{NULL       , NULL}
 };
 

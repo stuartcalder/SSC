@@ -54,7 +54,7 @@ BASE_INLINE void    Base_secure_zero (R_(void*) buffer, size_t size) {
 #endif
 }/* ~ Base_secure_zero */
 BASE_API    size_t  Base_ctime_memdiff (R_(const void*), R_(const void*), size_t);
-BASE_API    bool    Base_is_zero (R_(const void*), size_t);
+BASE_API    bool    Base_is_zero       (R_(const void*), size_t);
 BASE_API    bool    Base_ctime_is_zero (R_(const void*), size_t);
 BASE_END_DECLS
 #undef R_

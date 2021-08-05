@@ -29,20 +29,20 @@ static int sbuffer_new (lua_State* L) {
 		if (!(sb->p = (uint8_t*)Base_aligned_malloc(Base_MLock_g.page_size, sb->n)))
 			return luaL_error(L, "%s failed!", "Base_aligned_malloc");
 		switch (Base_mlock(sb->p, sb->n)) {
-		case 0:
-			SET_BITS_(sb->f, IS_LOCKED_);
-			break;
-		case BASE_MLOCK_ERR_OVER_MEMLIMIT:
-			/* Fail to lock silently when we cannot lock anymore. */
-			break;
-		case BASE_MLOCK_ERR_LOCK_OP:
-			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "MLock Op");
+			case 0:
+				SET_BITS_(sb->f, IS_LOCKED_);
+				break;
+			case BASE_MLOCK_ERR_OVER_MEMLIMIT:
+				/* Fail to lock silently when we cannot lock anymore. */
+				break;
+			case BASE_MLOCK_ERR_LOCK_OP:
+				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "MLock Op");
 #  ifdef BASE_EXTERN_MLOCK_THREADSAFE
-		case BASE_MLOCK_ERR_MTX_OP:
-			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Mutex Op");
+			case BASE_MLOCK_ERR_MTX_OP:
+				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Mutex Op");
 #  endif
-		default:
-			return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Invalid Base_mlock Retcode");
+			default:
+				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Invalid Base_mlock Retcode");
 		}
 	} else {
 		if (!(sb->p = (uint8_t*)malloc(sb->n)))
@@ -149,7 +149,9 @@ static const luaL_Reg sbuffer_methods[] = {
 	{"is_aligned", sbuffer_is_aligned},
 	{"del"       , sbuffer_del},
 	{"__gc"      , sbuffer_del},
+#if BASE_LUA >= BASE_LUA_5_4
 	{"__close"   , sbuffer_del},
+#endif
 #ifdef BASE_EXTERN_DEBUG
 	{"debug"     , sbuffer_debug},
 #endif

@@ -9,7 +9,7 @@
 #include <Base/lua/macros.h>
 
 /* Base_Lua_SBuffer convenience macros. */
-#define BASE_LUA_SBUFFER_MT		"Base.SBuffer"
+#define BASE_LUA_SBUFFER_MT		"Base_SBuffer"
 #define BASE_LUA_SBUFFER_KEY		BASE_LUA_SBUFFER_MT /* FIXME: Deprecated. */
 #define BASE_LUA_SBUFFER_NEW(L)		BASE_LUA_NEW_UD(L, Base_Lua_SBuffer)
 #define BASE_LUA_SBUFFER_CHECK(L, idx)	BASE_LUA_CHECK_UD(L, idx, Base_Lua_SBuffer, BASE_LUA_SBUFFER_MT)

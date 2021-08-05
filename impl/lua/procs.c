@@ -223,7 +223,9 @@ static int ptr_arithmetic (lua_State* L) {
 static const luaL_Reg file_methods[] = {
 	{"size"    , get_file_size},
 	{"close"   , close_file},
+#if BASE_LUA >= BASE_LUA_5_4
 	{"__close" , close_file},
+#endif
 	{"__gc"    , close_file},
 	{"is_open" , file_is_open},
 	{"fpath"   , file_fpath},
