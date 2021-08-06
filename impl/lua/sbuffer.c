@@ -164,7 +164,7 @@ static const luaL_Reg free_procs[] = {
 	{NULL       , NULL}
 };
 
-int luaopen_Base_SBuffer (lua_State *L) {
+int luaopen_Base_SBuffer (lua_State* L) {
 #ifdef BASE_MLOCK_H
 	switch (Base_MLock_g_init()) {
 	case 0:
@@ -177,6 +177,8 @@ int luaopen_Base_SBuffer (lua_State *L) {
 	case BASE_MLOCK_ERR_MTX_INIT:
 		return luaL_error(L, "%s failed! Error: %s", "Base_MLock_g_init", "MTX_INIT");
 #  endif
+	default:
+		return luaL_error(L, "%s failed! Error: %s", "Base_MLock_g_init", "RETCODE");
 	}
 #endif
 	if (luaL_newmetatable(L, MT_)) {
