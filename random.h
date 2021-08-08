@@ -13,8 +13,7 @@
 #	endif
 #	define BASE_GET_OS_ENTROPY_IMPL(ptr, size) { \
 		Base_File_t dev = Base_open_filepath_or_die(BASE_RANDOM_DEV, true); \
-		if (read(dev, ptr, size) != (ssize_t)size) \
-			Base_errx("Error: Failed to read from " BASE_RANDOM_DEV "\n"); \
+		Base_assert_msg((read(dev, ptr, size) == (ssize_t)size), "Error: Failed to read from " BASE_RANDOM_DEV "\n"); \
 		Base_close_file_or_die(dev); \
 	}
 #elif  defined(__gnu_linux__) || defined(__FreeBSD__)
@@ -49,19 +48,21 @@
 #	include <bcrypt.h>
 #	define BASE_GET_OS_ENTROPY_IMPL(ptr, size) { \
 		BCRYPT_ALG_HANDLE h; \
-		Base_assert_msg(BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS, \
+		Base_assert_msg((BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS), \
 		                "Error: BCryptOpenAlgorithmProvider failed.\n"); \
-		Base_assert_msg(BCryptGenRandom(h, ptr, size, 0) == STATUS_SUCCESS, \
+		Base_assert_msg((BCryptGenRandom(h, ptr, size, 0) == STATUS_SUCCESS), \
 		                "Error: BCryptGenRandom failed.\n"); \
-		Base_assert_msg(BCryptCloseAlgorithmProvider(h, 0) == STATUS_SUCCESS, \
+		Base_assert_msg((BCryptCloseAlgorithmProvider(h, 0) == STATUS_SUCCESS), \
 		                "Error: BCryptCloseAlgorithmProvider failed.\n"); \
 	}
 #else
 #	error "Unsupported OS."
 #endif
 
+#define R_(p) p BASE_RESTRICT
 BASE_BEGIN_DECLS
-BASE_API    void Base_get_os_entropy (uint8_t* BASE_RESTRICT, size_t);
+BASE_API void Base_get_os_entropy (R_(uint8_t*), size_t);
 BASE_END_DECLS
+#undef R_
 
 #endif

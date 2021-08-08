@@ -15,7 +15,7 @@
 
 #define BASE_FILES_DEFAULT_NEWFILE_SIZE 0
 
-#if    defined(BASE_OS_UNIXLIKE)
+#if defined(BASE_OS_UNIXLIKE)
 #  define BASE_CLOSE_FILE_IMPL_F close
 #  define BASE_CLOSE_FILE_IMPL(f) { return BASE_CLOSE_FILE_IMPL_F(f); }
 #  define BASE_CLOSE_FILE_INLINE
@@ -29,7 +29,8 @@
 /* On Unix-like systems, files are managed through handles, represented by integers. */
 typedef int Base_File_t;
 #  define BASE_NULL_FILE (-1)
-#elif  defined(BASE_OS_WINDOWS)
+
+#elif defined(BASE_OS_WINDOWS)
 #  define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
 #  define BASE_SET_FILE_SIZE_IMPL(f, n) { \
      LARGE_INTEGER i; \
@@ -42,6 +43,7 @@ typedef int Base_File_t;
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
 #  define BASE_NULL_FILE INVALID_HANDLE_VALUE
+
 #else
 #  error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
