@@ -16,17 +16,8 @@ enum {
  * @wordv: Word vector.
  * @offset: Offset into the first word to start reading.
  * @state:  Void pointer to data that will be modified by the procedure.
- * ->int(@x) if @x is negative, the absolute value of @x represents the number of characters
- *           of the first word that were consumed.
- *           if @x is positive, @x represents the number of whole words following 0 that were consumed.
- *           if @x is zero, only the first word was consumed.
- */
-/* @wordc: Number words: (--encrypt -iptext --output ctext).
- * @wordv: Word vector.
- * @offset: Offset into the first word to start reading.
- * @state:  Void pointer to data that will be modified by the procedure.
  * ->int(@x) Represents the number of words consumed.
- *           0  meaning "no additional" words,
+ *            0 meaning "no additional" words,
  *           -1 meaning only 1 char was consumed.
  */
 typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);

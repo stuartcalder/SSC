@@ -94,16 +94,18 @@ void Base_process_args(const int argc,   R_(char**)          argv,
 		       R_(void*) state)
 {
 	for (int arg_i = 0; arg_i < argc; ++arg_i) {
-		const int typ = Base_argtype(argv[arg_i]);
+		const int arg_left_c = argc - arg_i;
+		char**    arg_left_v = argv + arg_i;
+		const int typ = Base_argtype(arg_left_v[0]);
 		switch (typ) {
 			case BASE_ARGTYPE_SHORT: {
-				arg_i += process_shorts_(argc - arg_i, argv + arg_i, shortc, shortv, state);
+				arg_i += process_shorts_(arg_left_c, arg_left_v, shortc, shortv, state);
 			} break;
 			case BASE_ARGTYPE_LONG: {
-				arg_i += process_long_(arg - arg_i, argv + arg_i, longc, longv, state);
+				arg_i += process_long_(arg_left_c, arg_left_v, longc, longv, state);
 			} break;
 			case BASE_ARGTYPE_NONE: {
-				/* FIXME: Just ignore invalid arguments for now? */
+				Base_errx("Error: Invalid argument: %s!\n", arg_left_v[0]);
 			} break;
 		}
 	}
