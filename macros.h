@@ -177,8 +177,8 @@
 #ifdef	__OpenBSD__
 #  include <unistd.h>
 #  include "errors.h"
-#  define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()\n")
-#  define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()\n")
+#  define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()!\n")
+#  define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()!\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
 #  define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */

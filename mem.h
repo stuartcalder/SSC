@@ -55,7 +55,7 @@ BASE_API    size_t Base_get_pagesize (void);
 #endif
 
 BASE_API    void* Base_malloc_or_die  (size_t);
-BASE_API    void* Base_calloc_or_die  (size_t num_elements, size_t element_size);
+BASE_API    void* Base_calloc_or_die  (size_t n_elem, size_t elem_sz);
 BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 BASE_END_DECLS
 #undef R_

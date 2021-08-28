@@ -1,27 +1,10 @@
-/* Copyright (c) 2020 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
 #ifndef BASE_ARGS_H
 #define BASE_ARGS_H
 
-#include <stdbool.h>
 #include <stdlib.h>
 #include "macros.h"
-#define R_(ptr) ptr BASE_RESTRICT
-/* Processing arguments... A series of C strings terminate by null. abc, def, ghi, NULL
- * 	How to handle some specific argument: a handler that can change the remaining arguments, and somehow change
- * 	the rest of the program.
- */
-
-/* Argument Handlers modify some state as per received arguments.
- * 	No return value. */
-typedef void Base_Arg_Handler_f (char**, const int, R_(void*));
-/* Argument Parsers determine what argument handlers will be dispatched for some string. 
- * 	If there is no appropriate handler, return a NULL pointer. */
-typedef Base_Arg_Handler_f* Base_Arg_Parser_f (const char*);
-/* Argument Processors determine what Argument Parsers will be dispatched for some string.
- * 	If there is no valid parser, return a NULL pointer. */
-typedef Base_Arg_Parser_f* Base_Arg_Processor_f (const char*, R_(void*));
+#include "strings.h"
+#define R_(p) p BASE_RESTRICT
 
 enum {
 	BASE_ARGTYPE_NONE,
@@ -29,17 +12,60 @@ enum {
 	BASE_ARGTYPE_LONG
 };
 
-BASE_BEGIN_DECLS
-/* Base_argtype (argument string)
- * 	Return whether the argument qualifies as a short or long option, or as neither. */
-BASE_API int Base_argtype (const char*);
-/* Base_process_args (argument_count, arg_vector, processor_func_ptr, state_ptr)
- * Process arguments and classify them by their type (short option, long option, neither),
- * then dispatch the appropriate argument parsers.
- * 	No return value.
+/* @wordc: Number words: (--encrypt -iptext --output ctext).
+ * @wordv: Word vector.
+ * @offset: Offset into the first word to start reading.
+ * @state:  Void pointer to data that will be modified by the procedure.
+ * ->int(@x) if @x is negative, the absolute value of @x represents the number of characters
+ *           of the first word that were consumed.
+ *           if @x is positive, @x represents the number of whole words following 0 that were consumed.
+ *           if @x is zero, only the first word was consumed.
  */
-BASE_API void Base_process_args (const int argc, char** argv, Base_Arg_Processor_f* processor, R_(void*) state);
+/* @wordc: Number words: (--encrypt -iptext --output ctext).
+ * @wordv: Word vector.
+ * @offset: Offset into the first word to start reading.
+ * @state:  Void pointer to data that will be modified by the procedure.
+ * ->int(@x) Represents the number of words consumed.
+ *           0  meaning "no additional" words,
+ *           -1 meaning only 1 char was consumed.
+ */
+typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);
+
+enum {
+	BASE_ARG_PROC_ONECHAR = -1
+};
+
+typedef struct {
+	Base_Arg_Proc_f* proc;
+	char             ch;
+} Base_Arg_Short;
+#define BASE_ARG_SHORT_NULL_LITERAL                  (Base_Arg_Short){0}
+#define BASE_ARG_SHORT_LITERAL(procedure, character) (Base_Arg_Short){procedure, character}
+
+typedef struct {
+	Base_Arg_Proc_f* proc;
+	const char*      str;
+	size_t           str_n;
+} Base_Arg_Long;
+#define BASE_ARG_LONG_NULL_LITERAL               (Base_Arg_Long){0}
+#define BASE_ARG_LONG_LITERAL(procedure, string) (Base_Arg_Long){procedure, string, (sizeof(string) - 1)}
+
+BASE_BEGIN_DECLS
+/* Get the argument type of the string. Short? Long? Neither? */
+BASE_API int  Base_argtype(const char*);
+/* @argc:  Number of words passed in from main().
+ * @argv:  Argument vector.
+ * @shortc: Number of short options.
+ * @shortv: Short option vector.
+ * @longc: Number of long options.
+ * @longv: Long option vector.
+ * @state: Data to be modified by a registered procedure.
+ */
+BASE_API void Base_process_args(const int argc, R_(char**)            argv,
+				const int shortc, R_(Base_Arg_Short*) shortv,
+				const int longc, R_(Base_Arg_Long*)   longv,
+				R_(void*) state);
 BASE_END_DECLS
-		   
+
 #undef R_
 #endif /* ! */

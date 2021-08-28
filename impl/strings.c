@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include "errors.h"
 #include "strings.h"
 #include "operations.h"
 
@@ -19,17 +20,18 @@ int Base_shift_left_digits (R_(char*) str, const int size) {
 }
 int Base_String_init (Base_String* base_s, R_(char*) c_s, size_t size) {
 	BASE_ASSERT(base_s);
-	base_s->c_str = (char*)malloc(size + 1);
-	if (!base_s->c_str) return -1;
+	if (!(base_s->c_str = (char*)malloc(size + 1)))
+		return -1;
 	if (c_s)
 		strcpy(base_s->c_str, c_s);
 	else
-		memset(base_s->c_str, 0, size);
+		memset(base_s->c_str, 0, size + 1);
 	base_s->size = size;
 	return 0;
 }
-void Base_String_init_enforced (Base_String* base_s, R_(char*) c_s, size_t size) {
-	Base_assert_msg(!Base_String_init(base_s, c_s, size), "Error: Base_String_init failed!\n");
+void Base_String_init_or_die (Base_String* base_s, R_(char*) cstr, size_t size) {
+	Base_assert_msg(!Base_String_init(base_s, cstr, size), BASE_ERR_S_FAILED("Base_String_init"));
+	Base_assert_msg(!Base_String_init(base_s, cstr, size), "Error: Base_String_init failed!\n");
 }
 void Base_String_del (Base_String* s) {
 	BASE_ASSERT(s);

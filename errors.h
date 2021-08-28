@@ -10,7 +10,8 @@
 #include <stdlib.h>
 #include "macros.h"
 
-#define BASE_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure.\n"
+#define BASE_ERR_STR_ALLOC_FAILURE     "Error: Generic Allocation Failure.\n"
+#define BASE_ERR_S_FAILED(str)	       "Error: %s Failed!\n", str
 
 #ifdef BASE_OS_UNIXLIKE
 #  include <err.h>
@@ -34,7 +35,7 @@ BASE_API    void Base_errx_code_list (int code, R_(const char*) fmt, va_list arg
 #endif
 BASE_API    void Base_errx (R_(const char*) fmt, ...);
 BASE_API    void Base_assert_msg (bool, R_(const char*), ...);
-BASE_INLINE void Base_assert (bool b) { Base_assert_msg(b, "ERROR: Base_assert failed.\n"); }
+BASE_INLINE void Base_assert (bool b) { Base_assert_msg(b, BASE_ERR_S_FAILED("Base_assert")); }
 BASE_END_DECLS
 #undef R_
 

@@ -4,7 +4,6 @@
 #ifndef BASE_STRINGS_H
 #define BASE_STRINGS_H
 
-#include "errors.h"
 #include "macros.h"
 #include "types.h"
 
@@ -12,6 +11,7 @@ typedef struct {
 	char*  c_str;
 	size_t size;
 } Base_String;
+#define BASE_STRING_NULL_LITERAL (Base_String){NULL, 0}
 
 #define R_(ptr) ptr BASE_RESTRICT
 BASE_BEGIN_DECLS
