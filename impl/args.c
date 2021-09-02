@@ -127,10 +127,6 @@ void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
 			ctx->to_read = argv[1];
 			Base_assert_msg((ctx->size = strlen(ctx->to_read)), "Error: Zero-length option!\n");
 			ctx->consumed = 1;
-		} else {
-			ctx->to_read = NULL;
-			//FIXME
-			Base_errx("Less than 2 argc?\n");
-		}
+		} else ctx->to_read = NULL;
 	}
 }
