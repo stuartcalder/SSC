@@ -41,6 +41,13 @@ typedef struct {
 #define BASE_ARG_LONG_NULL_LITERAL               (Base_Arg_Long){0}
 #define BASE_ARG_LONG_LITERAL(procedure, string) (Base_Arg_Long){procedure, string, (sizeof(string) - 1)}
 
+typedef struct {
+	char*  to_read;
+	size_t size;
+	int    consumed;
+} Base_Arg_Parser;
+#define BASE_ARG_PARSER_NULL_LITERAL (Base_Arg_Parser){0}
+
 BASE_BEGIN_DECLS
 /* Get the argument type of the string. Short? Long? Neither? */
 BASE_API int  Base_argtype(const char*);
@@ -52,10 +59,13 @@ BASE_API int  Base_argtype(const char*);
  * @longv: Long option vector.
  * @state: Data to be modified by a registered procedure.
  */
-BASE_API void Base_process_args(const int argc, R_(char**)            argv,
-				const int shortc, R_(Base_Arg_Short*) shortv,
-				const int longc, R_(Base_Arg_Long*)   longv,
+BASE_API void Base_process_args(const int argc,   R_(char**)                argv,
+				const int shortc, R_(const Base_Arg_Short*) shortv,
+				const int longc,  R_(const Base_Arg_Long*)  longv,
 				R_(void*) state);
+BASE_API void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
+				   const int            argc, R_(char**) argv);
+
 BASE_END_DECLS
 
 #undef R_

@@ -6,6 +6,7 @@
 #if defined(BASE_OS_UNIXLIKE)
 #  include <unistd.h>
 #  include <stdlib.h>
+#  include <string.h>
 /* Base_aligned_malloc */
 #  define BASE_ALIGNED_MALLOC_IMPL(alignment, size) { \
      void* p; \
