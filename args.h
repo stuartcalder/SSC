@@ -58,11 +58,12 @@ BASE_API int  Base_argtype(const char*);
  * @longc: Number of long options.
  * @longv: Long option vector.
  * @state: Data to be modified by a registered procedure.
+ * @alone: Proc function pointer to handle "dashless" args. If NULL, we do not accept "dashless" args.
  */
 BASE_API void Base_process_args(const int argc,   R_(char**)                argv,
 				const int shortc, R_(const Base_Arg_Short*) shortv,
 				const int longc,  R_(const Base_Arg_Long*)  longv,
-				R_(void*) state);
+				R_(void*) state,  Base_Arg_Proc_f*          alone);
 BASE_API void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
 				   const int            argc, R_(char**) argv);
 BASE_INLINE int Base_1opt(const char ch) { if (ch) return BASE_ARG_PROC_ONECHAR; return 0; }

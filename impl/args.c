@@ -92,21 +92,24 @@ int process_long_(const int argc,  R_(char**)               argv,
 void Base_process_args(const int argc,   R_(char**)                argv,
 		       const int shortc, R_(const Base_Arg_Short*) shortv,
 		       const int longc,  R_(const Base_Arg_Long*)  longv,
-		       R_(void*) state)
+		       R_(void*) state,  Base_Arg_Proc_f*          alone)
 {
 	for (int arg_i = 0; arg_i < argc; ++arg_i) {
-		const int arg_left_c = argc - arg_i;
-		char**    arg_left_v = argv + arg_i;
-		const int typ = Base_argtype(arg_left_v[0]);
+		const int argc_left = argc - arg_i;
+		char**    argv_left = argv + arg_i;
+		const int typ = Base_argtype(argv_left[0]);
 		switch (typ) {
 			case BASE_ARGTYPE_SHORT: {
-				arg_i += process_shorts_(arg_left_c, arg_left_v, shortc, shortv, state);
+				arg_i += process_shorts_(argc_left, argv_left, shortc, shortv, state);
 			} break;
 			case BASE_ARGTYPE_LONG: {
-				arg_i += process_long_(arg_left_c, arg_left_v, longc, longv, state);
+				arg_i += process_long_(argc_left, argv_left, longc, longv, state);
 			} break;
 			case BASE_ARGTYPE_NONE: {
-				Base_errx("Error: Invalid argument: %s!\n", arg_left_v[0]);
+				if (alone) {
+					arg_i += alone(argc_left, argv_left, strlen(argv_left[0]), state);
+				} else
+					Base_errx("Error: Invalid argument: %s!\n", argv_left[0]);
 			} break;
 		}
 	}
