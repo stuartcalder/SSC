@@ -10,8 +10,9 @@
 #include <stdlib.h>
 #include "macros.h"
 
-#define BASE_ERR_STR_ALLOC_FAILURE     "Error: Generic Allocation Failure.\n"
-#define BASE_ERR_S_FAILED(str)	       "Error: %s Failed!\n", str
+#define BASE_ERR_STR_ALLOC_FAILURE	"Error: Generic Allocation Failure.\n"
+#define BASE_ERR_S_GENERIC(str)		"Error: %s!\n", str
+#define BASE_ERR_S_FAILED(str)		"Error: %s Failed!\n", str
 
 #ifdef BASE_OS_UNIXLIKE
 #  include <err.h>

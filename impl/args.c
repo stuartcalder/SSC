@@ -125,7 +125,7 @@ void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
 		if (argc >= 2) {
 		/* There is a next word. Assume this next word has the input we want. */
 			ctx->to_read = argv[1];
-			Base_assert_msg((ctx->size = strlen(ctx->to_read)), "Error: Zero-length option!\n");
+			ctx->size = strlen(ctx->to_read);
 			ctx->consumed = 1;
 		} else ctx->to_read = NULL;
 	}
