@@ -107,7 +107,7 @@ void Base_process_args(const int argc,   R_(char**)                argv,
 			} break;
 			case BASE_ARGTYPE_NONE: {
 				if (alone) {
-					arg_i += alone(argc_left, argv_left, strlen(argv_left[0]), state);
+					arg_i += alone(argc_left, argv_left, 0, state);
 				} else
 					Base_errx("Error: Invalid argument: %s!\n", argv_left[0]);
 			} break;
