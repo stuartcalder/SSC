@@ -123,9 +123,9 @@ int Base_set_file_size (Base_File_t file, size_t size) BASE_SET_FILE_SIZE_IMPL(f
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */
 
 #ifdef BASE_OS_UNIXLIKE
-#	define ERROR_	"Error: Base_enforce_set_file_size failed with fd %d; size %zd.\n", file, size
+#	define ERROR_	"Error: Base_enforce_set_file_size failed with fd %d; size %zu.\n", file, size
 #else
-#	define ERROR_	"Error: Base_enforce_set_file_size failed with size %zd.\n", size
+#	define ERROR_	"Error: Base_enforce_set_file_size failed with size %zu.\n", size
 #endif
 void Base_set_file_size_or_die (Base_File_t file, size_t size) {
 	Base_assert_msg(!Base_set_file_size(file, size), ERROR_);
