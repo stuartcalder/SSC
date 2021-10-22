@@ -152,7 +152,7 @@
 
 #ifdef BASE_EXTERN_STATIC_LIB
 #  define BASE_API /* Nil */
-#  define BSAE_API_IS_NIL
+#  define BASE_API_IS_NIL
 #else
 #  ifdef BASE_EXTERN_BUILD_DYNAMIC_LIB
 #    define BASE_API BASE_EXPORT
