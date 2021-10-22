@@ -48,11 +48,11 @@
 #	include <bcrypt.h>
 #	define BASE_GET_OS_ENTROPY_IMPL(ptr, size) { \
 		BCRYPT_ALG_HANDLE h; \
-		Base_assert_msg((BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS), \
+		Base_assert_msg(BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS, \
 		                BASE_ERR_S_FAILED("BCryptOpenAlgorithmProvider")); \
-		Base_assert_msg((BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS), \
+		Base_assert_msg(BCryptGenRandom(h, ptr, size, 0) == STATUS_SUCCESS, \
 		                BASE_ERR_S_FAILED("BCryptGenRandom")); \
-		Base_assert_msg((BCryptOpenAlgorithmProvider(&h, L"RNG", NULL, 0) == STATUS_SUCCESS), \
+		Base_assert_msg(BCryptCloseAlgorithmProvider(h, 0) == STATUS_SUCCESS, \
 		                BASE_ERR_S_FAILED("BCryptCloseAlgorithmProvider")); \
 	}
 #else
