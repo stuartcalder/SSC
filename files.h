@@ -33,8 +33,7 @@ typedef int Base_File_t;
 #elif defined(BASE_OS_WINDOWS)
 #  define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
 #  define BASE_SET_FILE_SIZE_IMPL(f, n) { \
-     LARGE_INTEGER i; \
-     i.QuadPart = n; \
+     LARGE_INTEGER i; i.QuadPart = n; \
      if (!SetFilePointerEx(f, i, NULL, FILE_BEGIN) || !SetEndOfFile(f)) \
        return -1; \
      return 0; \

@@ -46,8 +46,10 @@ int Base_MMap_unmap (Base_MMap* map) {
 	int ret;
 #if    defined(BASE_OS_UNIXLIKE)
 	ret = munmap(map->ptr, map->size);
-	if (!ret)
+	if (!ret) {
 		map->ptr = NULL;
+		map->readonly = UINT8_C(0);
+	}
 #elif  defined(BASE_OS_WINDOWS)
 	ret = 0;
 	if (!UnmapViewOfFile((LPCVOID)map->ptr))
@@ -58,11 +60,11 @@ int Base_MMap_unmap (Base_MMap* map) {
 		ret = -1;
 	else
 		map->win_fmapping = BASE_NULL_FILE;
+	if (!ret)
+		map->readonly = UINT8_C(0);
 #else
 #	error "Unsupported operating system."
 #endif
-	if (!ret)
-		map->readonly = UINT8_C(0);
 	return ret;
 }
 

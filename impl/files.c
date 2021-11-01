@@ -69,17 +69,15 @@ void Base_force_filepath_existence_or_die (R_(const char*) filepath, bool force_
 
 int Base_open_filepath (R_(const char*) filepath, bool readonly, R_(Base_File_t*) file) {
 #if    defined(BASE_OS_UNIXLIKE)
-	int read_write_rights = readonly ? O_RDONLY : O_RDWR;
+	const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
 	*file = open(filepath, read_write_rights, (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
-	DWORD read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
+	const DWORD read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
 	*file = CreateFileA(filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 #else
 #	error "Unsupported operating system."
 #endif
-	if (*file == BASE_NULL_FILE)
-		return -1;
-	return 0;
+	return (*file != BASE_NULL_FILE) ? 0 : -1;
 }
 
 Base_File_t Base_open_filepath_or_die (R_(const char*) filepath, bool readonly) {
@@ -96,8 +94,7 @@ int Base_create_filepath (R_(const char*) filepath, R_(Base_File_t*) file) {
 #else
 #	error "Unsupported operating system."
 #endif
-	if (*file == BASE_NULL_FILE) return -1;
-	return 0;
+	return (*file != BASE_NULL_FILE) ? 0 : -1;
 }
 
 Base_File_t Base_create_filepath_or_die (const char* filepath) {
