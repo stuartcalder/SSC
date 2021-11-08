@@ -97,7 +97,7 @@ void Base_process_args(const int argc,   R_(char**)                argv,
 	for (int arg_i = 0; arg_i < argc; ++arg_i) {
 		const int argc_left = argc - arg_i;
 		char**    argv_left = argv + arg_i;
-		const int typ = Base_argtype(argv_left[0]);
+		const int typ = Base_argtype(*argv_left);
 		switch (typ) {
 			case BASE_ARGTYPE_SHORT: {
 				arg_i += process_shorts_(argc_left, argv_left, shortc, shortv, state);
@@ -106,10 +106,10 @@ void Base_process_args(const int argc,   R_(char**)                argv,
 				arg_i += process_long_(argc_left, argv_left, longc, longv, state);
 			} break;
 			case BASE_ARGTYPE_NONE: {
-				if (alone) {
+				if (alone)
 					arg_i += alone(argc_left, argv_left, 0, state);
-				} else
-					Base_errx("Error: Invalid argument: %s!\n", argv_left[0]);
+				else
+					Base_errx("Error: Invalid argument: %s!\n", *argv_left);
 			} break;
 		}
 	}

@@ -14,7 +14,7 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 		page_rw = PAGE_READONLY;
 		map_rw  = FILE_MAP_READ;
 	} else {
-		pagw_rw = PAGE_READWRITE;
+		page_rw = PAGE_READWRITE;
 		map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);
 	}
 
