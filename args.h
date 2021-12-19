@@ -22,9 +22,7 @@ enum {
  */
 typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);
 
-enum {
-	BASE_ARG_PROC_ONECHAR = -1
-};
+enum { BASE_ARG_PROC_ONECHAR = -1 };
 
 typedef struct {
 	Base_Arg_Proc_f* proc;

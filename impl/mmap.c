@@ -34,7 +34,7 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 #else
 #	error "Unsupported operating system."
 #endif
-	map->readonly = (uint8_t)readonly;
+	map->readonly = readonly ? UINT8_C(1) : UINT8_C(0);
 	return 0;
 }
 

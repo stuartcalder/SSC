@@ -1,7 +1,7 @@
 #include "print.h"
 
 #define R_(ptr) ptr BASE_RESTRICT
-void Base_print_bytes (R_(uint8_t*) bytes, size_t n_bytes) {
+void Base_print_bytes (R_(const uint8_t*) bytes, size_t n_bytes) {
 	BASE_ASSERT(bytes);
 	if (!n_bytes) return;
 	const uint8_t* alias = bytes;

@@ -12,7 +12,9 @@
 #elif  defined(__NetBSD__)
 #	include <machine/bswap.h>
 #elif  defined(__gnu_linux__)
+#   if 0
 #	include <byteswap.h>
+#   endif
 #elif  defined(BASE_OS_MAC)
 #	define BASE_SWAP_DONT_INLINE
 #	define BASE_SWAP_NO_NATIVE_FUNCTIONS
@@ -29,9 +31,9 @@
 #	define BASE_SWAP_32_IMPL(u32) { return bswap32(u32); }
 #	define BASE_SWAP_64_IMPL(u64) { return bswap64(u64); }
 #elif  defined(__gnu_linux__)
-#	define BASE_SWAP_16_IMPL(u16) { return bswap_16(u16); }
-#	define BASE_SWAP_32_IMPL(u32) { return bswap_32(u32); }
-#	define BASE_SWAP_64_IMPL(u64) { return bswap_64(u64); }
+#	define BASE_SWAP_16_IMPL(u16) { return __builtin_bswap16(u16); }
+#	define BASE_SWAP_32_IMPL(u32) { return __builtin_bswap32(u32); }
+#	define BASE_SWAP_64_IMPL(u64) { return __builtin_bswap64(u64); }
 #elif  defined(BASE_OS_WINDOWS)
 #	define BASE_SWAP_16_IMPL(u16) { return _byteswap_ushort(u16); }
 #	define BASE_SWAP_32_IMPL(u32) { return _byteswap_ulong(u32); }

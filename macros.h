@@ -7,6 +7,10 @@
 #define BASE_RESTRICT_IMPL_C	(1u << 0) /*   restrict */
 #define BASE_RESTRICT_IMPL_CPP	(1u << 1) /* __restrict */
 
+#define BASE_ENDIAN_LITTLE   0
+#define BASE_ENDIAN_BIG      1
+#define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
+
 /* Operating System Macros */
 #if defined(__APPLE__) && defined(__MACH__)
 #  define BASE_OS_MAC
@@ -43,6 +47,54 @@
 #define BASE_CPP_14      201402L
 #define BASE_CPP_17      201703L
 #define BASE_CPP_20      202002L
+
+/* Architecture macros. */
+#if defined(__amd64__) || defined(__x86_64__) || defined (_M_X64) || defined(_M_AMD64)
+# define BASE_ARCH_AMD64
+# define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# define BASE_WORD_BYTES 8
+# define BASE_WORD_BITS  64
+#elif defined(__aarch64__) || defined (_M_ARM64)
+# define BASE_ARCH_ARM64
+# ifdef BASE_EXTERN_ENDIAN
+#  define BASE_ENDIAN BASE_EXTERN_ENDIAN
+# else
+#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
+# endif
+# define BASE_WORD_BYTES 8
+# define BASE_WORD_BITS  64
+#elif defined(__i386__) || defined (_M_IX86)
+# define BASE_ARCH_X86
+# define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# define BASE_WORD_BYTES 4
+# define BASE_WORD_BITS  32
+#elif defined(__arm__) || defined(_M_ARM)
+# define BASE_ARCH_ARM32
+# ifdef BASE_EXTERN_ENDIAN
+#  define BASE_ENDIAN BASE_EXTERN_ENDIAN
+# else
+#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
+# endif
+# define BASE_WORD_BYTES 4
+# define BASE_WORD_BITS  32
+#else
+# define BASE_ARCH_UNKNOWN
+# ifndef BASE_ENDIAN
+#  ifdef BASE_EXTERN_ENDIAN
+#   define BASE_ENDIAN BASE_EXTERN_ENDIAN
+#  else
+#   error "Unknown arch! BASE_EXTERN_ENDIAN undefined!"
+#  endif
+# endif
+# ifndef BASE_WORD_BYTES
+#  ifdef BASE_EXTERN_WORD_BYTES
+#   define BASE_WORD_BYTES BASE_EXTERN_WORD_BYTES
+#  else
+#   error "Unknown arch! BASE_EXTERN_WORD_BYTES undefined!"
+#  endif
+# endif
+# define BASE_WORD_BITS (BASE_WORD_BYTES * CHAR_BIT)
+#endif
 
 /* Simplification Macros */
 #ifdef __cplusplus

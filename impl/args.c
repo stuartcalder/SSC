@@ -4,13 +4,14 @@
 
 #define R_(p) p BASE_RESTRICT
 
-typedef Base_Arg_Short Short_t;
-typedef Base_Arg_Long  Long_t;
+typedef Base_Arg_Short  Short_t;
+typedef Base_Arg_Long   Long_t;
+typedef Base_Arg_Parser Parser_t;
 
 static int short_match_(const int, R_(const Short_t*), char);
 static int long_match_(const int, R_(const Long_t*), const size_t, R_(char*));
 static int process_shorts_(const int, R_(char**), const int, R_(const Short_t*), R_(void*));
-static int process_long_(const int, R_(char**), const int, R_(const Long_t*), R_(void*));
+static int process_longs_(const int, R_(char**), const int, R_(const Long_t*), R_(void*));
 
 int Base_argtype(const char* s) {
 	int n_hyphens = 0;
@@ -30,15 +31,15 @@ skip:
 
 enum { NOMATCH_ = -1 };
 
-int short_match_(const int shortc, R_(const Base_Arg_Short*) shortv, char ch) {
+int short_match_(const int shortc, R_(const Short_t*) shortv, char ch) {
 	for (int shorti = 0; shorti < shortc; ++shorti)
 		if (shortv[shorti].ch == ch)
 			return shorti;
 	return NOMATCH_;
 }
 
-int long_match_(const int    longc, R_(const Base_Arg_Long*) longv,
-		const size_t str_n, R_(char*)                str)
+int long_match_(const int    longc, R_(const Long_t*) longv,
+		const size_t str_n, R_(char*)         str)
 {
 	for (int longi = 0; longi < longc; ++longi) {
 		if (str_n != longv[longi].str_n)
@@ -54,8 +55,8 @@ int long_match_(const int    longc, R_(const Base_Arg_Long*) longv,
 	return NOMATCH_;
 }
 
-int process_shorts_(const int argc,   R_(char**)                argv,
-		    const int shortc, R_(const Base_Arg_Short*) shortv,
+int process_shorts_(const int argc,   R_(char**)         argv,
+		    const int shortc, R_(const Short_t*) shortv,
 		    R_(void*) state)
 {
 	if (!argc) return 0; /* Are there arguments? */
@@ -76,9 +77,9 @@ int process_shorts_(const int argc,   R_(char**)                argv,
 	return 0;
 }
 
-int process_long_(const int argc,  R_(char**)               argv,
-		  const int longc, R_(const Base_Arg_Long*) longv,
-		  R_(void*) state)
+int process_longs_(const int argc,  R_(char**)        argv,
+		   const int longc, R_(const Long_t*) longv,
+		   R_(void*) state)
 {
 	if (!argc) return 0; /* Are there arguments? */
 	const int len = (int)strlen(argv[0]);
@@ -89,10 +90,10 @@ int process_long_(const int argc,  R_(char**)               argv,
 	return (longv[long_i].proc)(argc, argv, len, state);
 }
 
-void Base_process_args(const int argc,   R_(char**)                argv,
-		       const int shortc, R_(const Base_Arg_Short*) shortv,
-		       const int longc,  R_(const Base_Arg_Long*)  longv,
-		       R_(void*) state,  Base_Arg_Proc_f*          alone)
+void Base_process_args(const int argc,   R_(char**)         argv,
+		       const int shortc, R_(const Short_t*) shortv,
+		       const int longc,  R_(const Long_t*)  longv,
+		       R_(void*) state,  Base_Arg_Proc_f*   alone)
 {
 	for (int arg_i = 0; arg_i < argc; ++arg_i) {
 		const int argc_left = argc - arg_i;
@@ -103,7 +104,7 @@ void Base_process_args(const int argc,   R_(char**)                argv,
 				arg_i += process_shorts_(argc_left, argv_left, shortc, shortv, state);
 			} break;
 			case BASE_ARGTYPE_LONG: {
-				arg_i += process_long_(argc_left, argv_left, longc, longv, state);
+				arg_i += process_longs_(argc_left, argv_left, longc, longv, state);
 			} break;
 			case BASE_ARGTYPE_NONE: {
 				if (alone)
@@ -115,8 +116,8 @@ void Base_process_args(const int argc,   R_(char**)                argv,
 	}
 }
 
-void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
-			  const int            argc, R_(char**) argv)
+void Base_Arg_Parser_init(R_(Parser_t*) ctx,  R_(char*)  start,
+			  const int     argc, R_(char**) argv)
 {
 	ctx->consumed = 0;
 	if (*start) {

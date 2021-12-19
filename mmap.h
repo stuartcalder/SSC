@@ -20,6 +20,7 @@
 #else
 #  error "Unsupported operating system."
 #endif /* ~ if defined(BASE_OS_UNIXLIKE) or defined(BASE_OS_WINDOWS) */
+BASE_BEGIN_DECLS
 
 typedef struct {
 	uint8_t*    ptr;
@@ -30,14 +31,11 @@ typedef struct {
 #endif /* ~ ifdef BASE_OS_WINDOWS */
 	uint8_t     readonly;
 } Base_MMap;
-
 #ifdef BASE_OS_WINDOWS
 #  define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0}
 #else
 #  define BASE_MMAP_NULL_LITERAL (Base_MMap){NULL, 0, BASE_NULL_FILE, 0}
 #endif
-
-BASE_BEGIN_DECLS
 BASE_API    int  Base_MMap_map (Base_MMap*, bool);
 BASE_API    void Base_MMap_map_or_die (Base_MMap*, bool);
 BASE_API    int  Base_MMap_unmap (Base_MMap*);
@@ -48,6 +46,6 @@ BASE_INLINE int  Base_MMap_sync (const Base_MMap* m) BASE_MMAP_SYNC_IMPL(m)
 BASE_API    int  Base_MMap_sync (const Base_MMap*);
 #endif
 BASE_API    void Base_MMap_sync_or_die (const Base_MMap*);
-BASE_END_DECLS
 
+BASE_END_DECLS
 #endif /* ~ BASE_MMAP_H */
