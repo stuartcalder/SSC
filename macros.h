@@ -6,7 +6,7 @@
 /* Flags to indicate support for restricting pointers. */
 #define BASE_RESTRICT_IMPL_C	(1u << 0) /*   restrict */
 #define BASE_RESTRICT_IMPL_CPP	(1u << 1) /* __restrict */
-
+/* Endianness. */
 #define BASE_ENDIAN_LITTLE   0
 #define BASE_ENDIAN_BIG      1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
@@ -48,43 +48,60 @@
 #define BASE_CPP_17      201703L
 #define BASE_CPP_20      202002L
 
+/* Endian macros. */
+#if !defined(BASE_ENDIAN) && defined(BASE_EXTERN_ENDIAN)
+  /* External definition trumps all endian detection methods. */
+# define BASE_ENDIAN BASE_EXTERN_ENDIAN
+#endif
+/* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
+#if !defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && defined (__ORDER_BIG_ENDIAN__) && defined (__ORDER_LITTLE_ENDIAN__)
+# if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#  define BASE_ENDIAN BASE_ENDIAN_BIG
+# else
+#  error "Invalid __BYTE_ORDER__ !"
+# endif
+#endif
+
 /* Architecture macros. */
-#if defined(__amd64__) || defined(__x86_64__) || defined (_M_X64) || defined(_M_AMD64)
+#if defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined (_M_X64) || defined(_M_AMD64)
+# define BASE_ARCH "amd64"
 # define BASE_ARCH_AMD64
-# define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# ifndef BASE_ENDIAN
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# endif
 # define BASE_WORD_BYTES 8
 # define BASE_WORD_BITS  64
 #elif defined(__aarch64__) || defined (_M_ARM64)
+# define BASE_ARCH "arm64"
 # define BASE_ARCH_ARM64
-# ifdef BASE_EXTERN_ENDIAN
-#  define BASE_ENDIAN BASE_EXTERN_ENDIAN
-# else
+# ifndef BASE_ENDIAN
 #  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 # endif
 # define BASE_WORD_BYTES 8
 # define BASE_WORD_BITS  64
 #elif defined(__i386__) || defined (_M_IX86)
+# define BASE_ARCH "x86"
 # define BASE_ARCH_X86
-# define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# ifndef BASE_ENDIAN
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# endif
 # define BASE_WORD_BYTES 4
 # define BASE_WORD_BITS  32
 #elif defined(__arm__) || defined(_M_ARM)
-# define BASE_ARCH_ARM32
-# ifdef BASE_EXTERN_ENDIAN
-#  define BASE_ENDIAN BASE_EXTERN_ENDIAN
-# else
+# define BASE_ARCH "armv7"
+# define BASE_ARCH_ARMV7
+# ifndef BASE_ENDIAN
 #  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 # endif
 # define BASE_WORD_BYTES 4
 # define BASE_WORD_BITS  32
 #else
+# define BASE_ARCH "unknown"
 # define BASE_ARCH_UNKNOWN
 # ifndef BASE_ENDIAN
-#  ifdef BASE_EXTERN_ENDIAN
-#   define BASE_ENDIAN BASE_EXTERN_ENDIAN
-#  else
-#   error "Unknown arch! BASE_EXTERN_ENDIAN undefined!"
-#  endif
+#  error "BASE_ENDIAN undefined!"
 # endif
 # ifndef BASE_WORD_BYTES
 #  ifdef BASE_EXTERN_WORD_BYTES
@@ -96,7 +113,7 @@
 # define BASE_WORD_BITS (BASE_WORD_BYTES * CHAR_BIT)
 #endif
 
-/* Simplification Macros */
+/* C/C++ Interoperability Macros */
 #ifdef __cplusplus
 #  define BASE_LANG_CPP __cplusplus
 #  define BASE_LANG     BASE_LANG_CPP
@@ -163,6 +180,7 @@
 #  endif /* ~ #ifdef __STDC_VERSION__ */
 #endif
 
+/* Can we restrict pointers? C++ or C99 style? */
 #ifndef BASE_RESTRICT_IMPL
 #  error "BASE_RESTRICT_IMPL undefined!"
 #endif

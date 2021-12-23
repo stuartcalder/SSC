@@ -39,22 +39,25 @@
 #	define BASE_SWAP_32_IMPL(u32) { return _byteswap_ulong(u32); }
 #	define BASE_SWAP_64_IMPL(u64) { return _byteswap_uint64(u64); }
 #elif  defined(BASE_SWAP_NO_NATIVE_FUNCTIONS)
-#	define BASE_SWAP_16_IMPL(u16) { return (u16 >> 8) | (u16 << 8); }
+#	define BASE_SWAP_16_IMPL(u16) { \
+		return ( (u16 & UINT16_C(0xff00)) >> 8 | \
+                         (u16 & UINT16_C(0x00ff)) << 8 ); \
+	}
 #	define BASE_SWAP_32_IMPL(u32) { \
-		return ( (u32 >> (3 * 8)) | \
-			((u32 >> (    8)) & UINT32_C(0x0000ff00)) | \
-			((u32 << (    8)) & UINT32_C(0x00ff0000)) | \
-			 (u32 << (3 * 8)) ); \
+		return ( (u32 & UINT32_C(0xff000000)) >> (8 * 3) | \
+		         (u32 & UINT32_C(0x00ff0000)) >> (8 * 1) | \
+			 (u32 & UINT32_C(0x0000ff00)) << (8 * 1) | \
+			 (u32 & UINT32_C(0x000000ff)) << (8 * 3) ); \
 	}
 #	define BASE_SWAP_64_IMPL(u64) { \
-		return ( (u64 >> (7 * 8)) | \
-			((u64 >> (5 * 8)) & UINT64_C(0x000000000000ff00)) | \
-			((u64 >> (3 * 8)) & UINT64_C(0x0000000000ff0000)) | \
-			((u64 >> (    8)) & UINT64_C(0x00000000ff000000)) | \
-			((u64 << (    8)) & UINT64_C(0x000000ff00000000)) | \
-			((u64 << (3 * 8)) & UINT64_C(0x0000ff0000000000)) | \
-			((u64 << (5 * 8)) & UINT64_C(0x00ff000000000000)) | \
-			 (u64 << (7 * 8)) ); \
+		return ( (u64 & UINT64_C(0xff00000000000000)) >> (8 * 7) | \
+		         (u64 & UINT64_C(0x00ff000000000000)) >> (8 * 5) | \
+			 (u64 & UINT64_C(0x0000ff0000000000)) >> (8 * 3) | \
+			 (u64 & UINT64_C(0x000000ff00000000)) >> (8 * 1) | \
+			 (u64 & UINT64_C(0x00000000ff000000)) << (8 * 1) | \
+			 (u64 & UINT64_C(0x0000000000ff0000)) << (8 * 3) | \
+			 (u64 & UINT64_C(0x000000000000ff00)) << (8 * 5) | \
+			 (u64 & UINT64_C(0x00000000000000ff)) << (8 * 7) ); \
 	}
 #else
 #	error "Unsupported."

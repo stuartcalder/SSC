@@ -10,7 +10,7 @@
 #include "macros.h"
 
 BASE_BEGIN_DECLS
-BASE_API void Base_print_bytes (const uint8_t* BASE_RESTRICT, size_t);
+BASE_API void Base_print_bytes (const void* BASE_RESTRICT, size_t);
 BASE_END_DECLS
 
 #endif // ~ BASE_PRINT_H
