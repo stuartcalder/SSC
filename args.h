@@ -5,12 +5,13 @@
 #include "macros.h"
 #include "strings.h"
 #define R_(p) p BASE_RESTRICT
+BASE_BEGIN_C_DECLS
 
-enum {
-	BASE_ARGTYPE_NONE,
-	BASE_ARGTYPE_SHORT,
-	BASE_ARGTYPE_LONG
-};
+typedef enum {
+  BASE_ARGTYPE_NONE  = 0,
+  BASE_ARGTYPE_SHORT = 1,
+  BASE_ARGTYPE_LONG  = 2
+} Base_ArgType_t;
 
 /* @wordc: Number words: (--encrypt -iptext --output ctext).
  * @wordv: Word vector.
@@ -46,9 +47,16 @@ typedef struct {
 } Base_Arg_Parser;
 #define BASE_ARG_PARSER_NULL_LITERAL (Base_Arg_Parser){0}
 
-BASE_BEGIN_DECLS
+typedef enum {
+  BASE_ARG_PARSER_FLAG_NONE           = 0x0000, /* Passing no flags. */
+  BASE_ARG_PARSER_FLAG_EQUALS_ISVALID = 0x0001  /* '=' is a valid character, not indicative of assignment. */
+} Base_Arg_Parser_Flag_t;
+
 /* Get the argument type of the string. Short? Long? Neither? */
-BASE_API int  Base_argtype(const char*);
+BASE_API Base_ArgType_t
+Base_argtype
+(const char*);
+
 /* @argc:  Number of words passed in from main().
  * @argv:  Argument vector.
  * @shortc: Number of short options.
@@ -58,16 +66,26 @@ BASE_API int  Base_argtype(const char*);
  * @state: Data to be modified by a registered procedure.
  * @alone: Proc function pointer to handle "dashless" args. If NULL, we do not accept "dashless" args.
  */
-BASE_API void Base_process_args(const int argc,   R_(char**)                argv,
-				const int shortc, R_(const Base_Arg_Short*) shortv,
-				const int longc,  R_(const Base_Arg_Long*)  longv,
-				R_(void*) state,  Base_Arg_Proc_f*          alone);
-BASE_API void Base_Arg_Parser_init(R_(Base_Arg_Parser*) ctx,  R_(char*)  start,
-				   const int            argc, R_(char**) argv);
-BASE_INLINE int Base_1opt(const char ch) { if (ch) return BASE_ARG_PROC_ONECHAR; return 0; }
+BASE_API void
+Base_process_args
+(const int argc,   R_(char**)                argv,
+ const int shortc, R_(const Base_Arg_Short*) shortv,
+ const int longc,  R_(const Base_Arg_Long*)  longv,
+ R_(void*) state,  Base_Arg_Proc_f*          alone);
 
+BASE_API void
+Base_Arg_Parser_init
+(R_(Base_Arg_Parser*) ctx,
+ R_(char*)            start,
+ const int            argc,
+ R_(char**)           argv);
 
-BASE_END_DECLS
+BASE_INLINE int
+Base_1opt
+(const char ch)
+{ if (ch) return BASE_ARG_PROC_ONECHAR; return 0; }
+
+BASE_END_C_DECLS
 
 #undef R_
 #endif /* ! */

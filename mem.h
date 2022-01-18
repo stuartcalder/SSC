@@ -1,9 +1,10 @@
 #ifndef BASE_MEM_H
 #define BASE_MEM_H
 
+#include <stdint.h>
+#include <string.h>
 #include "macros.h"
 #include "swap.h"
-#include <stdint.h>
 
 #if defined(BASE_OS_UNIXLIKE)
 #  include <unistd.h>
@@ -41,7 +42,7 @@
 #endif
 
 #define R_(p) p BASE_RESTRICT
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 
 #ifdef BASE_ALIGNED_MALLOC_INLINE
 BASE_INLINE void*  Base_aligned_malloc (size_t alignment, size_t size) BASE_ALIGNED_MALLOC_IMPL(alignment, size)
@@ -64,31 +65,31 @@ BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 
 #define BASE_LOAD_NATIVE_IMPL(ptr, bits) { \
  uint##bits##_t val; \
- memcpy(&val, (ptr), sizeof(val)); \
+ memcpy(&val, ptr, sizeof(val)); \
  return val; \
 }
 #define BASE_LOAD_SWAP_IMPL(ptr, bits) { \
  uint##bits##_t val; \
- memcpy(&val, (ptr), sizeof(val)); \
+ memcpy(&val, ptr, sizeof(val)); \
  return Base_swap_##bits(val); \
 }
-#define BASE_STORE_NATIVE_IMPL(ptr, val, bits) { \
- memcpy((ptr), &val, sizeof(uint##bits##_t)); \
+#define BASE_STORE_NATIVE_IMPL(ptr, val) { \
+ memcpy(ptr, &val, sizeof(val)); \
 }
 #define BASE_STORE_SWAP_IMPL(ptr, val, bits) { \
  val = Base_swap_##bits(val); \
- memcpy((ptr), &val, sizeof(uint##bits##_t)); \
+ memcpy(ptr, &val, sizeof(val)); \
 }
 
-#if   BASE_ENDIAN == BASE_ENDIAN_LITTLE
-# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val, bits)
-# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
+#if   (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
+# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
 # define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
+# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
 # define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
-#elif BASE_ENDIAN == BASE_ENDIAN_BIG
+#elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
 # define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
-# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val, bits)
 # define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
+# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
 # define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
 #else
 # error "Invalid byte-order!"
@@ -113,7 +114,7 @@ BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL(mem, 64)
 #undef BASE_STORE_LE_IMPL
 #undef BASE_STORE_BE_IMPL
 
-BASE_END_DECLS
+BASE_END_C_DECLS
 #undef R_
 
 #endif /* ! */

@@ -20,7 +20,7 @@
 #else
 #  error "Unsupported operating system."
 #endif /* ~ if defined(BASE_OS_UNIXLIKE) or defined(BASE_OS_WINDOWS) */
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 
 typedef struct {
 	uint8_t*    ptr;
@@ -47,5 +47,5 @@ BASE_API    int  Base_MMap_sync (const Base_MMap*);
 #endif
 BASE_API    void Base_MMap_sync_or_die (const Base_MMap*);
 
-BASE_END_DECLS
+BASE_END_C_DECLS
 #endif /* ~ BASE_MMAP_H */

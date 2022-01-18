@@ -35,7 +35,7 @@
 	} while (0)
 
 #define R_(ptr) ptr BASE_RESTRICT
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 BASE_API    void    Base_xor_16  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_32  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_64  (R_(void*), R_(const void*));
@@ -56,7 +56,7 @@ BASE_INLINE void    Base_secure_zero (R_(void*) buffer, size_t size) {
 BASE_API    size_t  Base_ctime_memdiff (R_(const void*), R_(const void*), size_t);
 BASE_API    bool    Base_is_zero       (R_(const void*), size_t);
 BASE_API    bool    Base_ctime_is_zero (R_(const void*), size_t);
-BASE_END_DECLS
+BASE_END_C_DECLS
 #undef R_
 
 #endif /* ~ ifndef BASE_OPERATIONS_H */

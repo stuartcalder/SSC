@@ -22,8 +22,8 @@ typedef struct {
 
 #define BASE_LUA_FILE_NULL_LITERAL (Base_Lua_File){BASE_NULL_FILE, 0, NULL, 0, 0}
 
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 BASE_API int luaopen_Base_Procs (lua_State* L);
-BASE_END_DECLS
+BASE_END_C_DECLS
 
 #endif

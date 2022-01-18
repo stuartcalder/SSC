@@ -20,26 +20,28 @@
 #	include <sys/random.h>
 #	define BASE_RANDOM_MAX 256
 #	define BASE_GET_OS_ENTROPY_IMPL(ptr, size) { \
+		uint8_t* p = (uint8_t*)ptr; \
 		while (size > BASE_RANDOM_MAX) { \
-			if (getrandom(ptr, BASE_RANDOM_MAX, 0) != (ssize_t)BASE_RANDOM_MAX) \
+			if (getrandom(p, BASE_RANDOM_MAX, 0) != (ssize_t)BASE_RANDOM_MAX) \
 				Base_errx(BASE_ERR_S_FAILED("getrandom")); \
 			size -= BASE_RANDOM_MAX; \
-			ptr  += BASE_RANDOM_MAX; \
+			p    += BASE_RANDOM_MAX; \
 		} \
-		if (getrandom(ptr, size, 0) != (ssize_t)size) \
+		if (getrandom(p, size, 0) != (ssize_t)size) \
 			Base_errx(BASE_ERR_S_FAILED("getrandom")); \
 	}
 #elif  defined(__OpenBSD__)
 #	include <unistd.h>
 #	define BASE_RANDOM_MAX 256
 #	define BASE_GET_OS_ENTROPY_IMPL(ptr, size) { \
+		uint8_t* p = (uint8_t*)ptr; \
 		while (size > BASE_RANDOM_MAX) { \
-			if (getentropy(ptr, BASE_RANDOM_MAX)) \
+			if (getentropy(p, BASE_RANDOM_MAX)) \
 				Base_errx(BASE_ERR_S_FAILED("getentropy")); \
 			size -= BASE_RANDOM_MAX; \
-			ptr  += BASE_RANDOM_MAX; \
+			p    += BASE_RANDOM_MAX; \
 		} \
-		if (getentropy(ptr, size)) \
+		if (getentropy(p, size)) \
 			Base_errx(BASE_ERR_S_FAILED("getentropy")); \
 	}
 #elif  defined(BASE_OS_WINDOWS)
@@ -59,10 +61,8 @@
 #	error "Unsupported OS."
 #endif
 
-#define R_(p) p BASE_RESTRICT
-BASE_BEGIN_DECLS
-BASE_API void Base_get_os_entropy (R_(uint8_t*), size_t);
-BASE_END_DECLS
-#undef R_
+BASE_BEGIN_C_DECLS
+BASE_API void Base_get_os_entropy(void* BASE_RESTRICT, size_t);
+BASE_END_C_DECLS
 
 #endif

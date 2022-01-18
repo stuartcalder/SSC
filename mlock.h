@@ -35,7 +35,7 @@ enum {
 #define BASE_MLOCK_F_GRACEFUL_UNLOCK_FAIL	(0x02u)
 
 #define R_(p) p BASE_RESTRICT
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 #ifdef BASE_OS_UNIXLIKE
 #  define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
 #endif
@@ -108,7 +108,7 @@ BASE_INLINE void Base_munlock_or_die (R_(void*) p, uint64_t n) {
 	Base_munlock_handled(p, n, 0u);
 }
 
-BASE_END_DECLS
+BASE_END_C_DECLS
 #undef R_
 
 #endif /* ~ if !defined(BASE_MLOCK_H) && defined(BASE_EXTERN_MLOCK) */

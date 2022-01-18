@@ -28,8 +28,8 @@ typedef struct {
 
 #define BASE_LUA_SBUFFER_NULL_LITERAL (Base_Lua_SBuffer){0}
 
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 BASE_API int luaopen_Base_SBuffer (lua_State* L);
-BASE_END_DECLS
+BASE_END_C_DECLS
 
 #endif

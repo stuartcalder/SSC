@@ -48,7 +48,7 @@ typedef HANDLE Base_File_t;
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
 #define R_(ptr) ptr BASE_RESTRICT
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 BASE_API int         Base_get_file_size (Base_File_t, R_(size_t*));
 BASE_API size_t      Base_get_file_size_or_die (Base_File_t);
 BASE_API int         Base_get_filepath_size (R_(const char*), R_(size_t*));
@@ -71,7 +71,7 @@ BASE_INLINE int Base_set_file_size (Base_File_t f, size_t s) BASE_SET_FILE_SIZE_
 BASE_API    int Base_set_file_size (Base_File_t, size_t);
 #endif
 BASE_API void Base_set_file_size_or_die (Base_File_t, size_t);
-BASE_END_DECLS
+BASE_END_C_DECLS
 #undef R_
 
 #endif /* ~ BASE_FILES_H */

@@ -4,19 +4,36 @@
 #include <stdarg.h>
 
 /* Flags to indicate support for restricting pointers. */
-#define BASE_RESTRICT_IMPL_C	(1u << 0) /*   restrict */
-#define BASE_RESTRICT_IMPL_CPP	(1u << 1) /* __restrict */
+enum {
+  BASE_RESTRICT_IMPL_C   = 0x0001,
+  BASE_RESTRICT_IMPL_CPP = 0x0002
+};
 /* Endianness. */
-#define BASE_ENDIAN_LITTLE   0
-#define BASE_ENDIAN_BIG      1
-#define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
+typedef enum {
+  BASE_ENDIAN_LITTLE,
+  BASE_ENDIAN_BIG
+} Base_Endian_t;
+
+/* Try to detect the compiler. */
+#if defined(__clang__)
+# define BASE_COMPILER_CLANG
+#elif defined(_MSC_VER)
+# define BASE_COMPILER_MSVC
+#elif defined(__GNUC__)
+# define BASE_COMPILER_GCC
+#else
+# warning "Failed to detect the compiler."
+# define BASE_COMPILER_UNKNOWN
+#endif
 
 /* Operating System Macros */
 #if defined(__APPLE__) && defined(__MACH__)
-#  define BASE_OS_MAC
+# define BASE_OS_MAC
 #endif /* ~ if defined (__APPLE__) and defined (__MACH__) */
 
-/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems. */
+/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems.
+ * I'm sure more systems could go here, but this software was developed
+ * with open source operating systems in mind first. */
 #if defined(BASE_OS_MAC)   || \
     defined(__Dragonfly__) || \
     defined(__FreeBSD__)   || \
@@ -53,6 +70,7 @@
   /* External definition trumps all endian detection methods. */
 # define BASE_ENDIAN BASE_EXTERN_ENDIAN
 #endif
+
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
 #if !defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && defined (__ORDER_BIG_ENDIAN__) && defined (__ORDER_LITTLE_ENDIAN__)
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
@@ -60,57 +78,52 @@
 # elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_BIG
 # else
-#  error "Invalid __BYTE_ORDER__ !"
+#  error "Invalid __BYTE_ORDER__!"
 # endif
 #endif
 
 /* Architecture macros. */
 #if defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined (_M_X64) || defined(_M_AMD64)
-# define BASE_ARCH "amd64"
+# define BASE_ARCH "AMD64"
 # define BASE_ARCH_AMD64
 # ifndef BASE_ENDIAN
+   /* AMD64 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
-# define BASE_WORD_BYTES 8
-# define BASE_WORD_BITS  64
+#elif defined(__riscv)
+# define BASE_ARCH "RISC-V"
+# define BASE_ARCH_RISCV
+# ifndef BASE_ENDIAN
+   /* RISCV is little endian. */
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# endif
 #elif defined(__aarch64__) || defined (_M_ARM64)
-# define BASE_ARCH "arm64"
+# define BASE_ARCH "ARM64"
 # define BASE_ARCH_ARM64
 # ifndef BASE_ENDIAN
-#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
-# endif
-# define BASE_WORD_BYTES 8
-# define BASE_WORD_BITS  64
-#elif defined(__i386__) || defined (_M_IX86)
-# define BASE_ARCH "x86"
-# define BASE_ARCH_X86
-# ifndef BASE_ENDIAN
+   /* ARM64 may be big or little endian, but it's tyically LE. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
-# define BASE_WORD_BYTES 4
-# define BASE_WORD_BITS  32
+#elif defined(__i386__) || defined (_M_IX86)
+# define BASE_ARCH "X86"
+# define BASE_ARCH_X86
+# ifndef BASE_ENDIAN
+   /* X86 is little endian. */
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
+# endif
 #elif defined(__arm__) || defined(_M_ARM)
-# define BASE_ARCH "armv7"
+# define BASE_ARCH "ARMV7"
 # define BASE_ARCH_ARMV7
 # ifndef BASE_ENDIAN
-#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
+   /* ArmV7 may be big or little endian, but it's typically LE. */
+#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
-# define BASE_WORD_BYTES 4
-# define BASE_WORD_BITS  32
 #else
-# define BASE_ARCH "unknown"
+# define BASE_ARCH "UNKNOWN"
 # define BASE_ARCH_UNKNOWN
 # ifndef BASE_ENDIAN
 #  error "BASE_ENDIAN undefined!"
 # endif
-# ifndef BASE_WORD_BYTES
-#  ifdef BASE_EXTERN_WORD_BYTES
-#   define BASE_WORD_BYTES BASE_EXTERN_WORD_BYTES
-#  else
-#   error "Unknown arch! BASE_EXTERN_WORD_BYTES undefined!"
-#  endif
-# endif
-# define BASE_WORD_BITS (BASE_WORD_BYTES * CHAR_BIT)
 #endif
 
 /* C/C++ Interoperability Macros */
@@ -122,8 +135,8 @@
 #    define BASE_RESTRICT_IMPL BASE_RESTRICT_IMPL_CPP
 #  endif
 /* Use C function name mangling. */
-#  define BASE_BEGIN_DECLS extern "C" {
-#  define BASE_END_DECLS   }
+#  define BASE_BEGIN_C_DECLS extern "C" {
+#  define BASE_END_C_DECLS   }
 /* If we're using C++11 or above, support "static_assert", "alignas", and "alignof". */
 #  if (BASE_LANG_CPP < BASE_CPP_11)
 #    error "Base is C++11 or higher only!"
@@ -133,10 +146,10 @@
 #  define BASE_ALIGNOF(v) alignof(v)
 #else /* Not C++. We are using C. */
 #  define BASE_LANG BASE_LANG_C
-#  define BASE_BEGIN_DECLS /* Nil */
-#  define BASE_BEGIN_DECLS_IS_NIL
-#  define BASE_END_DECLS   /* Nil */
-#  define BASE_END_DECLS_IS_NIL
+#  define BASE_BEGIN_C_DECLS
+#  define BASE_BEGIN_C_DECLS_IS_NIL
+#  define BASE_END_C_DECLS
+#  define BASE_END_C_DECLS_IS_NIL
 #  ifdef __STDC_VERSION__
 #    define BASE_LANG_C __STDC_VERSION__
 #    if (BASE_LANG_C >= BASE_C_99)
@@ -168,7 +181,7 @@
     */
 #    define BASE_LANG_C	0L
 #    ifndef BASE_RESTRICT_IMPL
-#      define BASE_RESTRICT_IMPL 0u
+#      define BASE_RESTRICT_IMPL 0
 #    endif
      /* Nil macros. */
 #    define BASE_STATIC_ASSERT(boolean, msg)
@@ -185,11 +198,11 @@
 #  error "BASE_RESTRICT_IMPL undefined!"
 #endif
 #if   (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP)
-#  define BASE_RESTRICT __restrict
+#  define BASE_RESTRICT __restrict /* C++ compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
-#  define BASE_RESTRICT restrict
+#  define BASE_RESTRICT restrict   /* C99-specified restrict. */
 #else
-#  define BASE_RESTRICT
+#  define BASE_RESTRICT /* We don't have restrict. */
 #  define BASE_RESTRICT_IS_NIL
 #endif
 

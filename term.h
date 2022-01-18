@@ -21,7 +21,7 @@
 #	error "Unsupported OS."
 #endif
 
-BASE_BEGIN_DECLS
+BASE_BEGIN_C_DECLS
 #if    defined(BASE_OS_UNIXLIKE)
 /* On a Unixlike, do not inline term_init or term_end, since
  * doing so will mean needing to link directly with ncurses,
@@ -55,7 +55,7 @@ BASE_API int Base_term_obtain_password_checked (R_(uint8_t*)    password_buffer,
 					        const int       max_pw_size,
 					        const int       buffer_size);
 BASE_API void Base_term_notify (char const *);
-BASE_END_DECLS
+BASE_END_C_DECLS
 #undef R_
 
 #endif /* ~ BASE_TERM_H */
