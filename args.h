@@ -37,8 +37,8 @@ typedef struct {
 	const char*      str;
 	size_t           str_n;
 } Base_Arg_Long;
-#define BASE_ARG_LONG_NULL_LITERAL               (Base_Arg_Long){0}
-#define BASE_ARG_LONG_LITERAL(procedure, string) (Base_Arg_Long){procedure, string, (sizeof(string) - 1)}
+#define BASE_ARG_LONG_NULL_LITERAL                    (Base_Arg_Long){0}
+#define BASE_ARG_LONG_LITERAL(procedure, str_literal) (Base_Arg_Long){procedure, str_literal, (sizeof(str_literal) - 1)}
 
 typedef struct {
 	char*  to_read;

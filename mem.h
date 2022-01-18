@@ -87,10 +87,10 @@ BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 # define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
 # define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
 #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
-# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
-# define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
 # define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
 # define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
+# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
+# define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
 #else
 # error "Invalid byte-order!"
 #endif
