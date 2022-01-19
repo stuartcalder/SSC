@@ -11,7 +11,8 @@ enum {
 /* Endianness. */
 typedef enum {
   BASE_ENDIAN_LITTLE,
-  BASE_ENDIAN_BIG
+  BASE_ENDIAN_BIG,
+  BASE_ENDIAN_DEFAULT = BASE_ENDIAN_LITTLE
 } Base_Endian_t;
 
 /* Try to detect the compiler. */
@@ -72,7 +73,7 @@ typedef enum {
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
-#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && defined (__ORDER_BIG_ENDIAN__) && defined (__ORDER_LITTLE_ENDIAN__))
+#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -83,7 +84,7 @@ typedef enum {
 #endif
 
 /* Architecture macros. */
-#if (defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined (_M_X64) || defined(_M_AMD64))
+#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined (_M_X64) || defined(_M_AMD64))
 # define BASE_ARCH "AMD64"
 # define BASE_ARCH_AMD64
 # ifndef BASE_ENDIAN
@@ -121,10 +122,9 @@ typedef enum {
 #else
 # define BASE_ARCH "UNKNOWN"
 # define BASE_ARCH_UNKNOWN
-# warning "BASE_ARCH is UNKNOWN."\
-          "BASE_ENDIAN must already be defined or we will terminate compilation."
 # ifndef BASE_ENDIAN
-#  error "BASE_ENDIAN undefined!"
+#  warning "BASE_ARCH is UNKNOWN. Will use default endianness and hope for the best."
+#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 # endif
 #endif
 
