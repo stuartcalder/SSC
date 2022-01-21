@@ -78,7 +78,7 @@ void Base_MLock_init_handled (Base_MLock* ml) {
 		Base_errx(ERR_, "Failed to increase memory limit.");
 		return;
 #endif
-#ifdef BASE_EXTERN_MLOCK_THREADSAFE
+#if BASE_MLOCK_INIT_MAYRETURN_ERR_MTX_INIT
 	case BASE_MLOCK_ERR_MTX_INIT:
 		Base_errx(ERR_, "Failed to initialize n mutex.");
 		return;
