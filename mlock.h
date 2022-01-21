@@ -7,6 +7,9 @@
 #endif
 #include "macros.h"
 
+#define R_(p) p BASE_RESTRICT
+BASE_BEGIN_C_DECLS
+
 typedef struct {
 	uint64_t page_size;
 	uint64_t limit;
@@ -19,25 +22,24 @@ typedef struct {
 
 BASE_API extern Base_MLock Base_MLock_g;
 
-enum {
-	BASE_MLOCK_ERR_LOCK_OP       = -1,
-	BASE_MLOCK_ERR_MTX_OP        = -2,
-	BASE_MLOCK_ERR_MTX_INIT      = -3,
-	BASE_MLOCK_ERR_OVER_MEMLIMIT = -4,
-	BASE_MLOCK_ERR_UNDER_MEMMIN  = -5,
-	BASE_MLOCK_ERR_GET_LIMIT     = -6,
-	BASE_MLOCK_ERR_SET_LIMIT     = -7,
-	BASE_MLOCK_ERR_UNINITIALIZED = -8
-};
+#define BASE_MLOCK_ERR_LOCK_OP       (-1)
+#define BASE_MLOCK_ERR_MTX_OP        (-2)
+#define BASE_MLOCK_ERR_MTX_INIT      (-3)
+#define BASE_MLOCK_ERR_OVER_MEMLIMIT (-4)
+#define BASE_MLOCK_ERR_UNDER_MEMMIN  (-5)
+#define BASE_MLOCK_ERR_GET_LIMIT     (-6)
+#define BASE_MLOCK_ERR_SET_LIMIT     (-7)
+#define BASE_MLOCK_ERR_UNINITIALIZED (-8)
 
 #define BASE_MLOCK_F_GRACEFUL_OVERMEMLIMIT_FAIL	(0x01u)
 #define BASE_MLOCK_F_GRACEFUL_LOCK_FAIL		(0x02u)
 #define BASE_MLOCK_F_GRACEFUL_UNLOCK_FAIL	(0x02u)
+typedef unsigned int Base_MLock_F_t;
 
-#define R_(p) p BASE_RESTRICT
-BASE_BEGIN_C_DECLS
 #ifdef BASE_OS_UNIXLIKE
-#  define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
+# define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT 1
+#else
+# define BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT 0
 #endif
 /* Initialize a Base_MLock struct. */
 BASE_API int Base_MLock_init (Base_MLock*);
@@ -65,7 +67,7 @@ BASE_INLINE int Base_mlock (R_(void*) p, uint64_t n) {
 }
 
 /* Lock the memory `p` with number bytes `n` using context `ctx` with the handle flags `f`. */
-BASE_API void Base_mlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, unsigned f);
+BASE_API void Base_mlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f);
 
 /* Lock the memory `p` with number bytes `n` using context `ctx` with a handle flag of `BASE_MLOCK_F_GRACEFUL_OVERMEMLIMIT_FAIL`. */
 BASE_INLINE void Base_mlock_ctx_or_die (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
@@ -73,7 +75,7 @@ BASE_INLINE void Base_mlock_ctx_or_die (R_(void*) p, uint64_t n, R_(Base_MLock*)
 }
 
 /* Lock the memory `p` with number bytes `n` using the default global context, with a handle flag of `f`. */
-BASE_INLINE void Base_mlock_handled (R_(void*) p, uint64_t n, unsigned f) {
+BASE_INLINE void Base_mlock_handled (R_(void*) p, uint64_t n, Base_MLock_F_t f) {
 	Base_mlock_ctx_handled(p, n, &Base_MLock_g, f);
 }
 
@@ -91,7 +93,7 @@ BASE_INLINE int Base_munlock (R_(void*) p, uint64_t n) {
 }
 
 /* Unlock the memory `p` with number bytes `n` using the context `ctx`, with a handle flag of `f`. */
-BASE_API void Base_munlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, unsigned f);
+BASE_API void Base_munlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f);
 
 /* Unlock the memory `p` with number bytes `n` using the context `ctx`, with a handle flag of 0. */
 BASE_INLINE void Base_munlock_ctx_or_die (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
@@ -99,7 +101,7 @@ BASE_INLINE void Base_munlock_ctx_or_die (R_(void*) p, uint64_t n, R_(Base_MLock
 }
 
 /* Unlock the memory `p` with number bytes `n` using the default global context, with a handle flag of `f`. */
-BASE_INLINE void Base_munlock_handled (R_(void*) p, uint64_t n, unsigned f) {
+BASE_INLINE void Base_munlock_handled (R_(void*) p, uint64_t n, Base_MLock_F_t f) {
 	Base_munlock_ctx_handled(p, n, &Base_MLock_g, f);
 }
 

@@ -4,16 +4,13 @@
 #include <stdarg.h>
 
 /* Flags to indicate support for restricting pointers. */
-enum {
-  BASE_RESTRICT_IMPL_C   = 0x0001,
-  BASE_RESTRICT_IMPL_CPP = 0x0002
-};
+#define BASE_RESTRICT_IMPL_C   0x0001
+#define BASE_RESTRICT_IMPL_CPP 0x0002
 /* Endianness. */
-typedef enum {
-  BASE_ENDIAN_LITTLE,
-  BASE_ENDIAN_BIG,
-  BASE_ENDIAN_DEFAULT = BASE_ENDIAN_LITTLE
-} Base_Endian_t;
+#define BASE_ENDIAN_LITTLE 0
+#define BASE_ENDIAN_BIG    1
+#define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
+typedef int Base_Endian_t;
 
 /* Try to detect the compiler. */
 #if defined(__clang__)
@@ -84,7 +81,7 @@ typedef enum {
 #endif
 
 /* Architecture macros. */
-#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined (_M_X64) || defined(_M_AMD64))
+#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined(_M_X64) || defined(_M_AMD64))
 # define BASE_ARCH "AMD64"
 # define BASE_ARCH_AMD64
 # ifndef BASE_ENDIAN

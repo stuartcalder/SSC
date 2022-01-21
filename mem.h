@@ -63,19 +63,23 @@ BASE_API    void* Base_malloc_or_die  (size_t);
 BASE_API    void* Base_calloc_or_die  (size_t n_elem, size_t elem_sz);
 BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 
+/* Native load memcpy's bytes into an automatic variable and returns it. */
 #define BASE_LOAD_NATIVE_IMPL(ptr, bits) { \
  uint##bits##_t val; \
  memcpy(&val, ptr, sizeof(val)); \
  return val; \
 }
+/* Swap load memcpy's bytes into an automatic variable, swaps its bytes, and returns it. */
 #define BASE_LOAD_SWAP_IMPL(ptr, bits) { \
  uint##bits##_t val; \
  memcpy(&val, ptr, sizeof(val)); \
  return Base_swap_##bits(val); \
 }
+/* A native store is merely a memcpy. */
 #define BASE_STORE_NATIVE_IMPL(ptr, val) { \
  memcpy(ptr, &val, sizeof(val)); \
 }
+/* A swap store bswaps the bytes before memcpy. */
 #define BASE_STORE_SWAP_IMPL(ptr, val, bits) { \
  val = Base_swap_##bits(val); \
  memcpy(ptr, &val, sizeof(val)); \
@@ -113,6 +117,10 @@ BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL(mem, 64)
 #undef BASE_LOAD_BE_IMPL
 #undef BASE_STORE_LE_IMPL
 #undef BASE_STORE_BE_IMPL
+#undef BASE_STORE_NATIVE_IMPL
+#undef BASE_STORE_SWAP_IMPL
+#undef BASE_LOAD_NATIVE_IMPL
+#undef BASE_LOAD_SWAP_IMPL
 
 BASE_END_C_DECLS
 #undef R_

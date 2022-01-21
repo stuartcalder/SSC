@@ -23,8 +23,16 @@ typedef enum {
  */
 typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);
 
+/* Return BASE_ARG_PROC_ONECHAR when processing
+ * short options, and we consume only 1 char
+ * during processing.
+ */
 enum { BASE_ARG_PROC_ONECHAR = -1 };
 
+/* Base_Arg_Short
+ *   Associate a Base_Arg_Proc_f function pointer
+ *   with a single character.
+ */
 typedef struct {
 	Base_Arg_Proc_f* proc;
 	char             ch;
@@ -32,6 +40,11 @@ typedef struct {
 #define BASE_ARG_SHORT_NULL_LITERAL                  (Base_Arg_Short){0}
 #define BASE_ARG_SHORT_LITERAL(procedure, character) (Base_Arg_Short){procedure, character}
 
+/* Base_Arg_Long
+ *   Associate a Base_Arg_Proc_f function pointer
+ *   with a null-terminated string.
+ *   Store also the length of the string (null-terminator not included).
+ */
 typedef struct {
 	Base_Arg_Proc_f* proc;
 	const char*      str;
@@ -39,6 +52,7 @@ typedef struct {
 } Base_Arg_Long;
 #define BASE_ARG_LONG_NULL_LITERAL                    (Base_Arg_Long){0}
 #define BASE_ARG_LONG_LITERAL(procedure, str_literal) (Base_Arg_Long){procedure, str_literal, (sizeof(str_literal) - 1)}
+/* Don't use BASE_ARG_LONG_LITERAL with any string other than a string literal "like this". */
 
 typedef struct {
 	char*  to_read;
@@ -47,10 +61,9 @@ typedef struct {
 } Base_Arg_Parser;
 #define BASE_ARG_PARSER_NULL_LITERAL (Base_Arg_Parser){0}
 
-typedef enum {
-  BASE_ARG_PARSER_FLAG_NONE           = 0x0000, /* Passing no flags. */
-  BASE_ARG_PARSER_FLAG_EQUALS_ISVALID = 0x0001  /* '=' is a valid character, not indicative of assignment. */
-} Base_Arg_Parser_Flag_t;
+#define BASE_ARG_PARSER_FLAG_NONE           0x0000 /* Passing no flags. */
+#define BASE_ARG_PARSER_FLAG_EQUALS_ISVALID 0x0001 /* '=' is a valid character, not indicative of assignment. */
+typedef int Base_Arg_Parser_Flag_t;
 
 /* Get the argument type of the string. Short? Long? Neither? */
 BASE_API Base_ArgType_t

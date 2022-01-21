@@ -82,6 +82,7 @@ if os == 'darwin'
   lang_flags += _D + '__STDC_WANT_LIB_EXT1__=1'
 endif
 # MLock options
+# Seems pointless to do this on OpenBSD. It encrypts its swap by default.
 if get_option('mlock') and os != 'openbsd'
   lang_flags += _D + 'BASE_EXTERN_MLOCK'
   if get_option('mlock_threadsafe')
@@ -115,6 +116,7 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
       lang_flags += '-march=native'
     endif
     lang_flags += GCC_COMPATIBLE_FLAGS
+    # We're UNIXLIKE and GCC compatible. Define feature test macros.
   endif
   if get_option('lua') # Lua support
     lang_flags += _D + 'BASE_EXTERN_LUA'

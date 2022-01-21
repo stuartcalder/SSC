@@ -73,7 +73,7 @@ void Base_MLock_init_handled (Base_MLock* ml) {
 	case BASE_MLOCK_ERR_GET_LIMIT:
 		Base_errx(ERR_, "Failed to get memory limit.");
 		return;
-#ifdef BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
+#if BASE_MLOCK_INIT_MAYRETURN_ERR_SET_LIMIT
 	case BASE_MLOCK_ERR_SET_LIMIT:
 		Base_errx(ERR_, "Failed to increase memory limit.");
 		return;
@@ -136,7 +136,7 @@ int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
 #undef  ERR_
 #define ERR_ "Error: Base_mlock_ctx_handled: %s\n"
 
-void Base_mlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, unsigned f) {
+void Base_mlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f) {
 	const int c = Base_mlock_ctx(p, n, ctx);
 	switch (c) {
 	case 0:
@@ -188,7 +188,7 @@ int Base_munlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
 #undef  ERR_
 #define ERR_ "Error: Base_munlock_ctx_handled: %s\n"
 
-void Base_munlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, unsigned f) {
+void Base_munlock_ctx_handled (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f) {
 	const int c = Base_munlock_ctx(p, n, ctx);
 	switch (c) {
 	case 0:
