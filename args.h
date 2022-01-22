@@ -61,8 +61,8 @@ typedef struct {
 } Base_Arg_Parser;
 #define BASE_ARG_PARSER_NULL_LITERAL (Base_Arg_Parser){0}
 
-#define BASE_ARG_PARSER_FLAG_NONE           0x0000 /* Passing no flags. */
-#define BASE_ARG_PARSER_FLAG_EQUALS_ISVALID 0x0001 /* '=' is a valid character, not indicative of assignment. */
+#define BASE_ARG_PARSER_FLAG_NONE           0x00 /* Passing no flags. */
+#define BASE_ARG_PARSER_FLAG_EQUALS_ISVALID 0x01 /* '=' is a valid character, not indicative of assignment. */
 typedef int Base_Arg_Parser_Flag_t;
 
 /* Get the argument type of the string. Short? Long? Neither? */

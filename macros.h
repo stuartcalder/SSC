@@ -4,11 +4,11 @@
 #include <stdarg.h>
 
 /* Flags to indicate support for restricting pointers. */
-#define BASE_RESTRICT_IMPL_C   0x0001
-#define BASE_RESTRICT_IMPL_CPP 0x0002
+#define BASE_RESTRICT_IMPL_C   0x01
+#define BASE_RESTRICT_IMPL_CPP 0x02
 /* Endianness. */
-#define BASE_ENDIAN_LITTLE 0
-#define BASE_ENDIAN_BIG    1
+#define BASE_ENDIAN_LITTLE  0
+#define BASE_ENDIAN_BIG     1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
 typedef int Base_Endian_t;
 
@@ -31,7 +31,8 @@ typedef int Base_Endian_t;
 
 /* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems.
  * I'm sure more systems could go here, but this software was developed
- * with open source operating systems in mind first. */
+ * with access to primarily open source operating systems.
+ */
 #if defined(BASE_OS_MAC)   || \
     defined(__Dragonfly__) || \
     defined(__FreeBSD__)   || \
@@ -63,7 +64,12 @@ typedef int Base_Endian_t;
 #define BASE_CPP_17      201703L
 #define BASE_CPP_20      202002L
 
-/* Endian macros. */
+/* BASE_ENDIAN
+ * int
+ *   Defines the native byte order.
+ *   May be defined outside by the BASE_EXTERN_ENDIAN macro.
+ *   Must equal to BASE_ENDIAN_LITTLE, or BASE_ENDIAN_BIG.
+ */
 #if !defined(BASE_ENDIAN) && defined(BASE_EXTERN_ENDIAN)
   /* External definition trumps all endian detection methods. */
 # define BASE_ENDIAN BASE_EXTERN_ENDIAN
@@ -80,47 +86,62 @@ typedef int Base_Endian_t;
 # endif
 #endif
 
+/* BASE_ISA
+ * string literal
+ *   Tells us what ISA we are compiling for, or "UNKNOWN" if we fail to detect it.
+ */
+
 /* Architecture macros. */
 #if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined(_M_X64) || defined(_M_AMD64))
-# define BASE_ARCH "AMD64"
-# define BASE_ARCH_AMD64
+# define BASE_ISA "AMD64"
+# define BASE_ISA_AMD64
 # ifndef BASE_ENDIAN
    /* AMD64 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
 #elif defined(__riscv)
-# define BASE_ARCH "RISC-V"
-# define BASE_ARCH_RISCV
+# define BASE_ISA "RISC-V"
+# define BASE_ISA_RISCV
 # ifndef BASE_ENDIAN
    /* RISCV is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
 #elif defined(__aarch64__) || defined (_M_ARM64)
-# define BASE_ARCH "ARM64"
-# define BASE_ARCH_ARM64
+# define BASE_ISA "ARM64"
+# define BASE_ISA_ARM64
 # ifndef BASE_ENDIAN
    /* ARM64 may be big or little endian, but it's tyically LE. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
 #elif defined(__i386__) || defined (_M_IX86)
-# define BASE_ARCH "X86"
-# define BASE_ARCH_X86
+# define BASE_ISA "X86"
+# define BASE_ISA_X86
 # ifndef BASE_ENDIAN
    /* X86 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
 #elif defined(__arm__) || defined(_M_ARM)
-# define BASE_ARCH "ARMV7"
-# define BASE_ARCH_ARMV7
+# define BASE_ISA "ARMV7"
+# define BASE_ISA_ARMV7
 # ifndef BASE_ENDIAN
    /* ArmV7 may be big or little endian, but it's typically LE. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
 #else
-# define BASE_ARCH "UNKNOWN"
-# define BASE_ARCH_UNKNOWN
+# warning "Failed to detect ISA."
+# define BASE_ISA "UNKNOWN"
+# define BASE_ISA_UNKNOWN
+# if ((BASE_ENDIAN_DEFAULT != BASE_ENDIAN_LITTLE) && \
+      (BASE_ENDIAN_DEFAULT != BASE_ENDIAN_BIG))
+#  error "BASE_ENDIAN_DEFAULT is invalid!"
+# endif
 # ifndef BASE_ENDIAN
-#  warning "BASE_ARCH is UNKNOWN. Will use default endianness and hope for the best."
+#  if (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
+#   warning "BASE_ISA is UNKNOWN. Will use default (little) endianness and hope for the best."
+#  else
+#   warning "BASE_ISA is UNKNOWN. Will use default (big) endianness and hope for the best."
+#  endif
+#  warning "To specify endianness, define BASE_EXTERN_ENDIAN to BASE_ENDIAN_LITTLE or BASE_ENDIAN_BIG!"
 #  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 # endif
 #endif
@@ -201,6 +222,7 @@ typedef int Base_Endian_t;
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 #  define BASE_RESTRICT restrict   /* C99-specified restrict. */
 #else
+#  warning "Restricting pointers disabled."
 #  define BASE_RESTRICT /* We don't have restrict. */
 #  define BASE_RESTRICT_IS_NIL
 #endif
