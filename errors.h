@@ -15,15 +15,15 @@
 #define BASE_ERR_S_FAILED(str)		"Error: %s Failed!\n", str
 
 #ifdef BASE_OS_UNIXLIKE
-#  include <err.h>
-#  define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { verrx(code, fmt, arg_list); }
-#  define BASE_ERRX_CODE_LIST_INLINE
+# include <err.h>
+# define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { verrx(code, fmt, arg_list); }
+# define BASE_ERRX_CODE_LIST_INLINE
 #else
-#  define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { \
-     vfprintf(stderr, fmt, arg_list); \
-     va_end(arg_list); \
-     exit(code); \
-   }
+# define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) { \
+    vfprintf(stderr, fmt, arg_list); \
+    va_end(arg_list); \
+    exit(code); \
+  }
 #endif
 
 #define R_(ptr) ptr BASE_RESTRICT
@@ -48,4 +48,4 @@ BASE_END_C_DECLS
 #  define BASE_ASSERT_MSG(...) /* Nil */
 #endif
 
-#endif /* ~ BASE_ERRORS_H */
+#endif /* ! BASE_ERRORS_H */

@@ -85,6 +85,9 @@ BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
  memcpy(ptr, &val, sizeof(val)); \
 }
 
+#ifndef BASE_ENDIAN
+# error "BASE_ENDIAN undefined!"
+#endif
 #if   (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
 # define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
 # define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
@@ -115,12 +118,12 @@ BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL(mem, 64)
 
 #undef BASE_LOAD_LE_IMPL
 #undef BASE_LOAD_BE_IMPL
+#undef BASE_LOAD_NATIVE_IMPL
+#undef BASE_LOAD_SWAP_IMPL
 #undef BASE_STORE_LE_IMPL
 #undef BASE_STORE_BE_IMPL
 #undef BASE_STORE_NATIVE_IMPL
 #undef BASE_STORE_SWAP_IMPL
-#undef BASE_LOAD_NATIVE_IMPL
-#undef BASE_LOAD_SWAP_IMPL
 
 BASE_END_C_DECLS
 #undef R_

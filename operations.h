@@ -24,9 +24,6 @@
 #endif
 
 #if BASE_OPERATIONS_USE_CPP20_ROT
-# include <cstdint>
-using std::int16_t , std::int32_t , std::int64_t,
-      std::uint16_t, std::uint32_t, std::uint64_t;
 # include <bit>
 # define BASE_ROT_LEFT(value, count, bits) \
   std::rotl<uint##bits##_t>(value, count)
@@ -36,11 +33,10 @@ using std::int16_t , std::int32_t , std::int64_t,
 # if (CHAR_BIT != 8)
 #  error "We need 8-bit chars."
 # endif
-# define BASE_ROT_IMPL_UNSIGNED_MASK_TYPE(bits)	uint##bits##_t
 # define BASE_ROT_IMPL_UNSIGNED_MASK(bits) \
-	 ((BASE_ROT_IMPL_UNSIGNED_MASK_TYPE(bits))(sizeof(BASE_ROT_IMPL_UNSIGNED_MASK_TYPE(bits)) * CHAR_BIT) - 1)
+         ((uint##bits##_t)(sizeof(uint##bits##_t) * CHAR_BIT) - 1)
 # define BASE_ROT_IMPL_MASKED_COUNT(bits, count) \
-	 ((BASE_ROT_IMPL_UNSIGNED_MASK(bits)) & count)
+	 (BASE_ROT_IMPL_UNSIGNED_MASK(bits) & count)
 # define BASE_ROT_LEFT(value, count, bits) \
 	 ((value << BASE_ROT_IMPL_MASKED_COUNT(bits, count)) | (value >> ((-BASE_ROT_IMPL_MASKED_COUNT(bits, count)) & BASE_ROT_IMPL_UNSIGNED_MASK(bits))))
 # define BASE_ROT_RIGHT(value, count, bits) \
@@ -60,7 +56,6 @@ BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIG
 #undef BASE_ROT_RIGHT
 #undef BASE_ROT_IMPL_MASKED_COUNT
 #undef BASE_ROT_IMPL_UNSIGNED_MASK
-#undef BASE_ROT_IMPL_UNSIGNED_MASK_TYPE
 /* Base_xor_n(write_to, read_from)
  * XOR n bytes beginning at both addresses, and store in @write_to.
  */
@@ -94,7 +89,7 @@ Base_secure_zero
 /* Base_ctime_memdiff(m_0, m_1, num_bytes)
  * Compare the first @num_bytes bytes of @m_0 and @m_1.
  * Return the number of bytes that differed between @m_0 and @m_1.
- * Do the comparison in constant time.
+ * Do the comparison in constant (worst case) time.
  */
 BASE_API size_t
 Base_ctime_memdiff
