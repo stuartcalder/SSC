@@ -10,3 +10,5 @@ option('mlock', type: 'boolean', value: true)
 option('mlock_threadsafe', type: 'boolean', value: false)
 # Whether to compile Lua bindings. (Default is false)
 option('lua', type: 'boolean', value: false)
+# Little Endian? Big Endian?
+option('endian', type: 'combo', choices: ['auto', 'little', 'big'], value: 'auto')

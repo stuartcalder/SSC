@@ -136,6 +136,14 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
     endif
   endif # ! if get_option('lua')
 endif
+if get_option('endian') != 'auto'
+  if get_option('endian') == 'little'
+    lang_flags += _D + 'BASE_EXTERN_ENDIAN=BASE_ENDIAN_LITTLE'
+  endif
+  if get_option('endian') == 'big'
+    lang_flags += _D + 'BASE_EXTERN_ENDIAN=BASE_ENDIAN_BIG'
+  endif
+endif
 
 include_dirs += '..'
 # Install the base folder into the system header directory

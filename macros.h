@@ -12,7 +12,10 @@
 #define BASE_ENDIAN_LITTLE  0
 #define BASE_ENDIAN_BIG     1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
+#define BASE_ENDIAN_ISVALID(endian) (endian == BASE_ENDIAN_LITTLE || \
+                                     endian == BASE_ENDIAN_BIG)
 typedef int_fast8_t Base_Endian_t;
+#define BASE_ENDIAN_PRI PRIiFAST8
 
 /* Try to detect the compiler. */
 #if defined(__clang__)
@@ -73,12 +76,16 @@ typedef int_fast8_t Base_Endian_t;
  *   Must equal to BASE_ENDIAN_LITTLE, or BASE_ENDIAN_BIG.
  */
 #if !defined(BASE_ENDIAN) && defined(BASE_EXTERN_ENDIAN)
+# if !BASE_ENDIAN_ISVALID(BASE_EXTERN_ENDIAN)
+#  error "BASE_EXTERN_ENDIAN is an invalid endianness!"
+# endif
   /* External definition trumps all endian detection methods. */
 # define BASE_ENDIAN BASE_EXTERN_ENDIAN
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
-#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
+#if (!defined(BASE_ENDIAN) && defined(__BYTE_ORDER__) && \
+     defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -94,7 +101,8 @@ typedef int_fast8_t Base_Endian_t;
  */
 
 /* Architecture macros. */
-#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(_M_IX64) || defined(_M_X64) || defined(_M_AMD64))
+#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || \
+     defined(_M_IX64) || defined(_M_X64)    || defined(_M_AMD64))
 # define BASE_ISA "AMD64"
 # define BASE_ISA_AMD64
 # ifndef BASE_ENDIAN
@@ -108,14 +116,14 @@ typedef int_fast8_t Base_Endian_t;
    /* RISCV is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
-#elif defined(__aarch64__) || defined (_M_ARM64)
+#elif (defined(__aarch64__) || defined(_M_ARM64))
 # define BASE_ISA "ARM64"
 # define BASE_ISA_ARM64
 # ifndef BASE_ENDIAN
    /* ARM64 may be big or little endian, but it's tyically LE. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # endif
-#elif defined(__i386__) || defined (_M_IX86)
+#elif (defined(__i386__) || defined(_M_IX86))
 # define BASE_ISA "X86"
 # define BASE_ISA_X86
 # ifndef BASE_ENDIAN
@@ -133,8 +141,7 @@ typedef int_fast8_t Base_Endian_t;
 # warning "Failed to detect ISA."
 # define BASE_ISA "UNKNOWN"
 # define BASE_ISA_UNKNOWN
-# if ((BASE_ENDIAN_DEFAULT != BASE_ENDIAN_LITTLE) && \
-      (BASE_ENDIAN_DEFAULT != BASE_ENDIAN_BIG))
+# if !BASE_ENDIAN_ISVALID(BASE_ENDIAN_DEFAULT)
 #  error "BASE_ENDIAN_DEFAULT is invalid!"
 # endif
 # ifndef BASE_ENDIAN
@@ -146,6 +153,12 @@ typedef int_fast8_t Base_Endian_t;
 #  warning "To specify endianness, define BASE_EXTERN_ENDIAN to BASE_ENDIAN_LITTLE or BASE_ENDIAN_BIG!"
 #  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 # endif
+#endif
+#ifndef BASE_ENDIAN
+# error "BASE_ENDIAN is not defined!"
+#endif
+#if !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
+# error "BASE_ENDIAN is an invalid endianness!"
 #endif
 
 /* C/C++ Interoperability Macros */
@@ -241,7 +254,7 @@ typedef int_fast8_t Base_Endian_t;
 #  define BASE_EXPORT_IS_NIL
 #  define BASE_IMPORT
 #  define BASE_IMPORT_IS_NIL
-# endif /* ! #if defined (__GNUC__) and (__GNUC__ >= 4) */
+# endif /* ! #if defined(__GNUC__) and (__GNUC__ >= 4) */
 #elif defined(BASE_OS_WINDOWS)
 # ifdef __GNUC__
 #  define BASE_EXPORT __attribute__ ((dllexport))
