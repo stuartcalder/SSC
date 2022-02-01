@@ -63,6 +63,7 @@ BASE_API    void    Base_xor_16  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_32  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_64  (R_(void*), R_(const void*));
 BASE_API    void    Base_xor_128 (R_(void*), R_(const void*));
+
 /* Base_secure_zero(mem, n)
  * Zero over the memory @mem with @n zero bytes.
  * Do not optimize away the zeroing.

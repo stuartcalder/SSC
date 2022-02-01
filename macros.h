@@ -12,8 +12,7 @@
 #define BASE_ENDIAN_LITTLE  0
 #define BASE_ENDIAN_BIG     1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
-#define BASE_ENDIAN_ISVALID(endian) (endian == BASE_ENDIAN_LITTLE || \
-                                     endian == BASE_ENDIAN_BIG)
+#define BASE_ENDIAN_ISVALID(endian) (endian == BASE_ENDIAN_LITTLE || endian == BASE_ENDIAN_BIG)
 typedef int_fast8_t Base_Endian_t;
 #define BASE_ENDIAN_PRI PRIiFAST8
 
@@ -21,7 +20,7 @@ typedef int_fast8_t Base_Endian_t;
 #if defined(__clang__)
 # define BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
-# define BASE_COMPILER_MSVC
+# define BASE_COMPILER_MSVC _MSC_VER
 #elif defined(__GNUC__)
 # define BASE_COMPILER_GCC
 #else
@@ -57,7 +56,7 @@ typedef int_fast8_t Base_Endian_t;
 #    define BASE_OS_WIN32
 #  endif /* ! #ifdef _WIN64 */
 #else
-#	error "Unsupported."
+#  error "Unsupported."
 #endif /* ! #if defined (unixlike os's ...) */
 
 #define BASE_C_89        199409L
@@ -84,7 +83,7 @@ typedef int_fast8_t Base_Endian_t;
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
-#if (!defined(BASE_ENDIAN) && defined(__BYTE_ORDER__) && \
+#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && \
      defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
@@ -156,8 +155,7 @@ typedef int_fast8_t Base_Endian_t;
 #endif
 #ifndef BASE_ENDIAN
 # error "BASE_ENDIAN is not defined!"
-#endif
-#if !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
+#elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
 # error "BASE_ENDIAN is an invalid endianness!"
 #endif
 
@@ -230,8 +228,9 @@ typedef int_fast8_t Base_Endian_t;
 #ifndef BASE_RESTRICT_IMPL
 # error "BASE_RESTRICT_IMPL undefined!"
 #endif
-#if   (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP)
-# define BASE_RESTRICT __restrict /* C++ compatible restrict. */
+#if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) || \
+     (defined(BASE_COMPILER_MSVC) && BASE_COMPILER_MSVC >= 1900))
+# define BASE_RESTRICT __restrict /* C++/MSVC compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 # define BASE_RESTRICT restrict   /* C99-specified restrict. */
 #else
