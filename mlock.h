@@ -18,7 +18,7 @@ typedef struct {
 	pthread_mutex_t n_mtx;
 #endif
 } Base_MLock;
-#define BASE_MLOCK_NULL_LITERAL (Base_MLock){0}
+#define BASE_MLOCK_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MLock, 0)
 
 BASE_API extern Base_MLock Base_MLock_g;
 

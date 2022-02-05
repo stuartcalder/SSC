@@ -13,8 +13,6 @@
 #define BASE_ENDIAN_BIG     1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
 #define BASE_ENDIAN_ISVALID(endian) (endian == BASE_ENDIAN_LITTLE || endian == BASE_ENDIAN_BIG)
-typedef int_fast8_t Base_Endian_t;
-#define BASE_ENDIAN_PRI PRIiFAST8
 
 /* Try to detect the compiler. */
 #if defined(__clang__)
@@ -47,9 +45,6 @@ typedef int_fast8_t Base_Endian_t;
 /* Define MS Windows, naming scheme consistent with the above. */
 #elif defined(_WIN32) || defined(__CYGWIN__)
 #  define BASE_OS_WINDOWS
-#  ifndef BASE_RESTRICT_IMPL
-#    define BASE_RESTRICT_IMPL BASE_RESTRICT_IMPL_CPP
-#  endif
 #  ifdef _WIN64
 #    define BASE_OS_WIN64
 #  else
@@ -83,8 +78,8 @@ typedef int_fast8_t Base_Endian_t;
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
-#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && \
-     defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
+#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && \
+     defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -140,14 +135,13 @@ typedef int_fast8_t Base_Endian_t;
 # warning "Failed to detect ISA."
 # define BASE_ISA "UNKNOWN"
 # define BASE_ISA_UNKNOWN
-# if !BASE_ENDIAN_ISVALID(BASE_ENDIAN_DEFAULT)
-#  error "BASE_ENDIAN_DEFAULT is invalid!"
-# endif
 # ifndef BASE_ENDIAN
-#  if (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
+#  if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
 #   warning "BASE_ISA is UNKNOWN. Will use default (little) endianness and hope for the best."
-#  else
+#  elif (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_BIG)
 #   warning "BASE_ISA is UNKNOWN. Will use default (big) endianness and hope for the best."
+#  else
+#   error "BASE_ENDIAN_DEFAULT is invalid!"
 #  endif
 #  warning "To specify endianness, define BASE_EXTERN_ENDIAN to BASE_ENDIAN_LITTLE or BASE_ENDIAN_BIG!"
 #  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
@@ -223,6 +217,18 @@ typedef int_fast8_t Base_Endian_t;
 #   define BASE_ALIGNOF_IS_NIL
 # endif /* ! #ifdef __STDC_VERSION__ */
 #endif /* ! #ifdef __cplusplus */
+
+/* What do compound literals look like? */
+#if defined(BASE_LANG_CPP)
+# define BASE_COMPOUND_LITERAL(type, ...) type{__VA_ARGS__}
+#elif defined(BASE_LANG_C)
+# if BASE_LANG_C && BASE_LANG_C < BASE_C_99
+#  error "We need C99 style literals!"
+# endif
+# define BASE_COMPOUND_LITERAL(type, ...) (type){__VA_ARGS__}
+#else
+# error "C++ and C both undefined!"
+#endif
 
 /* Can we restrict pointers? C++ or C99 style? */
 #ifndef BASE_RESTRICT_IMPL

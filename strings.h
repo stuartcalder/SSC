@@ -11,7 +11,7 @@ typedef struct {
 	char*  c_str;
 	size_t size;
 } Base_String;
-#define BASE_STRING_NULL_LITERAL (Base_String){NULL, 0}
+#define BASE_STRING_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_String, NULL, 0)
 
 #define R_(ptr) ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS

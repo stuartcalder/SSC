@@ -19,6 +19,7 @@
    }
 /* Base_aligned_free */
 #  define BASE_ALIGNED_FREE_IMPL(ptr) { free(ptr); }
+#  define BASE_ALIGNED_FREE_IS_POSIX_FREE
 /* Base_get_pagesize */
 #  define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
 #  define BASE_GET_PAGESIZE_INLINE

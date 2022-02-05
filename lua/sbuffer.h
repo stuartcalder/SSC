@@ -25,8 +25,7 @@ typedef struct {
 	uint8_t  f; /* Flags. */
 #endif
 } Base_Lua_SBuffer;
-
-#define BASE_LUA_SBUFFER_NULL_LITERAL (Base_Lua_SBuffer){0}
+#define BASE_LUA_SBUFFER_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_Lua_SBuffer, 0)
 
 BASE_BEGIN_C_DECLS
 BASE_API int luaopen_Base_SBuffer (lua_State* L);

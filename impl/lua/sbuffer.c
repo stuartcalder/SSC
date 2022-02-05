@@ -25,12 +25,12 @@ static int sbuffer_new (lua_State* L) {
 	sb->n = n;
 	sb->f = UINT8_C(0);
 	if (lua_isboolean(L, 2) ? lua_toboolean(L, 2) : 0) {
-		SET_BITS_(sb->f, IS_ALIGNED_);
+		sb->f |= IS_ALIGNED_;
 		if (!(sb->p = (uint8_t*)Base_aligned_malloc(Base_MLock_g.page_size, sb->n)))
 			return luaL_error(L, "%s failed!", "Base_aligned_malloc");
 		switch (Base_mlock(sb->p, sb->n)) {
 			case 0:
-				SET_BITS_(sb->f, IS_LOCKED_);
+				sb->f |= IS_LOCKED_;
 				break;
 			case BASE_MLOCK_ERR_OVER_MEMLIMIT:
 				/* Fail to lock silently when we cannot lock anymore. */
@@ -63,12 +63,16 @@ static int sbuffer_del (lua_State* L) {
 	if (sb->p) {
 		memset(sb->p, 0, sb->n);
 #ifdef BASE_MLOCK_H
-		if (HAS_BITS_(sb->f, IS_LOCKED_) && Base_munlock(sb->p, sb->n))
+		if ((sb->f & IS_LOCKED_) && Base_munlock(sb->p, sb->n))
 			return luaL_error(L, "Base_munlock failed!");
-		if (HAS_BITS_(sb->f, IS_ALIGNED_))
+# ifdef BASE_ALIGNED_FREE_IS_POSIX_FREE
+		free(sb->p);
+# else
+		if (sb->f & IS_ALIGNED_)
 			Base_aligned_free(sb->p);
 		else
 			free(sb->p);
+# endif
 #else
 		free(sb->p);
 #endif
