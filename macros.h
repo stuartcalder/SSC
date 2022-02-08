@@ -219,10 +219,10 @@
 #endif /* ! #ifdef __cplusplus */
 
 /* What do compound literals look like? */
-#if defined(BASE_LANG_CPP)
+#if   defined(BASE_LANG_CPP)
 # define BASE_COMPOUND_LITERAL(type, ...) type{__VA_ARGS__}
 #elif defined(BASE_LANG_C)
-# if BASE_LANG_C && BASE_LANG_C < BASE_C_99
+# if (BASE_LANG_C && BASE_LANG_C < BASE_C_99)
 #  error "We need C99 style literals!"
 # endif
 # define BASE_COMPOUND_LITERAL(type, ...) (type){__VA_ARGS__}
