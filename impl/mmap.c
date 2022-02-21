@@ -4,8 +4,10 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 #if    defined(BASE_OS_UNIXLIKE)
 	const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
 	map->ptr = (uint8_t*)mmap(NULL, map->size, rw, MAP_SHARED, map->file, 0);
-	if (map->ptr == MAP_FAILED)
+	if (map->ptr == MAP_FAILED) {
+		map->ptr = NULL;
 		return -1;
+	}
 #elif  defined(BASE_OS_WINDOWS)
 	const DWORD high_32 = (DWORD)((uint64_t)map->size >> 32);
 	const DWORD low_32  = (DWORD)map->size;

@@ -78,8 +78,8 @@
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
-#if (!defined(BASE_ENDIAN) && defined(__GNUC__) && \
-     defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
+#if (!defined(BASE_ENDIAN) && defined(__BYTE_ORDER__) && \
+     defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 # elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -95,8 +95,9 @@
  */
 
 /* Architecture macros. */
-#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || \
-     defined(_M_IX64) || defined(_M_X64)    || defined(_M_AMD64))
+#if (defined(__amd64)  || defined(__amd64__)  || \
+     defined(__x86_64) || defined(__x86_64__) || \
+     defined(_M_X64)   || defined(_M_AMD64))
 # define BASE_ISA "AMD64"
 # define BASE_ISA_AMD64
 # ifndef BASE_ENDIAN
@@ -222,7 +223,7 @@
 #if   defined(BASE_LANG_CPP)
 # define BASE_COMPOUND_LITERAL(type, ...) type{__VA_ARGS__}
 #elif defined(BASE_LANG_C)
-# if (BASE_LANG_C && BASE_LANG_C < BASE_C_99)
+# if (BASE_LANG_C > 0L && BASE_LANG_C < BASE_C_99)
 #  error "We need C99 style literals!"
 # endif
 # define BASE_COMPOUND_LITERAL(type, ...) (type){__VA_ARGS__}
@@ -249,17 +250,23 @@
 #undef BASE_RESTRICT_IMPL
 
 /* Symbol Visibility, Export/Import Macros */
-#if defined(BASE_OS_UNIXLIKE)
+#if defined(BASE_COMPILER_UNKNOWN)
+# warning "The compiler was not detected. Export and Import symbols are therefore NIL!"
+# define BASE_EXPORT
+# define BASE_EXPORT_IS_NIL
+# define BASE_IMPORT
+# define BASE_IMPORT_IS_NIL
+#elif defined(BASE_OS_UNIXLIKE)
 # if defined(__GNUC__) && (__GNUC__ >= 4)
 #  define BASE_EXPORT __attribute__ ((visibility ("default")))
 #  define BASE_IMPORT BASE_EXPORT
 # else
-#  warning "__GNUC__ not defined, or less than 4. No export or import symbols."
+#  warning "__GNUC__ not defined, or less than 4. No export or import symbols!"
 #  define BASE_EXPORT
 #  define BASE_EXPORT_IS_NIL
 #  define BASE_IMPORT
 #  define BASE_IMPORT_IS_NIL
-# endif /* ! #if defined(__GNUC__) and (__GNUC__ >= 4) */
+# endif
 #elif defined(BASE_OS_WINDOWS)
 # ifdef __GNUC__
 #  define BASE_EXPORT __attribute__ ((dllexport))
@@ -267,16 +274,16 @@
 # else
 #  define BASE_EXPORT __declspec(dllexport)
 #  define BASE_IMPORT __declspec(dllimport)
-# endif /* ! #ifdef __GNUC__ */
+# endif
 #else
-#	error "Unsupported operating system."
+# error "Compiler is known, but operating system is not!"
 #endif
 
 #define BASE_INLINE		static inline
 #define BASE_STRINGIFY_IMPL(s)	#s
 #define BASE_STRINGIFY(s)	BASE_STRINGIFY_IMPL(s)
 
-#ifdef BASE_EXTERN_STATIC_LIB
+#ifdef BASE_EXTERN_STATIC_LIB /* Base is being built, or imported as a static library. */
 # define BASE_API /* Nil */
 # define BASE_API_IS_NIL
 #else

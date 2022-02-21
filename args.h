@@ -96,7 +96,7 @@ Base_Arg_Parser_init
 BASE_INLINE int
 Base_1opt
 (const char ch)
-{ if (ch) return BASE_ARG_PROC_ONECHAR; return 0; }
+{ return ch ? BASE_ARG_PROC_ONECHAR : 0; }
 
 BASE_END_C_DECLS
 

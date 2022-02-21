@@ -59,10 +59,10 @@ BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIG
 /* Base_xor_n(write_to, read_from)
  * XOR n bytes beginning at both addresses, and store in @write_to.
  */
-BASE_API    void    Base_xor_16  (R_(void*), R_(const void*));
-BASE_API    void    Base_xor_32  (R_(void*), R_(const void*));
-BASE_API    void    Base_xor_64  (R_(void*), R_(const void*));
-BASE_API    void    Base_xor_128 (R_(void*), R_(const void*));
+BASE_API void Base_xor_16  (R_(void*), R_(const void*));
+BASE_API void Base_xor_32  (R_(void*), R_(const void*));
+BASE_API void Base_xor_64  (R_(void*), R_(const void*));
+BASE_API void Base_xor_128 (R_(void*), R_(const void*));
 
 /* Base_secure_zero(mem, n)
  * Zero over the memory @mem with @n zero bytes.
@@ -96,15 +96,15 @@ BASE_API size_t
 Base_ctime_memdiff
 (R_(const void*), R_(const void*), size_t);
 /* Base_is_zero(mem, num_bytes)
- * Compare the first @num_bytes bytes of @mem.
- * Return false immediaely upon detecting a non-zero byte.
+ * Compare the first @num_bytes bytes of @mem with 0.
+ * Return false immediately upon detecting a non-zero byte.
  * Return true if all bytes are zero.
  */
 BASE_API bool
 Base_is_zero
 (R_(const void*), size_t);
 /* Base_ctime_is_zero(mem, num_bytes)
- * Compare the first @num_bytes bytes of @mem.
+ * Compare the first @num_bytes bytes of @mem with 0.
  * This comparison is constant time. All @num_bytes bytes will be scanned,
  * before determining whether they were all zero or not.
  * Return false if one or more of the @mem bytes were non-zero.

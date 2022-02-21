@@ -49,16 +49,17 @@ typedef HANDLE Base_File_t;
 
 #define R_(ptr) ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
-BASE_API int         Base_get_file_size (Base_File_t, R_(size_t*));
-BASE_API size_t      Base_get_file_size_or_die (Base_File_t);
-BASE_API int         Base_get_filepath_size (R_(const char*), R_(size_t*));
-BASE_API size_t      Base_get_filepath_size_or_die (const char*);
-BASE_API bool        Base_filepath_exists (const char*);
-BASE_API void        Base_force_filepath_existence_or_die (R_(const char*), bool);
-BASE_API int         Base_open_filepath (R_(const char*), bool, R_(Base_File_t*));
-BASE_API Base_File_t Base_open_filepath_or_die (R_(const char*), bool);
-BASE_API int         Base_create_filepath (R_(const char*), R_(Base_File_t*));
-BASE_API Base_File_t Base_create_filepath_or_die (const char*);
+
+BASE_API    int         Base_get_file_size (Base_File_t, R_(size_t*));
+BASE_API    size_t      Base_get_file_size_or_die (Base_File_t);
+BASE_API    int         Base_get_filepath_size (R_(const char*), R_(size_t*));
+BASE_API    size_t      Base_get_filepath_size_or_die (const char*);
+BASE_API    bool        Base_filepath_exists (const char*);
+BASE_API    void        Base_force_filepath_existence_or_die (R_(const char*), bool);
+BASE_API    int         Base_open_filepath (R_(const char*), bool, R_(Base_File_t*));
+BASE_API    Base_File_t Base_open_filepath_or_die (R_(const char*), bool);
+BASE_API    int         Base_create_filepath (R_(const char*), R_(Base_File_t*));
+BASE_API    Base_File_t Base_create_filepath_or_die (const char*);
 #ifdef BASE_CLOSE_FILE_INLINE
 BASE_INLINE int Base_close_file (Base_File_t f) BASE_CLOSE_FILE_IMPL(f)
 #else
@@ -70,7 +71,8 @@ BASE_INLINE int Base_set_file_size (Base_File_t f, size_t s) BASE_SET_FILE_SIZE_
 #else
 BASE_API    int Base_set_file_size (Base_File_t, size_t);
 #endif
-BASE_API void Base_set_file_size_or_die (Base_File_t, size_t);
+BASE_API   void Base_set_file_size_or_die (Base_File_t, size_t);
+
 BASE_END_C_DECLS
 #undef R_
 

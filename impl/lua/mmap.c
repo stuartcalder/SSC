@@ -35,7 +35,7 @@ static int new_mmap (lua_State* L) {
 			lua_pushnil(L);
 			return 1;
 		} 
-		f->file = BASE_NULL_FILE;
+		f->file = BASE_NULL_FILE; /* We take ownership. */
 	}
 	luaL_getmetatable(L, MMAP_MT_);
 	lua_setmetatable(L, -2);

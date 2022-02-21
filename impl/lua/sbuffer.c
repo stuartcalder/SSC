@@ -21,8 +21,8 @@ typedef Base_Lua_SBuffer		SB_t;
 static int sbuffer_new (lua_State* L) {
 	const size_t n = (size_t)luaL_checkinteger(L, 1);
 	SB_t* sb = NEW_(L);
-#ifdef BASE_MLOCK_H
 	sb->n = n;
+#ifdef BASE_MLOCK_H
 	sb->f = UINT8_C(0);
 	if (lua_isboolean(L, 2) ? lua_toboolean(L, 2) : 0) {
 		sb->f |= IS_ALIGNED_;
@@ -49,7 +49,6 @@ static int sbuffer_new (lua_State* L) {
 			return MALLOC_FAIL_(L);
 	}
 #else /* Memory-Locking disabled. */
-	sb->n = n;
 	if (!(sb->p = (uint8_t*)malloc(sb->n)))
 		return MALLOC_FAIL_(L);
 #endif
@@ -111,12 +110,12 @@ static int sbuffer_has_mlock (lua_State* L) {
 #ifdef BASE_MLOCK_H
 static int sbuffer_is_mlocked (lua_State* L) {
 	SB_t* sb = CHECK_(L, 1);
-	lua_pushboolean(L, (sb->p != NULL) && HAS_BITS_(sb->f, IS_LOCKED_));
+	lua_pushboolean(L, (sb->p != NULL) && (sb->f & IS_LOCKED_));
 	return 1;
 }
 static int sbuffer_is_aligned (lua_State* L) {
 	SB_t* sb = CHECK_(L, 1);
-	lua_pushboolean(L, (sb->p != NULL) && HAS_BITS_(sb->f, IS_ALIGNED_));
+	lua_pushboolean(L, (sb->p != NULL) && (sb->f & IS_ALIGNED_));
 	return 1;
 }
 #else

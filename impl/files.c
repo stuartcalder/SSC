@@ -2,9 +2,13 @@
 
 #define R_(ptr) ptr BASE_RESTRICT
 
+#ifdef BASE_OS_UNIXLIKE
+typedef struct stat Stat_t;
+#endif
+
 int Base_get_file_size (Base_File_t file, R_(size_t*) size_p) {
 #if    defined(BASE_OS_UNIXLIKE)
-	struct stat s;
+	Stat_t s;
 	if (fstat(file, &s))
 		return -1;
 	*size_p = (size_t)s.st_size;
@@ -27,7 +31,7 @@ size_t Base_get_file_size_or_die (Base_File_t file) {
 
 int Base_get_filepath_size (R_(const char*) fpath, R_(size_t*) size_p) {
 #ifdef BASE_OS_UNIXLIKE
-	struct stat s;
+	Stat_t s;
 	if (stat(fpath, &s))
 		return -1;
 	*size_p = (size_t)s.st_size;
@@ -46,7 +50,7 @@ int Base_get_filepath_size (R_(const char*) fpath, R_(size_t*) size_p) {
 
 size_t Base_get_filepath_size_or_die (const char* filepath) {
 	size_t size;
-	Base_assert_msg(!Base_get_filepath_size(filepath, &size), "Error: Base_get_filepath_size failed!\n");
+	Base_assert_msg(!Base_get_filepath_size(filepath, &size), "Error: Base_get_filepath_size failed with filepath `%s`!\n", filepath);
 	return size;
 }
 
