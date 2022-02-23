@@ -3,9 +3,9 @@
 int Base_MMap_map (Base_MMap* map, bool readonly) {
 #if    defined(BASE_OS_UNIXLIKE)
 	const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
-	map->ptr = (uint8_t*)mmap(NULL, map->size, rw, MAP_SHARED, map->file, 0);
+	map->ptr = (uint8_t*)mmap(BASE_NULL, map->size, rw, MAP_SHARED, map->file, 0);
 	if (map->ptr == MAP_FAILED) {
-		map->ptr = NULL;
+		map->ptr = BASE_NULL;
 		return -1;
 	}
 #elif  defined(BASE_OS_WINDOWS)
@@ -23,7 +23,7 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 	BASE_STATIC_ASSERT(sizeof(map->size) == 8, "Map's size must be 8 bytes.");
 	BASE_STATIC_ASSERT(sizeof(DWORD) == 4, "DWORD must be 4 bytes.");
 
-	map->win_fmapping = CreateFileMappingA(map->file, NULL, page_rw, high_32, low_32, NULL);
+	map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high_32, low_32, BASE_NULL);
 	if (map->win_fmapping == BASE_NULL_FILE)
 		return -1;
 
@@ -49,7 +49,7 @@ int Base_MMap_unmap (Base_MMap* map) {
 #if    defined(BASE_OS_UNIXLIKE)
 	ret = munmap(map->ptr, map->size);
 	if (!ret) {
-		map->ptr = NULL;
+		map->ptr = BASE_NULL;
 		map->readonly = UINT8_C(0);
 	}
 #elif  defined(BASE_OS_WINDOWS)
@@ -57,7 +57,7 @@ int Base_MMap_unmap (Base_MMap* map) {
 	if (!UnmapViewOfFile((LPCVOID)map->ptr))
 		ret = -1;
 	else
-		map->ptr = NULL;
+		map->ptr = BASE_NULL;
 	if (Base_close_file(map->win_fmapping))
 		ret = -1;
 	else

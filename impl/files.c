@@ -77,7 +77,7 @@ int Base_open_filepath (R_(const char*) filepath, bool readonly, R_(Base_File_t*
 	*file = open(filepath, read_write_rights, (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
 	const DWORD read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
-	*file = CreateFileA(filepath, read_write_rights, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	*file = CreateFileA(filepath, read_write_rights, 0, BASE_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
 #	error "Unsupported operating system."
 #endif
@@ -94,7 +94,7 @@ int Base_create_filepath (R_(const char*) filepath, R_(Base_File_t*) file) {
 #if    defined(BASE_OS_UNIXLIKE)
 	*file = open(filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
-	*file = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	*file = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), 0, BASE_NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
 #	error "Unsupported operating system."
 #endif

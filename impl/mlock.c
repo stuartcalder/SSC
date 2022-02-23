@@ -56,7 +56,7 @@ int Base_MLock_init (Base_MLock* ml) {
 #endif
 	ml->n = 0;
 #ifdef BASE_EXTERN_MLOCK_THREADSAFE
-	if (pthread_mutex_init(&ml->n_mtx, NULL))
+	if (pthread_mutex_init(&ml->n_mtx, BASE_NULL))
 		return BASE_MLOCK_ERR_MTX_INIT;
 #endif
 	return 0;

@@ -4,6 +4,7 @@
 #ifndef BASE_MMAP_H
 #define BASE_MMAP_H
 
+#include <stdbool.h>
 #include "errors.h"
 #include "files.h"
 #include "macros.h"
@@ -32,9 +33,9 @@ typedef struct {
 	uint8_t     readonly;
 } Base_MMap;
 #ifdef BASE_OS_WINDOWS
-#  define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0)
+#  define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0, BASE_NULL_FILE, BASE_NULL_FILE, 0)
 #else
-#  define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, NULL, 0, BASE_NULL_FILE, 0)
+#  define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0, BASE_NULL_FILE, 0)
 #endif
 BASE_API    int  Base_MMap_map (Base_MMap*, bool);
 BASE_API    void Base_MMap_map_or_die (Base_MMap*, bool);

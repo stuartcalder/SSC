@@ -2,7 +2,7 @@
 
 #define R_(ptr) ptr BASE_RESTRICT
 void Base_print_bytes (R_(const void*) vbytes, size_t n_bytes) {
-	BASE_ASSERT(vbytes != NULL);
+	BASE_ASSERT(vbytes != BASE_NULL);
 	if (n_bytes == 0) return;
 	const uint8_t* bytes = (const uint8_t*)vbytes;
 	const size_t backtick_one_index = n_bytes - 1;

@@ -211,6 +211,6 @@ Base_Arg_Parser_init
       ctx->size = strlen(ctx->to_read);
       ctx->consumed = 1;
     } else
-      ctx->to_read = NULL;
+      ctx->to_read = BASE_NULL;
   }
 }

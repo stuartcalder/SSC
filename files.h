@@ -28,26 +28,26 @@
 #  include <sys/types.h>
 /* On Unix-like systems, files are managed through handles, represented by integers. */
 typedef int Base_File_t;
-#  define BASE_NULL_FILE (-1)
+#  define BASE_NULL_FILE (-1) /* -1 is typically returned on failure. */
 
 #elif defined(BASE_OS_WINDOWS)
 #  define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
 #  define BASE_SET_FILE_SIZE_IMPL(f, n) { \
      LARGE_INTEGER i; i.QuadPart = n; \
-     if (!SetFilePointerEx(f, i, NULL, FILE_BEGIN) || !SetEndOfFile(f)) \
+     if (!SetFilePointerEx(f, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(f)) \
        return -1; \
      return 0; \
    }
 #  include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
-#  define BASE_NULL_FILE INVALID_HANDLE_VALUE
+#  define BASE_NULL_FILE (INVALID_HANDLE_VALUE)
 
 #else
 #  error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_(ptr) ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
 BASE_BEGIN_C_DECLS
 
 BASE_API    int         Base_get_file_size (Base_File_t, R_(size_t*));

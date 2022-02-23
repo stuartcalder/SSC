@@ -14,7 +14,7 @@
 #  define BASE_ALIGNED_MALLOC_IMPL(alignment, size) { \
      void* p; \
      if (posix_memalign(&p, alignment, size)) \
-       return NULL; \
+       return BASE_NULL; \
      return p; \
    }
 /* Base_aligned_free */
