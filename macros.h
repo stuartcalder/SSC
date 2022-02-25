@@ -12,7 +12,7 @@
 #define BASE_ENDIAN_LITTLE  0
 #define BASE_ENDIAN_BIG     1
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
-#define BASE_ENDIAN_ISVALID(endian) (endian == BASE_ENDIAN_LITTLE || endian == BASE_ENDIAN_BIG)
+#define BASE_ENDIAN_ISVALID(Endian) (Endian == BASE_ENDIAN_LITTLE || Endian == BASE_ENDIAN_BIG)
 
 /* Try to detect the compiler. */
 #if defined(__clang__)
@@ -55,10 +55,12 @@
 # error "Unsupported."
 #endif /* ! #if defined (unixlike os's ...) */
 
+/* C language standards. */
 #define BASE_C_89        199409L
 #define BASE_C_99        199901L
 #define BASE_C_11        201112L
 #define BASE_C_17        201710L
+/* C++ language standards. */
 #define BASE_CPP_11      201103L
 #define BASE_CPP_14      201402L
 #define BASE_CPP_17      201703L
@@ -97,53 +99,64 @@
  *   Tells us what ISA we are compiling for, or "UNKNOWN" if we fail to detect it.
  */
 
+#define BASE_ISA_UNKNOWN 0
+#define BASE_ISA_AMD64   1
+#define BASE_ISA_RISCV   2
+#define BASE_ISA_ARM64   3
+#define BASE_ISA_X86     4
+#define BASE_ISA_ARMV7   5
+
 /* Architecture macros. */
 #if (defined(__amd64)  || defined(__amd64__)  || \
      defined(__x86_64) || defined(__x86_64__) || \
      defined(_M_X64)   || defined(_M_AMD64))
-# define BASE_ISA "AMD64"
-# define BASE_ISA_AMD64
+# define BASE_ISA BASE_ISA_AMD64
 # ifndef BASE_ENDIAN
    /* AMD64 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #  define BASE_ENDIAN_IS_ISA
 # endif
 #elif defined(__riscv)
-# define BASE_ISA "RISC-V"
-# define BASE_ISA_RISCV
+# define BASE_ISA BASE_ISA_RISCV
 # ifndef BASE_ENDIAN
    /* RISCV is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #  define BASE_ENDIAN_IS_ISA
 # endif
 #elif (defined(__aarch64__) || defined(_M_ARM64))
-# define BASE_ISA "ARM64"
-# define BASE_ISA_ARM64
+# define BASE_ISA BASE_ISA_ARM64
 # ifndef BASE_ENDIAN
-   /* ARM64 may be big or little endian, but it's tyically LE. */
-#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#  define BASE_ENDIAN_IS_ISA
+#  ifdef BASE_COMPILER_MSVC /* Assume little-endian mode when used with MSVC. */
+#   define BASE_ENDIAN BASE_ENDIAN_LITTLE
+#   define BASE_ENDIAN_IS_COMPILER
+#  else
+#   warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness."
+#   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
+#   define BASE_ENDIAN_IS_DEFAULT
+#  endif
 # endif
 #elif (defined(__i386__) || defined(_M_IX86))
-# define BASE_ISA "X86"
-# define BASE_ISA_X86
+# define BASE_ISA BASE_ISA_X86
 # ifndef BASE_ENDIAN
    /* X86 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #  define BASE_ENDIAN_IS_ISA
 # endif
 #elif defined(__arm__) || defined(_M_ARM)
-# define BASE_ISA "ARMV7"
-# define BASE_ISA_ARMV7
+# define BASE_ISA BASE_ISA_ARMV7
 # ifndef BASE_ENDIAN
-   /* ArmV7 may be big or little endian, but it's typically LE. */
-#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#  define BASE_ENDIAN_IS_ISA
+#  ifdef BASE_COMPILER_MSVC /* Assume little-endian mode when used with MSVC. */
+#   define BASE_ENDIAN BASE_ENDIAN_LITTLE
+#   define BASE_ENDIAN_IS_COMPILER
+#  else
+#   warning "ARMv7 is bi-endian, and BASE_ENDIAN is still not yet defined!"
+#   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
+#   define BASE_ENDIAN_IS_DEFAULT
+#  endif
 # endif
 #else
 # warning "Failed to detect ISA."
-# define BASE_ISA "UNKNOWN"
-# define BASE_ISA_UNKNOWN
+# define BASE_ISA BASE_ISA_UNKNOWN
 # ifndef BASE_ENDIAN
 #  if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
 #   warning "BASE_ISA is UNKNOWN. Will use default (little) endianness and hope for the best."
