@@ -130,7 +130,13 @@
 #   define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #   define BASE_ENDIAN_IS_COMPILER
 #  else
-#   warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness."
+#   if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
+#    warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Little)."
+#   elif (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_BIG)
+#    warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Big)."
+#   else
+#    error "BASE_ENDIAN is invalid!"
+#   endif
 #   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 #   define BASE_ENDIAN_IS_DEFAULT
 #  endif
@@ -149,11 +155,17 @@
 #   define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #   define BASE_ENDIAN_IS_COMPILER
 #  else
-#   warning "ARMv7 is bi-endian, and BASE_ENDIAN is still not yet defined!"
+#   if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
+#    warning "Armv7 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Little)."
+#   elif (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_BIG)
+#    warning "Armv7 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Big)."
+#   else
+#    error "BASE_ENDIAN is invalid!"
+#   endif
 #   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 #   define BASE_ENDIAN_IS_DEFAULT
-#  endif
-# endif
+#  endif /* ! ifdef BASE_COMPILER_MSVC */
+# endif /* ! ifndef BASE_ENDIAN */
 #else
 # warning "Failed to detect ISA."
 # define BASE_ISA BASE_ISA_UNKNOWN

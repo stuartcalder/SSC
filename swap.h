@@ -73,6 +73,9 @@
 #  define BASE_SWAP_32_IMPL(u32_v) { return _byteswap_ulong(u32_v); }
 #  define BASE_SWAP_64_IMPL(u64_v) { return _byteswap_uint64(u64_v); }
 # elif defined(BASE_OS_MAC)
+   /* We just want to byteswap here. OSX provides functions to convert from host to alternative endians,
+    * which is the same as a byteswap when endianness differs.
+    */
 #  if   (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
 #   define BASE_SWAP_IMPL_HOST_TO(Var, Bits) (uint##Bits##_t)OSSwapHostToBigInt##Bits(Var)
 #  elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
