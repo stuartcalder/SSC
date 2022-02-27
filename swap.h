@@ -1,31 +1,46 @@
 #ifndef BASE_SWAP_H
 #define BASE_SWAP_H
+/* This header implements byte-swapping; reversing the order of bytes in
+ * unsigned integers.
+ */
 
 #include <stdlib.h>
 #include "errors.h"
 #include "macros.h"
 
+/* Which implementation will we use? */
 #define BASE_SWAP_IMPL_RAW           0
 #define BASE_SWAP_IMPL_GNUC          1
-#define BASE_SWAP_IMPL_OS_PROVIDED   2
+#define BASE_SWAP_IMPL_CPP23         2
+#define BASE_SWAP_IMPL_OS_PROVIDED   3
 
+/* Choose GNUC's builtin swap first. */
 #if !defined(BASE_SWAP_IMPL) && defined(__GNUC__)
 # define BASE_SWAP_IMPL BASE_SWAP_IMPL_GNUC
 #endif
-
+/* If using C++23 or higher, next prefer std::byteswap. */
+#if (!defined(BASE_SWAP_IMPL) && \
+     defined(BASE_LANG_CPP) && BASE_LANG_CPP >= BASE_CPP_23)
+# define BASE_SWAP_IMPL BASE_SWAP_IMPL_CPP23
+#endif
+/* On OSX we will use the provided OSByteOrder.h
+ * to byteswap, if it is available and if the compiler
+ * supports __has_include.
+ */
 #if !defined(BASE_SWAP_IMPL) && defined(BASE_OS_MAC)
 # ifdef __has_include
 #  if __has_include(<libkern/OSByteOrder.h>)
 #   include <libkern/OSByteOrder.h>
 #   define BASE_SWAP_IMPL BASE_SWAP_IMPL_OS_PROVIDED
-#  else
+#  else /* Otherwise, we will use raw. */
 #   define BASE_SWAP_IMPL BASE_SWAP_IMPL_RAW
 #  endif
-# else /* We don't have __has_include. FIXME: Don't assume we can use OSByteOrder for now.*/
+# else /* We don't have __has_include. Don't assume we can use OSByteOrder.*/
 #  define BASE_SWAP_IMPL BASE_SWAP_IMPL_RAW
-# endif /* ! __has_include */
+# endif /* ! ifdef __has_include */
 #endif
 
+/* Next, prefer functions natively available on some operating system. */
 #if (!defined(BASE_SWAP_IMPL) && \
      (defined(__OpenBSD__) || \
       defined(__FreeBSD__) || \
@@ -36,6 +51,9 @@
 # define BASE_SWAP_IMPL BASE_SWAP_IMPL_OS_PROVIDED
 #endif
 
+/* If no swap implementation has been chosen yet,
+ * we will implement the byteswapping ourselves.
+ */
 #ifndef BASE_SWAP_IMPL
 # define BASE_SWAP_IMPL BASE_SWAP_IMPL_RAW
 #endif
@@ -47,6 +65,11 @@
 # define BASE_SWAP_16_IMPL(u16_v) { return __builtin_bswap16(u16_v); }
 # define BASE_SWAP_32_IMPL(u32_v) { return __builtin_bswap32(u32_v); }
 # define BASE_SWAP_64_IMPL(u64_v) { return __builtin_bswap64(u64_v); }
+#elif (BASE_SWAP_IMPL == BASE_SWAP_IMPL_CPP23)
+# include <bit>
+# define BASE_SWAP_16_IMPL(u16_v) { return std::byteswap<uint16_t>(u16_v); }
+# define BASE_SWAP_32_IMPL(u32_v) { return std::byteswap<uint32_t>(u32_v); }
+# define BASE_SWAP_64_IMPL(u64_v) { return std::byteswap<uint64_t>(u64_v); }
 #elif (BASE_SWAP_IMPL == BASE_SWAP_IMPL_OS_PROVIDED)
 # if defined(__OpenBSD__)
 #  include <endian.h>
@@ -115,7 +138,7 @@
 }
 #else
 # error "Invalid BASE_SWAP_IMPL!"
-#endif
+#endif /* ~ Defining swap implementation. */
 
 #ifdef BASE_SWAP_DONT_INLINE
 BASE_API    uint16_t Base_swap_16 (uint16_t);
@@ -125,6 +148,9 @@ BASE_API    uint64_t Base_swap_64 (uint64_t);
 BASE_INLINE uint16_t Base_swap_16 (uint16_t u16_v) BASE_SWAP_16_IMPL(u16_v)
 BASE_INLINE uint32_t Base_swap_32 (uint32_t u32_v) BASE_SWAP_32_IMPL(u32_v)
 BASE_INLINE uint64_t Base_swap_64 (uint64_t u64_v) BASE_SWAP_64_IMPL(u64_v)
+# undef BASE_SWAP_16_IMPL
+# undef BASE_SWAP_32_IMPL
+# undef BASE_SWAP_64_IMPL
 #endif /* ! ifdef BASE_SWAP_DONT_INLINE */
 
 #endif /* ~ BASE_SWAP_H */

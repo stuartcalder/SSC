@@ -18,6 +18,7 @@
 #include "swap.h"
 
 #if defined(BASE_LANG_CPP) && (BASE_LANG_CPP >= BASE_CPP_20)
+/* C++20 provides functions for bitwise rotation. */
 # define BASE_OPERATIONS_USE_CPP20_ROT 1
 #else
 # define BASE_OPERATIONS_USE_CPP20_ROT 0
@@ -25,10 +26,8 @@
 
 #if BASE_OPERATIONS_USE_CPP20_ROT
 # include <bit>
-# define BASE_ROT_LEFT(value, count, bits) \
-  std::rotl<uint##bits##_t>(value, count)
-# define BASE_ROT_RIGHT(value, count, bits) \
-  std::rotr<uint##bits##_t>(value, count)
+# define BASE_ROT_LEFT(value, count, bits)  std::rotl<uint##bits##_t>(value, count)
+# define BASE_ROT_RIGHT(value, count, bits) std::rotr<uint##bits##_t>(value, count)
 #else
 # if (CHAR_BIT != 8)
 #  error "We need 8-bit chars."

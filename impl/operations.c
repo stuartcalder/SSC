@@ -60,21 +60,28 @@ Base_xor_128
   XOR_128_(base, add, 0);
 }
 
-size_t Base_ctime_memdiff (R_(const void*) m_0, R_(const void*) m_1, size_t size) {
-  BASE_ASSERT(m_0 && m_1);
-  const uint8_t* b_0 = (const uint8_t*)m_0;
-  const uint8_t* b_1 = (const uint8_t*)m_1;
+size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size) {
+  BASE_ASSERT(v_0 && v_1);
+  const uint8_t* const u8_0 = (const uint8_t*)v_0;
+  const uint8_t* const u8_1 = (const uint8_t*)v_1;
+  /* Count the number of byte indices of @u8_0 and @u8_1 that are unequal. */
   size_t unequal_count = 0;
   for (size_t i = 0; i < size; ++i) {
-    uint8_t b = b_0[i] ^ b_1[i];
-    b |= ((b >> 7)|
-          (b >> 6)|
-	  (b >> 5)|
-	  (b >> 4)|
-	  (b >> 3)|
-	  (b >> 2)|
-	  (b >> 1));
-    unequal_count += (b & UINT8_C(0x01));
+    uint8_t u8_bits = u8_0[i] ^ u8_1[i];
+    /* Bit-index 0 absorbs every 1 bit. */
+    u8_bits |= ((u8_bits >> 7)|
+                (u8_bits >> 6)|
+	        (u8_bits >> 5)|
+	        (u8_bits >> 4)|
+	        (u8_bits >> 3)|
+	        (u8_bits >> 2)|
+	        (u8_bits >> 1));
+    /* We do integer addition.
+     * If bit-index 0 was 1, this will increment @unequal_count,
+     * else the bytes were equal.
+     * This should take the same amount of time in either case.
+     */
+    unequal_count += (u8_bits & UINT8_C(0x01));
   }
   return unequal_count;
 }
@@ -88,9 +95,14 @@ bool Base_is_zero (R_(const void*) mem, size_t n_bytes) {
 }
 bool Base_ctime_is_zero (R_(const void*) mem, size_t n_bytes) {
 	BASE_ASSERT(mem);
-	const uint8_t* b = (const uint8_t*)mem;
+	const uint8_t* cu8p = (const uint8_t*)mem;
 	uint8_t zero_test = 0;
-	for (size_t i = 0; i < n_bytes; ++i)
-	  zero_test |= b[i];
+	for (size_t i = 0; i < n_bytes; ++i) {
+	  /* @zero_test absorbs all the 1 bits. */
+	  zero_test |= cu8p[i];
+	}
+	/* If any 1 bits were absorbed, the memory range
+	 * was not all zero'd.
+	 */
 	return !zero_test;
 }

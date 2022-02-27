@@ -16,9 +16,10 @@
 
 /* Try to detect the compiler. */
 #if defined(__clang__)
+  /* We need to test Clang first because it also defines __GNUC__, and may also define _MSC_VER. */
 # define BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
-/* We can test _MSC_VER as BASE_COMPILER_MSVC for features later. */
+  /* We can test _MSC_VER as BASE_COMPILER_MSVC for features later. */
 # define BASE_COMPILER_MSVC _MSC_VER
 #elif defined(__GNUC__)
 # define BASE_COMPILER_GCC
@@ -32,10 +33,7 @@
 # define BASE_OS_MAC
 #endif /* ! #if defined (__APPLE__) and defined (__MACH__) */
 
-/* Define the BSDs, GNU/Linux, and MacOS as UNIX-like operating systems.
- * I'm sure more systems could go here, but this software was developed
- * with access to primarily open source operating systems.
- */
+/* More unixlikes could go here without too much code change, probably. */
 #if (defined(BASE_OS_MAC)   || \
      defined(__Dragonfly__) || \
      defined(__FreeBSD__)   || \
@@ -56,15 +54,16 @@
 #endif /* ! #if defined (unixlike os's ...) */
 
 /* C language standards. */
-#define BASE_C_89        199409L
-#define BASE_C_99        199901L
-#define BASE_C_11        201112L
-#define BASE_C_17        201710L
+#define BASE_C_89 199409L
+#define BASE_C_99 199901L
+#define BASE_C_11 201112L
+#define BASE_C_17 201710L
 /* C++ language standards. */
-#define BASE_CPP_11      201103L
-#define BASE_CPP_14      201402L
-#define BASE_CPP_17      201703L
-#define BASE_CPP_20      202002L
+#define BASE_CPP_11 201103L
+#define BASE_CPP_14 201402L
+#define BASE_CPP_17 201703L
+#define BASE_CPP_20 202002L
+#define BASE_CPP_23 202312L /* Hasn't released yet. Set this to December of 2023 for now. */
 
 /* BASE_ENDIAN
  * int
@@ -95,8 +94,10 @@
 #endif
 
 /* BASE_ISA
- * string literal
- *   Tells us what ISA we are compiling for, or "UNKNOWN" if we fail to detect it.
+ * int
+ *   The instruction set architecture of the system.
+ *   If not explicitly defined in this file,
+ *   BASE_ISA will default to BASE_ISA_UNKNOWN.
  */
 
 #define BASE_ISA_UNKNOWN 0
@@ -139,15 +140,15 @@
 #   endif
 #   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
 #   define BASE_ENDIAN_IS_DEFAULT
-#  endif
-# endif
+#  endif /* ! ifdef BASE_COMPILER_MSVC */
+# endif /* ! ifndef BASE_ENDIAN */
 #elif (defined(__i386__) || defined(_M_IX86))
 # define BASE_ISA BASE_ISA_X86
 # ifndef BASE_ENDIAN
    /* X86 is little endian. */
 #  define BASE_ENDIAN BASE_ENDIAN_LITTLE
 #  define BASE_ENDIAN_IS_ISA
-# endif
+# endif /* ! ifndef BASE_ENDIAN */
 #elif defined(__arm__) || defined(_M_ARM)
 # define BASE_ISA BASE_ISA_ARMV7
 # ifndef BASE_ENDIAN
