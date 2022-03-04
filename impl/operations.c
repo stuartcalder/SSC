@@ -68,7 +68,7 @@ size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size
   size_t unequal_count = 0;
   for (size_t i = 0; i < size; ++i) {
     uint8_t u8_bits = u8_0[i] ^ u8_1[i];
-    /* Bit-index 0 absorbs every 1 bit. */
+    /* Bit-index 0 absorbs 1 bits from bit-indices 1 through 7. */
     u8_bits |= ((u8_bits >> 7)|
                 (u8_bits >> 6)|
 	        (u8_bits >> 5)|

@@ -1,4 +1,5 @@
 #include "mmap.h"
+#define R_(p) p BASE_RESTRICT
 
 int Base_MMap_map (Base_MMap* map, bool readonly) {
 #if    defined(BASE_OS_UNIXLIKE)
@@ -80,4 +81,62 @@ int Base_MMap_sync (const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
 
 void Base_MMap_sync_or_die (const Base_MMap* map) {
 	Base_assert_msg(!Base_MMap_sync(map), "Error: Base_MMap_sync failed!\n");
+}
+
+int
+Base_MMap_init
+(R_(Base_MMap*)  map,
+ R_(const char*) filepath,
+ bool            readonly)
+{
+  if (Base_open_filepath(filepath, readonly, &map->file))
+    return -1;
+  if (Base_get_file_size(map->file, &map->size));
+    return -2;
+  if (Base_MMap_map(map, readonly))
+    return -3;
+  return 0;
+}
+
+#define FAILED_IN_(Sub, Main) "Error: %s failed in %s!\n", Sub, Main
+
+void
+Base_MMap_init_or_die
+(R_(Base_MMap*)  map,
+ R_(const char*) filepath,
+ bool            readonly)
+{
+  int r = Base_MMap_init(map, filepath, readonly);
+  switch (r) {
+    case 0:
+      break;
+    case -1:
+      Base_errx(FAILED_IN_("Base_open_filepath", "Base_MMap_init"));
+      break;
+    case -2:
+      Base_close_file(map->file);
+      Base_errx(FAILED_IN_("Base_get_file_size", "Base_MMap_init"));
+      break;
+    case -3:
+      Base_close_file(map->file);
+      Base_errx(FAILED_IN_("Base_MMap_map", "Base_MMap_init"));
+      break;
+  }
+}
+
+void
+Base_MMap_del
+(Base_MMap* map)
+{
+  if (map->ptr && Base_MMap_unmap(map))
+    Base_errx(FAILED_IN_("Base_MMap_unmap", "Base_MMap_del"));
+  if ((map->file != BASE_NULL_FILE) &&
+      Base_close_file(map->file))
+    Base_errx(FAILED_IN_("Base_close_file","Base_MMap_del"));
+  #ifdef BASE_OS_WINDOWS
+  if ((map->win_fmapping != BASE_NULL_FILE) &&
+      Base_close_file(map->win_fmapping))
+    Base_errx("Error: Base_close_file failed for win_fmapping in Base_MMap_del!\n");
+  #endif
+  *map = BASE_MMAP_NULL_LITERAL;
 }
