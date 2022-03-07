@@ -11,9 +11,11 @@
 #include "macros.h"
 
 #define BASE_ERR_STR_ALLOC_FAILURE "Error: Generic Allocation Failure.\n"
-#define BASE_ERR_S_GENERIC(str)	   "Error: %s!\n", str
-#define BASE_ERR_S_FAILED(str)	   "Error: %s failed!\n", str
-#define BASE_ERR_S_FAILED_IN(str)  "Error: %s failed in function %s!\n", str, __func__
+#define BASE_ERR_S(Str)            "Error: %s!\n", Str
+#define BASE_ERR_S_GENERIC(Str)	   BASE_ERR_S(Str) /* TODO: Remove me. */
+#define BASE_ERR_S_IN(Str)         "Error: %s in function %s!\n", Str, __func__
+#define BASE_ERR_S_FAILED(Str)	   "Error: %s failed!\n", Str
+#define BASE_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
 
 #define BASE_ERRX_CODE_LIST_IMPL_GENERIC(code, fmt, arg_list) { \
   vfprintf(stderr, fmt, arg_list); \

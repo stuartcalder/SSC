@@ -6,6 +6,11 @@
  * cast to specific function pointer types.
  */
 typedef void Base_Func_f ();
-typedef Base_Func_f * Base_Fptr_t;
+typedef Base_Func_f* Base_Fptr_t;
+
+typedef union {
+  Base_Fptr_t func;
+  void*       obj; /* Object pointer. */
+} Base_Ptr;
 
 #endif /* ~ifndef BASE_FUNCS */

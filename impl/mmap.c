@@ -1,3 +1,5 @@
+#include "errors.h"
+#include "files.h"
 #include "mmap.h"
 #define R_(p) p BASE_RESTRICT
 
@@ -37,7 +39,7 @@ int Base_MMap_map (Base_MMap* map, bool readonly) {
 #else
 #	error "Unsupported operating system."
 #endif
-	map->readonly = (uint8_t)readonly;
+	map->readonly = (uint_fast8_t)readonly;
 	return 0;
 }
 
@@ -51,7 +53,7 @@ int Base_MMap_unmap (Base_MMap* map) {
 	ret = munmap(map->ptr, map->size);
 	if (!ret) {
 		map->ptr = BASE_NULL;
-		map->readonly = UINT8_C(0);
+		map->readonly = 0;
 	}
 #elif  defined(BASE_OS_WINDOWS)
 	ret = 0;
@@ -64,7 +66,7 @@ int Base_MMap_unmap (Base_MMap* map) {
 	else
 		map->win_fmapping = BASE_NULL_FILE;
 	if (!ret)
-		map->readonly = UINT8_C(0);
+		map->readonly = 0;
 #else
 #	error "Unsupported operating system."
 #endif
@@ -83,46 +85,120 @@ void Base_MMap_sync_or_die (const Base_MMap* map) {
 	Base_assert_msg(!Base_MMap_sync(map), "Error: Base_MMap_sync failed!\n");
 }
 
-int
+typedef enum {
+  INIT_CODE_OK = 0,
+  INIT_CODE_ERR_NOCREATE = -1,
+  INIT_CODE_ERR_READONLY = -2,
+  INIT_CODE_ERR_SHRINK = -3,
+  INIT_CODE_ERR_NOSIZE = -4,
+  INIT_CODE_ERR_OPEN_FILEPATH = -5,
+  INIT_CODE_ERR_CREATE_FILEPATH = -6,
+  INIT_CODE_ERR_GET_FILE_SIZE = -7,
+  INIT_CODE_ERR_SET_FILE_SIZE = -8,
+  INIT_CODE_ERR_MAP = -9,
+} Init_Code_t;
+
+#define RONLY_       BASE_MMAP_INIT_READONLY
+#define NOCREATE_    BASE_MMAP_INIT_NOCREATE
+#define ALLOWSHRINK_ BASE_MMAP_INIT_ALLOWSHRINK
+typedef Base_MMap_Init_t  Init_t;
+
+Init_Code_t
 Base_MMap_init
 (R_(Base_MMap*)  map,
  R_(const char*) filepath,
- bool            readonly)
+ size_t          size,
+ Init_t          flags)
 {
-  if (Base_open_filepath(filepath, readonly, &map->file))
-    return -1;
-  if (Base_get_file_size(map->file, &map->size));
-    return -2;
-  if (Base_MMap_map(map, readonly))
-    return -3;
-  return 0;
-}
+  bool exists, set_size;
 
-#define FAILED_IN_(Sub, Main) "Error: %s failed in %s!\n", Sub, Main
+  exists = Base_filepath_exists(filepath);
+  /* We will set the size when the filepath
+   * doesn't exist, and when it does exist and a size has been requested.
+   */
+  set_size = !(flags & RONLY_) && (!exists || (size > 0));
+  if (exists) {
+    if (Base_open_filepath(filepath, flags & RONLY_, &map->file))
+      return INIT_CODE_ERR_OPEN_FILEPATH;
+    if (Base_get_file_size(map->file, &map->size))
+      return INIT_CODE_ERR_GET_FILE_SIZE;
+    if (!(flags & RONLY_)) {
+      if (map->size > size) {
+        if (!(flags & ALLOWSHRINK_))
+	  return INIT_CODE_ERR_SHRINK;
+      } else if (map->size == size)
+        set_size = false;
+    }
+  } else {
+    if (flags & NOCREATE_)
+      return INIT_CODE_ERR_NOCREATE;
+    if (flags & RONLY_)
+      return INIT_CODE_ERR_READONLY;
+    if (!size)
+      return INIT_CODE_ERR_NOSIZE;
+    if (Base_create_filepath(filepath, &map->file))
+      return INIT_CODE_ERR_CREATE_FILEPATH;
+  }
+  if (set_size) {
+    map->size = size;
+    if (Base_set_file_size(map->file, map->size))
+      return INIT_CODE_ERR_SET_FILE_SIZE;
+  }
+  /* When we create a new file, it implicitly
+   * is readwrite, not readonly.
+   */
+  if (Base_MMap_map(map, exists && (flags & RONLY_)))
+    return INIT_CODE_ERR_MAP;
+  return INIT_CODE_OK;
+}
 
 void
 Base_MMap_init_or_die
 (R_(Base_MMap*)  map,
  R_(const char*) filepath,
- bool            readonly)
+ size_t          size,
+ Init_t          flags)
 {
-  int r = Base_MMap_init(map, filepath, readonly);
-  switch (r) {
-    case 0:
+  Init_Code_t ic = Base_MMap_init(map, filepath, size, flags);
+  const char* err_str;
+  switch (ic) {
+    case INIT_CODE_OK:
+      return;
+    case INIT_CODE_ERR_NOCREATE:
+      err_str = "File creation disabled";
       break;
-    case -1:
-      Base_errx(FAILED_IN_("Base_open_filepath", "Base_MMap_init"));
+    case INIT_CODE_ERR_READONLY:
+      err_str = "File creation prevented by readonly";
       break;
-    case -2:
-      Base_close_file(map->file);
-      Base_errx(FAILED_IN_("Base_get_file_size", "Base_MMap_init"));
+    case INIT_CODE_ERR_SHRINK:
+      err_str = "File shrinking disallowed";
       break;
-    case -3:
-      Base_close_file(map->file);
-      Base_errx(FAILED_IN_("Base_MMap_map", "Base_MMap_init"));
+    case INIT_CODE_ERR_NOSIZE:
+      err_str = "Size not provided";
+      break;
+    case INIT_CODE_ERR_OPEN_FILEPATH:
+      err_str = "Base_open_filepath failed";
+      break;
+    case INIT_CODE_ERR_CREATE_FILEPATH:
+      err_str = "Base_create_filepath failed";
+      break;
+    case INIT_CODE_ERR_GET_FILE_SIZE:
+      err_str = "Base_get_file_size failed";
+      break;
+    case INIT_CODE_ERR_SET_FILE_SIZE:
+      err_str = "Base_set_file_size failed";
+      break;
+    case INIT_CODE_ERR_MAP:
+      err_str = "Base_MMap_map failed";
+      break;
+    default:
+      Base_errx(BASE_ERR_S_IN("Invalid Init_Code_t"));
       break;
   }
+  Base_errx(BASE_ERR_S_IN(err_str));
 }
+
+#define FAILED_IN_(Sub, Main) "Error: %s failed in %s!\n", Sub, Main
 
 void
 Base_MMap_del
@@ -133,7 +209,7 @@ Base_MMap_del
   if ((map->file != BASE_NULL_FILE) &&
       Base_close_file(map->file))
     Base_errx(FAILED_IN_("Base_close_file","Base_MMap_del"));
-  #ifdef BASE_OS_WINDOWS
+  #ifdef BASE_MMAP_HAS_WIN_FMAPPING
   if ((map->win_fmapping != BASE_NULL_FILE) &&
       Base_close_file(map->win_fmapping))
     Base_errx("Error: Base_close_file failed for win_fmapping in Base_MMap_del!\n");
