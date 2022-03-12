@@ -5,7 +5,6 @@
 #define BASE_STRINGS_H
 
 #include "macros.h"
-#include "types.h"
 
 typedef struct {
 	char*  c_str; /* -> [@size+1] */

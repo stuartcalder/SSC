@@ -9,23 +9,36 @@
 #define BASE_RESTRICT_IMPL_C    0x01
 #define BASE_RESTRICT_IMPL_CPP  0x02
 /* Endianness. */
-#define BASE_ENDIAN_LITTLE  0
-#define BASE_ENDIAN_BIG     1
+#define BASE_ENDIAN_NONE    0
+#define BASE_ENDIAN_LITTLE  1
+#define BASE_ENDIAN_BIG     2
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
-#define BASE_ENDIAN_ISVALID(Endian) (Endian == BASE_ENDIAN_LITTLE || Endian == BASE_ENDIAN_BIG)
+#define BASE_ENDIAN_ISVALID(Endian) ((Endian) == BASE_ENDIAN_LITTLE || (Endian) == BASE_ENDIAN_BIG)
+/* How are we determining endianness? */
+#define BASE_ENDIAN_SRC_NONE     0
+#define BASE_ENDIAN_SRC_EXTERN   1
+#define BASE_ENDIAN_SRC_ISA      2
+#define BASE_ENDIAN_SRC_COMPILER 3
+#define BASE_ENDIAN_SRC_DEFAULT  4
+#define BASE_ENDIAN_SRC_ISVALID(EndSrc) ((EndSrc) >= BASE_ENDIAN_SRC_EXTERN && (EndSrc) <= BASE_ENDIAN_SRC_DEFAULT)
 
-/* Try to detect the compiler. */
-#if defined(__clang__)
-  /* We need to test Clang first because it also defines __GNUC__, and may also define _MSC_VER. */
-# define BASE_COMPILER_CLANG
+#define BASE_COMPILER_UNKNOWN 0
+#define BASE_COMPILER_GCC     1
+#define BASE_COMPILER_CLANG   2
+#define BASE_COMPILER_MSVC    3
+#define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC)
+#define BASE_COMPILER_IS_GCC_COMPAT (BASE_COMPILER == BASE_COMPILER_GCC || BASE_COMPILER == BASE_COMPILER_CLANG)
+
+#if   defined(__clang__)
+# define BASE_COMPILER BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
-  /* We can test _MSC_VER as BASE_COMPILER_MSVC for features later. */
-# define BASE_COMPILER_MSVC _MSC_VER
+# define BASE_COMPILER BASE_COMPILER_MSVC
+# define BASE_COMPILER_V _MSC_VER
 #elif defined(__GNUC__)
-# define BASE_COMPILER_GCC
+# define BASE_COMPILER BASE_COMPILER_GCC
 #else
-# warning "Failed to detect the compiler."
-# define BASE_COMPILER_UNKNOWN
+# define BASE_COMPILER BASE_COMPILER_UNKNOWN
+# warning "BASE_COMPILER unknown!"
 #endif
 
 /* Operating System Macros */
@@ -53,17 +66,19 @@
 # error "Unsupported."
 #endif /* ! #if defined (unixlike os's ...) */
 
+#define BASE_2023 202312L /* Version not yet released. */
 /* C language standards. */
 #define BASE_C_89 199409L
 #define BASE_C_99 199901L
 #define BASE_C_11 201112L
 #define BASE_C_17 201710L
+#define BASE_C_23 BASE_2023
 /* C++ language standards. */
 #define BASE_CPP_11 201103L
 #define BASE_CPP_14 201402L
 #define BASE_CPP_17 201703L
 #define BASE_CPP_20 202002L
-#define BASE_CPP_23 202312L /* Hasn't released yet. Set this to December of 2023 for now. */
+#define BASE_CPP_23 BASE_2023
 
 /* BASE_ENDIAN
  * int
@@ -76,8 +91,8 @@
 #  error "BASE_EXTERN_ENDIAN is an invalid endianness!"
 # endif
   /* External definition trumps all endian detection methods. */
-# define BASE_ENDIAN BASE_EXTERN_ENDIAN
-# define BASE_ENDIAN_IS_EXTERN
+# define BASE_ENDIAN     BASE_EXTERN_ENDIAN
+# define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_EXTERN
 #endif
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
@@ -90,7 +105,7 @@
 # else
 #  error "Invalid __BYTE_ORDER__!"
 # endif
-# define BASE_ENDIAN_IS_GNUC
+# define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_COMPILER
 #endif
 
 /* BASE_ISA
@@ -114,22 +129,22 @@
 # define BASE_ISA BASE_ISA_AMD64
 # ifndef BASE_ENDIAN
    /* AMD64 is little endian. */
-#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#  define BASE_ENDIAN_IS_ISA
+#  define BASE_ENDIAN     BASE_ENDIAN_LITTLE
+#  define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_ISA
 # endif
 #elif defined(__riscv)
 # define BASE_ISA BASE_ISA_RISCV
 # ifndef BASE_ENDIAN
    /* RISCV is little endian. */
-#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#  define BASE_ENDIAN_IS_ISA
+#  define BASE_ENDIAN     BASE_ENDIAN_LITTLE
+#  define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_ISA
 # endif
 #elif (defined(__aarch64__) || defined(_M_ARM64))
 # define BASE_ISA BASE_ISA_ARM64
 # ifndef BASE_ENDIAN
-#  ifdef BASE_COMPILER_MSVC /* Assume little-endian mode when used with MSVC. */
-#   define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#   define BASE_ENDIAN_IS_COMPILER
+#  if (BASE_COMPILER == BASE_COMPILER_MSVC) /* Assume little-endian mode when used with MSVC. */
+#   define BASE_ENDIAN     BASE_ENDIAN_LITTLE
+#   define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_ISA
 #  else
 #   if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
 #    warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Little)."
@@ -138,23 +153,23 @@
 #   else
 #    error "BASE_ENDIAN is invalid!"
 #   endif
-#   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
-#   define BASE_ENDIAN_IS_DEFAULT
-#  endif /* ! ifdef BASE_COMPILER_MSVC */
+#   define BASE_ENDIAN     BASE_ENDIAN_DEFAULT
+#   define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_DEFAULT
+#  endif /* ! if (BASE_COMPILER == BASE_COMPILER_MSVC) */
 # endif /* ! ifndef BASE_ENDIAN */
 #elif (defined(__i386__) || defined(_M_IX86))
 # define BASE_ISA BASE_ISA_X86
 # ifndef BASE_ENDIAN
    /* X86 is little endian. */
-#  define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#  define BASE_ENDIAN_IS_ISA
+#  define BASE_ENDIAN     BASE_ENDIAN_LITTLE
+#  define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_ISA
 # endif /* ! ifndef BASE_ENDIAN */
 #elif defined(__arm__) || defined(_M_ARM)
 # define BASE_ISA BASE_ISA_ARMV7
 # ifndef BASE_ENDIAN
-#  ifdef BASE_COMPILER_MSVC /* Assume little-endian mode when used with MSVC. */
-#   define BASE_ENDIAN BASE_ENDIAN_LITTLE
-#   define BASE_ENDIAN_IS_COMPILER
+#  if (BASE_COMPILER == BASE_COMPILER_MSVC) /* Assume little-endian mode when used with MSVC. */
+#   define BASE_ENDIAN     BASE_ENDIAN_LITTLE
+#   define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_COMPILER
 #  else
 #   if   (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_LITTLE)
 #    warning "Armv7 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Little)."
@@ -163,8 +178,8 @@
 #   else
 #    error "BASE_ENDIAN is invalid!"
 #   endif
-#   define BASE_ENDIAN BASE_ENDIAN_DEFAULT
-#   define BASE_ENDIAN_IS_DEFAULT
+#   define BASE_ENDIAN     BASE_ENDIAN_DEFAULT
+#   define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_DEFAULT
 #  endif /* ! ifdef BASE_COMPILER_MSVC */
 # endif /* ! ifndef BASE_ENDIAN */
 #else
@@ -179,14 +194,18 @@
 #   error "BASE_ENDIAN_DEFAULT is invalid!"
 #  endif
 #  warning "To specify endianness, define BASE_EXTERN_ENDIAN to BASE_ENDIAN_LITTLE or BASE_ENDIAN_BIG!"
-#  define BASE_ENDIAN BASE_ENDIAN_DEFAULT
-#  define BASE_ENDIAN_IS_DEFAULT
+#  define BASE_ENDIAN     BASE_ENDIAN_DEFAULT
+#  define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_DEFAULT
 # endif
 #endif
-#ifndef BASE_ENDIAN
+#if   !defined(BASE_ENDIAN)
 # error "BASE_ENDIAN is not defined!"
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
 # error "BASE_ENDIAN is an invalid endianness!"
+#elif !defined(BASE_ENDIAN_SRC)
+# error "BASE_ENDIAN_SRC is not defined!"
+#elif !BASE_ENDIAN_SRC_ISVALID(BASE_ENDIAN_SRC)
+# error "BASE_ENDIAN_SRC is an invalid endian source!"
 #endif
 
 /* C/C++ Interoperability Macros */
@@ -208,6 +227,12 @@
 # define BASE_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
 # define BASE_ALIGNAS(v)                      alignas(v)
 # define BASE_ALIGNOF(v)                      alignof(v)
+# if (BASE_LANG_CPP >= BASE_CPP_17)
+#  define BASE_STATIC_ASSERT_1(boolean)       static_assert(boolean)
+# else
+#  define BASE_STATIC_ASSERT_1(boolean)
+#  define BASE_STATIC_ASSERT_1_IS_NIL
+# endif
 #else /* Not C++. We are using C. */
 # define BASE_LANG BASE_LANG_C
 # define BASE_NULL NULL
@@ -220,17 +245,16 @@
 #  if (BASE_LANG_C < BASE_C_99)
 #   error "When compiled as C, Base is C99 or higher only!"
 #  endif
-#  include <stdint.h>
-#  include <inttypes.h>
+#  include <stdint.h>   /* We use stdint.h typedefs everywhere. */
+#  include <inttypes.h> /* We want accesss to PRI macros. */
 #  ifndef BASE_RESTRICT_IMPL
 #   define BASE_RESTRICT_IMPL BASE_RESTRICT_IMPL_C
 #  endif
 #  if (BASE_LANG_C >= BASE_C_11)
-#   define BASE_STATIC_ASSERT(boolean, msg)	_Static_assert(boolean, msg)
-#   define BASE_ALIGNAS(as)			_Alignas(as)
-#   define BASE_ALIGNOF(of)			_Alignof(of)
+#   define BASE_STATIC_ASSERT(boolean, msg) _Static_assert(boolean, msg)
+#   define BASE_ALIGNAS(as)                 _Alignas(as)
+#   define BASE_ALIGNOF(of)                 _Alignof(of)
 #  else
-    /* Nil macros. */
 #   define BASE_STATIC_ASSERT(boolean, msg)
 #   define BASE_STATIC_ASSERT_IS_NIL
 #   define BASE_ALIGNAS(as)
@@ -238,17 +262,24 @@
 #   define BASE_ALIGNOF(of)
 #   define BASE_ALIGNOF_IS_NIL
 #  endif
+#  if (BASE_LANG_C >= BASE_C_23)
+#   define BASE_STATIC_ASSERT_1(boolean) _Static_assert(boolean)
+#  else
+#   define BASE_STATIC_ASSERT_1(boolean)
+#   define BASE_STATIC_ASSERT_1_IS_NIL
+#  endif
 # else  /* __STDC_VERSION__ not defined. */
   /* We use C99 features, so if we can't detect a C version just pray
    * everything doesn't break.
    */
-#  define BASE_LANG_C	0L
+#  define BASE_LANG_C 0L
 #  ifndef BASE_RESTRICT_IMPL
 #   define BASE_RESTRICT_IMPL 0
 #  endif
-  /* Nil macros. */
 #  define BASE_STATIC_ASSERT(boolean, msg)
 #  define BASE_STATIC_ASSERT_IS_NIL
+#  define BASE_STATIC_ASSERT_1(boolean)
+#  define BASE_STATIC_ASSERT_1_IS_NIL
 #  define BASE_ALIGNAS(as)
 #  define BASE_ALIGNAS_IS_NIL
 #  define BASE_ALIGNOF(of)
@@ -270,10 +301,11 @@
 
 /* Can we restrict pointers? C++ or C99 style? */
 #ifndef BASE_RESTRICT_IMPL
-# error "BASE_RESTRICT_IMPL undefined!"
+# define BASE_RESTRICT_IMPL 0
 #endif
 #if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) || \
-     (defined(BASE_COMPILER_MSVC) && BASE_COMPILER_MSVC >= 1900))
+     ((BASE_COMPILER == BASE_COMPILER_MSVC) && \
+      (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
 # define BASE_RESTRICT __restrict /* C++/MSVC compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 # define BASE_RESTRICT restrict   /* C99-specified restrict. */
@@ -287,13 +319,15 @@
 #undef BASE_RESTRICT_IMPL
 
 /* Symbol Visibility, Export/Import Macros */
-#if defined(BASE_COMPILER_UNKNOWN)
+#if !defined(BASE_COMPILER)
+# error "BASE_COMPILER undefined!"
+#elif (BASE_COMPILER == BASE_COMPILER_UNKNOWN)
 # warning "Compiler unknown: NIL-ing import/export attributes!"
 # define BASE_EXPORT
 # define BASE_EXPORT_IS_NIL
 # define BASE_IMPORT
 # define BASE_IMPORT_IS_NIL
-#elif (defined(BASE_COMPILER_GCC) || defined(BASE_COMPILER_CLANG))
+#elif BASE_COMPILER_IS_GCC_COMPAT
 # if defined(BASE_OS_UNIXLIKE)
 #  define BASE_EXPORT __attribute__ ((visibility ("default")))
 #  define BASE_IMPORT BASE_EXPORT
@@ -303,7 +337,7 @@
 # else
 #  error "GCC/Clang support Unixlikes and Windows."
 # endif
-#elif defined(BASE_COMPILER_MSVC)
+#elif (BASE_COMPILER == BASE_COMPILER_MSVC)
 # ifndef BASE_OS_WINDOWS
 #  error "This is only for Windows OS's."
 # endif

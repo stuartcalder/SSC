@@ -76,7 +76,8 @@ int Base_open_filepath (R_(const char*) filepath, bool readonly, R_(Base_File_t*
 	const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
 	*file = open(filepath, read_write_rights, (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
-	const DWORD read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
+	BASE_STATIC_ASSERT(sizeof(Base_Dw32_t) == 4, "Base_Dw32_t not 4 bytes!");
+	const Base_Dw32_t read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
 	*file = CreateFileA(filepath, read_write_rights, 0, BASE_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
 #	error "Unsupported operating system."

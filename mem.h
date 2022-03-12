@@ -11,14 +11,14 @@
 #  include <stdlib.h>
 #  include <string.h>
 /* Base_aligned_malloc */
-#  define BASE_ALIGNED_MALLOC_IMPL(alignment, size) { \
+#  define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { \
      void* p; \
-     if (posix_memalign(&p, alignment, size)) \
+     if (posix_memalign(&p, Alignment, Size)) \
        return BASE_NULL; \
      return p; \
    }
 /* Base_aligned_free */
-#  define BASE_ALIGNED_FREE_IMPL(ptr) { free(ptr); }
+#  define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
 #  define BASE_ALIGNED_FREE_IS_POSIX_FREE
 /* Base_get_pagesize */
 #  define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
@@ -28,10 +28,10 @@
 #  include <malloc.h>
 #  include <sysinfoapi.h>
 /* Base_aligned_malloc */
-#  define BASE_ALIGNED_MALLOC_IMPL(alignment, size) { return _aligned_malloc(size, alignment); }
+#  define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
 #  define BASE_ALIGNED_MALLOC_INLINE
 /* Base_aligned_free */
-#  define BASE_ALIGNED_FREE_IMPL(ptr) { _aligned_free(ptr); }
+#  define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
 /* Base_get_pagesize */
 #  define BASE_GET_PAGESIZE_IMPL { \
      SYSTEM_INFO si; \
@@ -65,39 +65,39 @@ BASE_API    void* Base_calloc_or_die  (size_t n_elem, size_t elem_sz);
 BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
 
 /* A native load is just memcpy'ing bytes into an automatic variable and returning it. */
-#define BASE_LOAD_NATIVE_IMPL(ptr, bits) { \
- uint##bits##_t val; \
- memcpy(&val, ptr, sizeof(val)); \
+#define BASE_LOAD_NATIVE_IMPL(Ptr, Bits) { \
+ uint##Bits##_t val; \
+ memcpy(&val, Ptr, sizeof(val)); \
  return val; \
 }
 /* A swap load is memcpy'ing bytes into an automatic variable, byte-swapping it, and returning it. */
-#define BASE_LOAD_SWAP_IMPL(ptr, bits) { \
- uint##bits##_t val; \
- memcpy(&val, ptr, sizeof(val)); \
- return Base_swap_##bits(val); \
+#define BASE_LOAD_SWAP_IMPL(Ptr, Bits) { \
+ uint##Bits##_t val; \
+ memcpy(&val, Ptr, sizeof(val)); \
+ return Base_swap_##Bits(val); \
 }
 /* A native store is merely a memcpy call. */
-#define BASE_STORE_NATIVE_IMPL(ptr, val) { \
- memcpy(ptr, &val, sizeof(val)); \
+#define BASE_STORE_NATIVE_IMPL(Ptr, Val) { \
+ memcpy(Ptr, &Val, sizeof(Val)); \
 }
 /* A swap store byte-swaps the bytes before memcpy. */
-#define BASE_STORE_SWAP_IMPL(ptr, val, bits) { \
- val = Base_swap_##bits(val); \
- memcpy(ptr, &val, sizeof(val)); \
+#define BASE_STORE_SWAP_IMPL(Ptr, Val, Bits) { \
+ Val = Base_swap_##Bits(Val); \
+ memcpy(Ptr, &Val, sizeof(Val)); \
 }
 
 #ifndef BASE_ENDIAN
 # error "BASE_ENDIAN undefined!"
 #elif (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
-# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
-# define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
-# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
-# define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
+# define BASE_STORE_LE_IMPL(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL(Ptr, Val)
+# define BASE_LOAD_LE_IMPL(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL(Ptr, Bits)
+# define BASE_STORE_BE_IMPL(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL(Ptr, Val, Bits)
+# define BASE_LOAD_BE_IMPL(Ptr, Bits)        BASE_LOAD_SWAP_IMPL(Ptr, Bits)
 #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
-# define BASE_STORE_BE_IMPL(ptr, val, bits) BASE_STORE_NATIVE_IMPL(ptr, val)
-# define BASE_LOAD_BE_IMPL(ptr, bits)       BASE_LOAD_NATIVE_IMPL(ptr, bits)
-# define BASE_STORE_LE_IMPL(ptr, val, bits) BASE_STORE_SWAP_IMPL(ptr, val, bits)
-# define BASE_LOAD_LE_IMPL(ptr, bits)       BASE_LOAD_SWAP_IMPL(ptr, bits)
+# define BASE_STORE_BE_IMPL(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL(Ptr, Val)
+# define BASE_LOAD_BE_IMPL(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL(Ptr, Bits)
+# define BASE_STORE_LE_IMPL(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL(Ptr, Val, Bits)
+# define BASE_LOAD_LE_IMPL(Ptr, Bits)        BASE_LOAD_SWAP_IMPL(Ptr, Bits)
 #else
 # error "Invalid byte-order!"
 #endif

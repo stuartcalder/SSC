@@ -7,11 +7,12 @@
 #define R_(p) p BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
-typedef enum {
+enum {
   BASE_ARGTYPE_NONE  = 0,
   BASE_ARGTYPE_SHORT = 1,
   BASE_ARGTYPE_LONG  = 2
-} Base_ArgType_t;
+};
+typedef int_fast8_t Base_ArgType_t;
 
 /* @wordc: Number words: (--encrypt -iptext --output ctext).
  * @wordv: Word vector.
