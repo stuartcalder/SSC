@@ -105,13 +105,15 @@ uint64_t num_locked_bytes_ (uint64_t n, uint64_t page_size) {
 	uint64_t locked = n / page_size; /* Floor division. The number of whole pages. */
 	if (n % page_size) /* If n is not evenly divisible into pages. */
 		++locked; /* We lock all pages along the covered boundaries. */
+	BASE_ASSERT_MSG((locked * page_size) > locked, "Overflow!\n");
 	return locked * page_size; /* Number pages x Size of each page in bytes. */
 }
 
 int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
-	const uint64_t locked = num_locked_bytes_(n, ctx->page_size);
-	LOCK_N_MTX_(ctx);
+	const uint64_t locked = num_locked_bytes_(n, ctx->page_size); /* How many bytes would be locked? */
+	LOCK_N_MTX_(ctx); /* Lock mutex. */
 	if ((locked + ctx->n) > ctx->limit) {
+		/* Went over the limit. */
 		UNLOCK_N_MTX_(ctx);
 		return BASE_MLOCK_ERR_OVER_MEMLIMIT;
 	}
@@ -129,7 +131,7 @@ int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx) {
 #  error "Unsupported."
 #endif
 	ctx->n += locked;
-	UNLOCK_N_MTX_(ctx);
+	UNLOCK_N_MTX_(ctx); /* Unlock mutex. */
 	return 0;
 }
 

@@ -25,19 +25,15 @@
 BASE_BEGIN_C_DECLS
 
 /* Initialization flags. */
-enum {
-/* Is the memorymap readonly? */
-  BASE_MMAP_INIT_READONLY =    0x01,
-/* Are we allowed to shrink the size of the file? */
-  BASE_MMAP_INIT_ALLOWSHRINK = 0x02,
+#define BASE_MMAP_INIT_READONLY        UINT8_C(0x01) /* Is the memorymap readonly? */
+#define BASE_MMAP_INIT_ALLOWSHRINK     UINT8_C(0x02) /* Are we allowed to shrink the size of the file? */
+#define BASE_MMAP_INIT_FORCE_EXIST     UINT8_C(0x04)
 /* When BASE_MMAP_INIT_FORCE_EXIST is on...
  * if BASE_MMAP_INIT_FORCE_EXIST_YES is on, enforce that the file already exists.
  * else, enforce that the file DOESN'T already exist.
  */
-  BASE_MMAP_INIT_FORCE_EXIST =     0x04,
-  BASE_MMAP_INIT_FORCE_EXIST_YES = 0x08,
-};
-typedef int_fast8_t Base_MMap_Init_t;
+#define BASE_MMAP_INIT_FORCE_EXIST_YES UINT8_C(0x08)
+typedef uint_fast8_t Base_MMap_Init_t;
 
 typedef struct {
   uint8_t*     ptr;
@@ -50,9 +46,17 @@ typedef struct {
 } Base_MMap;
 
 #ifdef BASE_MMAP_HAS_WIN_FMAPPING
-# define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_NULL_FILE, BASE_NULL_FILE, false)
+# define BASE_MMAP_NULL_LITERAL \
+ BASE_COMPOUND_LITERAL(\
+  Base_MMap,\
+  BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, BASE_FILE_NULL_LITERAL, false\
+ )
 #else
-# define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_NULL_FILE, false)
+# define BASE_MMAP_NULL_LITERAL \
+ BASE_COMPOUND_LITERAL(\
+  Base_MMap,\
+  BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false\
+ )
 #endif
 
 BASE_API int Base_MMap_map
@@ -80,17 +84,17 @@ BASE_API void Base_MMap_sync_or_die
 
 /* Initialization error codes. */
 enum {
-  BASE_MMAP_INIT_CODE_OK =                    0,
-  BASE_MMAP_INIT_CODE_ERR_FEXIST_NO =       (-1),
-  BASE_MMAP_INIT_CODE_ERR_FEXIST_YES =      (-2),
-  BASE_MMAP_INIT_CODE_ERR_READONLY =        (-3),
-  BASE_MMAP_INIT_CODE_ERR_SHRINK =          (-4),
-  BASE_MMAP_INIT_CODE_ERR_NOSIZE =          (-5),
-  BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH =   (-6),
-  BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH = (-7),
-  BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE =   (-8),
-  BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE =   (-9),
-  BASE_MMAP_INIT_CODE_ERR_MAP =            (-10),
+  BASE_MMAP_INIT_CODE_OK =                   0,
+  BASE_MMAP_INIT_CODE_ERR_FEXIST_NO =       -1,
+  BASE_MMAP_INIT_CODE_ERR_FEXIST_YES =      -2,
+  BASE_MMAP_INIT_CODE_ERR_READONLY =        -3,
+  BASE_MMAP_INIT_CODE_ERR_SHRINK =          -4,
+  BASE_MMAP_INIT_CODE_ERR_NOSIZE =          -5,
+  BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH =   -6,
+  BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH = -7,
+  BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE =   -8,
+  BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE =   -9,
+  BASE_MMAP_INIT_CODE_ERR_MAP =            -10,
 };
 typedef int_fast8_t Base_MMap_Init_Code_t;
 

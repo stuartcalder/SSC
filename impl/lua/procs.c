@@ -82,7 +82,7 @@ static int fpath_size (lua_State* L) {
  */
 static int get_file_size (lua_State* L) {
 	const File_t* const f = CHECK_(L, 1);
-	if (f->file != BASE_NULL_FILE)
+	if (f->file != BASE_FILE_NULL_LITERAL)
 		lua_pushinteger(L, (lua_Integer)f->file_n);
 	else
 		lua_pushnil(L);
@@ -95,12 +95,12 @@ static int get_file_size (lua_State* L) {
 static int close_file (lua_State* L) {
 	File_t* const f = CHECK_(L, 1);
 	int ok = 1;
-	if ((f->file != BASE_NULL_FILE) && Base_close_file(f->file))
+	if ((f->file != BASE_FILE_NULL_LITERAL) && Base_close_file(f->file))
 		ok = 0;
-	/* Do not assume that if (f->file == BASE_NULL_FILE)
+	/* Do not assume that if (f->file == BASE_FILE_NULL_LITERAL)
 	 * that f->fpath is invalid data. It is possible for
 	 * other code to take ownership over the file handle,
-	 * and they will set f->file to BASE_NULL_FILE when
+	 * and they will set f->file to BASE_FILE_NULL_LITERALwhen
 	 * they do so.
 	 */
 	if (f->fpath) {
@@ -126,7 +126,7 @@ static int fpath_exists (lua_State* L) {
  */
 static int file_is_open (lua_State* L) {
 	const File_t* const f = CHECK_(L, 1);
-	lua_pushboolean(L, f->file != BASE_NULL_FILE);
+	lua_pushboolean(L, f->file != BASE_FILE_NULL_LITERAL);
 	return 1;
 }
 
@@ -135,7 +135,7 @@ static int file_is_open (lua_State* L) {
  */
 static int file_set_size (lua_State* L) {
 	File_t* const f = CHECK_(L, 1);
-	if (f->file == BASE_NULL_FILE) {
+	if (f->file == BASE_FILE_NULL_LITERAL) {
 		lua_pushboolean(L, 0);
 		return 1;
 	}

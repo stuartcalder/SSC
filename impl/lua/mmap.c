@@ -22,7 +22,7 @@ typedef Base_Lua_MMap MMap_t; /* Base Lua MMap Userdata. */
 
 static int new_mmap (lua_State* L) {
 	File_t* f = FILE_TEST_(L, 1); /* Initial file is optional. */
-	if (f && (f->file == BASE_NULL_FILE))
+	if (f && (f->file == BASE_FILE_NULL_LITERAL))
 		return luaL_error(L, "Tried to create new MMap with invalid file!");
 	const bool ronly = lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true; /* Defaults to readonly. */
 	MMap_t* map = MMAP_NEW_(L);
@@ -35,7 +35,7 @@ static int new_mmap (lua_State* L) {
 			lua_pushnil(L);
 			return 1;
 		} 
-		f->file = BASE_NULL_FILE; /* We take ownership. */
+		f->file = BASE_FILE_NULL_LITERAL; /* We take ownership. */
 	}
 	luaL_getmetatable(L, MMAP_MT_);
 	lua_setmetatable(L, -2);

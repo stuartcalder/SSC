@@ -49,22 +49,34 @@ typedef int Base_MLock_F_t;
 /* Initialize a Base_MLock struct. */
 BASE_API int Base_MLock_init (Base_MLock*);
 
-BASE_INLINE int Base_MLock_g_init (void) {
-	if (!Base_MLock_g.page_size)
-		return Base_MLock_init(&Base_MLock_g);
-	return 0;
+BASE_INLINE int Base_MLock_g_init
+(void)
+{
+  /* Initialize, if not already initialized. */
+  if (!Base_MLock_g.page_size)
+    return Base_MLock_init(&Base_MLock_g);
+  return 0;
 }
 
-BASE_API void Base_MLock_init_handled (Base_MLock*);
+BASE_API void Base_MLock_init_handled
+/* Initialize  @ctx, terminating the program on failure. */
+(Base_MLock* ctx);
 
-BASE_INLINE void Base_MLock_g_init_handled (void) {
-	if (!Base_MLock_g.page_size)
-		Base_MLock_init_handled(&Base_MLock_g);
+BASE_INLINE void Base_MLock_g_init_handled
+/* Initialize the global variable Base_MLock_g, the default
+ * memory locking structure when none is specified.
+ */
+(void)
+{
+  if (!Base_MLock_g.page_size)
+    Base_MLock_init_handled(&Base_MLock_g);
 }
 
-/* Attempt to lock the memory `p` with requested number of bytes `n`, with the
- * MemoryLock struct pointer `ctx`. */
-BASE_API int Base_mlock_ctx (R_(void*) p, uint64_t n, R_(Base_MLock*) ctx);
+BASE_API int Base_mlock_ctx
+/* Attempt to lock the memory @p with requested number of bytes @n, with the
+ * MemoryLock struct pointer @ctx.
+ */
+(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx);
 
 /* Lock the memory `p` with number bytes `n` using the default global context. */
 BASE_INLINE int Base_mlock (R_(void*) p, uint64_t n) {

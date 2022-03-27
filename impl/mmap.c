@@ -1,12 +1,13 @@
 #include "errors.h"
 #include "files.h"
 #include "mmap.h"
-#define R_(p) p BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 
 #if   defined(BASE_OS_UNIXLIKE)
 # define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
 #elif defined(BASE_OS_WINDOWS)
 # define MAP_FAIL_ ((uint8_t*)BASE_NULL)
+typedef Base_Dw32_t Dw32_t;
 #else
 # error "Unsupported."
 #endif
@@ -21,12 +22,12 @@ int Base_MMap_map
     return -1;
   }
 #elif  defined(BASE_OS_WINDOWS)
-  BASE_STATIC_ASSERT(CHAR_BIT                         ==  8, "8-bit bytes required!");
-  BASE_STATIC_ASSERT((sizeof(Base_Dw32_t) * CHAR_BIT) == 32, "Base_Dw32_t should be 32 bits wide!");
-  Base_Dw32_t high, low, page_rw, map_rw;
+  BASE_STATIC_ASSERT(CHAR_BIT                    ==  8, "8-bit bytes required!");
+  BASE_STATIC_ASSERT((sizeof(Dw32_t) * CHAR_BIT) == 32, "Base_Dw32_t should be 32 bits wide!");
+  Dw32_t high, low, page_rw, map_rw;
 
-  high = (Base_Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
-  low  = (Base_Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0x00000000ffffffff))      );
+  high = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
+  low  = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0x00000000ffffffff))      );
   if (readonly) {
     page_rw = PAGE_READONLY;
     map_rw  = FILE_MAP_READ;
@@ -34,17 +35,17 @@ int Base_MMap_map
     page_rw = PAGE_READWRITE;
     map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);
   }
-  if ((map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high, low, BASE_NULL)) == BASE_NULL_FILE)
+  if ((map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high, low, BASE_NULL)) == BASE_FILE_NULL_LITERAL)
     return -1;
   if ((map->ptr = (uint8_t*)MapViewOfFile(map->win_fmapping, map_rw, 0, 0, map->size)) == MAP_FAIL_) {
     if (!Base_close_file(map->win_fmapping))
-      map->win_fmapping = BASE_NULL_FILE;
+      map->win_fmapping = BASE_FILE_NULL_LITERAL;
     return -1;
   }
 #else
 # error "Unsupported operating system."
 #endif
-  map->readonly = (bool)readonly;
+  map->readonly = readonly;
   return 0;
 }
 
@@ -71,7 +72,7 @@ int Base_MMap_unmap
   if (Base_close_file(map->win_fmapping))
     ret = -1;
   else
-    map->win_fmapping = BASE_NULL_FILE;
+    map->win_fmapping = BASE_FILE_NULL_LITERAL;
   if (!ret)
     map->readonly = false;
 #else
@@ -151,7 +152,7 @@ Init_Code_t Base_MMap_init
         setsize = false;
     }
   } else {
-    if (flags & RONLY_)
+    if (readonly)
       return ERR_READONLY_;
     if (!size)
       return ERR_NOSIZE_;
@@ -226,10 +227,10 @@ void Base_MMap_del
 {
   if (map->ptr && Base_MMap_unmap(map))
     Base_errx(FAILED_IN_("Base_MMap_unmap", "Base_MMap_del"));
-  if ((map->file != BASE_NULL_FILE) && Base_close_file(map->file))
+  if ((map->file != BASE_FILE_NULL_LITERAL) && Base_close_file(map->file))
     Base_errx(FAILED_IN_("Base_close_file","Base_MMap_del"));
   #ifdef BASE_MMAP_HAS_WIN_FMAPPING
-  if ((map->win_fmapping != BASE_NULL_FILE) && Base_close_file(map->win_fmapping))
+  if ((map->win_fmapping != BASE_FILE_NULL_LITERAL) && Base_close_file(map->win_fmapping))
     Base_errx("Error: Base_close_file failed for win_fmapping in Base_MMap_del!\n");
   #endif
   *map = BASE_MMAP_NULL_LITERAL;

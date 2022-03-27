@@ -1,4 +1,5 @@
 #include "term.h"
+#include "macros.h"
 
 #if    defined(BASE_OS_UNIXLIKE)
 #	define NEWLINE_	"\n"
@@ -22,18 +23,77 @@ void Base_term_init (void) { initscr(); clear(); }
 void Base_term_end  (void) { endwin();           }
 #endif /* ~ BASE_OS_UNIXLIKE */
 
-#define STR_IMPL_(text) #text
-#define STR_(text)	STR_IMPL_ (text)
 #define SECRET_STR_MIN_BUFSIZE_ 2
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 int Base_term_get_secret_string (R_(uint8_t*)    buffer,
                                  R_(const char*) prompt,
 				 const int       buffer_size)
-#if    defined (BASE_OS_UNIXLIKE)
+#if    defined(BASE_OS_UNIXLIKE)
 { /* Unixlike impl */
+	#if 0
+	Base_assert_msg(
+	 buffer_size >= SECRET_STR_MIN_BUFSIZE_,
+	 "Error: Buffer in Base_term_get_secret_string has buffer size less than " BASE_STRINGIFY(SECRET_STR_MIN_BUFSIZE_) ".\n"
+	);
+	const int max_pw_size = buffer_size - 1;
+	int index = 0;
+	bool outer, inner;
+	WINDOW* w;
+	enum {
+	  STATE_0_, /* .   */
+	  STATE_1_, /*  .  */
+	  STATE_2_  /*   . */
+	}; typedef int_fast8_t State_t;
+	State_t state = STATE_0_;
+
+	cbreak();
+	noecho();
+	keypad(stdscr, TRUE);
+	w = newwin(5, max_pw_size + 10, 0, 0);
+	keypad(w, TRUE);
+	outer = true;
+	while (outer) {
+	  memset(buffer, 0, buffer_size);
+	  wclear(w);
+	  wmove(w, 1, 0);
+	  waddstr(w, prompt);
+	  inner = true;
+	  while (inner) {
+	    int ch = wgetch(w);
+	    switch (ch) {
+	    case 127:
+	    case KEY_DC:
+	    case KEY_LEFT:
+	    case KEY_BACKSPACE:
+	      if (index > 0) {
+	        int y, x;
+		getyx(w, y, x);
+		wdelch(w);
+		wmove(w, y, (x - 1));
+		buffer[--index] = 0;
+	      }
+	      break;
+	    case '\n':
+	    case KEY_ENTER:
+	      inner = false;
+	      break;
+	    default:
+	      if (index < max_pw_size) {
+	        waddch(w, '*');
+		wrefresh(w);
+		buffer[index++] = (uint8_t)ch;
+	      }
+	    }
+	  } /* ~ while(inner) */
+	  outer = false;
+	} /* ~ while(outer) */
+	const int pw_size = strlen((char*)buffer);
+	delwin(w);
+	return pw_size;
+	#else
 	BASE_ASSERT(buffer && prompt);
 	Base_assert_msg(buffer_size >= SECRET_STR_MIN_BUFSIZE_,
-		"Error: Buffer in Base_term_get_secret_string has buffer size less than " STR_(SECRET_STR_MIN_BUFSIZE_) ".\n");
+		"Error: Buffer in Base_term_get_secret_string has buffer size less than " BASE_STRINGIFY(SECRET_STR_MIN_BUFSIZE_) ".\n");
 	const int max_pw_size = buffer_size - 1;
 	cbreak();
 	noecho();
@@ -85,12 +145,13 @@ int Base_term_get_secret_string (R_(uint8_t*)    buffer,
 	const int pw_size = strlen((char *)buffer);
 	delwin(w);
 	return pw_size;
+	#endif
 } /* ~ Unixlike impl */
-#elif  defined (BASE_OS_WINDOWS)
+#elif  defined(BASE_OS_WINDOWS)
 { /* Windows impl */
 	BASE_ASSERT(buffer && prompt);
 	Base_assert_msg(buffer_size >= SECRET_STR_MIN_BUFSIZE_,
-		"Error: Buffer in Base_term_get_secret_string has buffer size less than " STR_(SECRET_STR_MIN_BUFSIZE_) ".\n");
+		"Error: Buffer in Base_term_get_secret_string has buffer size less than " BASE_STRINGIFY(SECRET_STR_MIN_BUFSIZE_) ".\n");
 	const int max_pw_size = buffer_size - 1;
 	int index = 0;
 	bool repeat_ui, repeat_input;

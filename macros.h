@@ -26,9 +26,10 @@
 #define BASE_COMPILER_GCC     1
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
-#define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC)
-#define BASE_COMPILER_IS_GCC_COMPAT (BASE_COMPILER == BASE_COMPILER_GCC || BASE_COMPILER == BASE_COMPILER_CLANG)
+#define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
+#define BASE_COMPILER_IS_GCC_COMPAT (((BASE_COMPILER) == BASE_COMPILER_GCC) || ((BASE_COMPILER) == BASE_COMPILER_CLANG))
 
+/* Compiler macros. */
 #if   defined(__clang__)
 # define BASE_COMPILER BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
@@ -41,7 +42,7 @@
 # warning "BASE_COMPILER unknown!"
 #endif
 
-/* Operating System Macros */
+/* Operating system macros */
 #if defined(__APPLE__) && defined(__MACH__)
 # define BASE_OS_MAC
 #endif /* ! #if defined (__APPLE__) and defined (__MACH__) */
@@ -289,12 +290,12 @@
 
 /* What do compound literals look like? */
 #if   defined(BASE_LANG_CPP)
-# define BASE_COMPOUND_LITERAL(type, ...) type{__VA_ARGS__}
+# define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__}
 #elif defined(BASE_LANG_C)
 # if (BASE_LANG_C > 0L && BASE_LANG_C < BASE_C_99)
 #  error "We need C99 style literals!"
 # endif
-# define BASE_COMPOUND_LITERAL(type, ...) (type){__VA_ARGS__}
+# define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__}
 #else
 # error "C++ and C both undefined!"
 #endif
@@ -347,6 +348,9 @@
 # error "Unaccounted for compiler."
 #endif
 
+/* Currenly in Base all inline functions are
+ * marked "static inline".
+ */
 #define BASE_INLINE		static inline
 #define BASE_STRINGIFY_IMPL(s)	#s
 #define BASE_STRINGIFY(s)	BASE_STRINGIFY_IMPL(s)

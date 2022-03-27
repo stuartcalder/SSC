@@ -27,7 +27,8 @@
 # include <sys/types.h>
 /* On Unix-like systems, files are managed through handles, represented by integers. */
 typedef int Base_File_t;
-# define BASE_NULL_FILE (-1) /* -1 is typically returned on failure. */
+# define BASE_FILE_NULL_LITERAL (-1) /* -1 is typically returned on failure. */
+# define BASE_NULL_FILE         BASE_FILE_NULL_LITERAL /* FIXME: Deprecated. */
 
 #elif defined(BASE_OS_WINDOWS)
 # define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
@@ -40,11 +41,8 @@ typedef int Base_File_t;
 #  include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
-#  define BASE_NULL_FILE (INVALID_HANDLE_VALUE)
-/* On Windows, DWORD is an unsigned 32-bit integer type. */
-#  define BASE_HAS_DW32_T
-typedef DWORD  Base_Dw32_t;
-#  define BASE_DW32_NULL 0u
+#  define BASE_FILE_NULL_LITERAL (INVALID_HANDLE_VALUE)
+#  define BASE_NULL_FILE         BASE_FILE_NULL_LITERAL /* FIXME: Deprecated. */
 
 #else
 #  error "Unsupported operating system."
