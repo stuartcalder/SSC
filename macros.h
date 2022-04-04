@@ -9,9 +9,9 @@
 #define BASE_RESTRICT_IMPL_C    0x01
 #define BASE_RESTRICT_IMPL_CPP  0x02
 /* Endianness. */
-#define BASE_ENDIAN_NONE    0
-#define BASE_ENDIAN_LITTLE  1
-#define BASE_ENDIAN_BIG     2
+#define BASE_ENDIAN_NONE   0
+#define BASE_ENDIAN_LITTLE 1
+#define BASE_ENDIAN_BIG    2
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
 #define BASE_ENDIAN_ISVALID(Endian) ((Endian) == BASE_ENDIAN_LITTLE || (Endian) == BASE_ENDIAN_BIG)
 /* How are we determining endianness? */
@@ -27,7 +27,7 @@
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
-#define BASE_COMPILER_IS_GCC_COMPAT (((BASE_COMPILER) == BASE_COMPILER_GCC) || ((BASE_COMPILER) == BASE_COMPILER_CLANG))
+#define BASE_COMPILER_IS_GCC_COMPAT (((BASE_COMPILER) == (BASE_COMPILER_GCC)) || ((BASE_COMPILER) == (BASE_COMPILER_CLANG)))
 
 /* Compiler macros. */
 #if   defined(__clang__)
@@ -67,7 +67,7 @@
 # error "Unsupported."
 #endif /* ! #if defined (unixlike os's ...) */
 
-#define BASE_2023 202312L /* Version not yet released. */
+#define BASE_2023 202312L /* Not released yet. */
 /* C language standards. */
 #define BASE_C_89 199409L
 #define BASE_C_99 199901L
@@ -234,6 +234,14 @@
 #  define BASE_STATIC_ASSERT_1(boolean)
 #  define BASE_STATIC_ASSERT_1_IS_NIL
 # endif
+# if (BASE_LANG_CPP >= BASE_CPP_20)
+#  define BASE_CONSTEVAL consteval
+# else
+#  define BASE_CONSTEVAL
+#  define BASE_CONSTEVAL_IS_NIL
+# endif
+# define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__} /* C++ syntax. */
+# define BASE_CONSTEXPR constexpr
 #else /* Not C++. We are using C. */
 # define BASE_LANG BASE_LANG_C
 # define BASE_NULL NULL
@@ -286,19 +294,12 @@
 #  define BASE_ALIGNOF(of)
 #  define BASE_ALIGNOF_IS_NIL
 # endif /* ! #ifdef __STDC_VERSION__ */
+# define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 syntax. */
+# define BASE_CONSTEXPR
+# define BASE_CONSTEXPR_IS_NIL
+# define BASE_CONSTEVAL
+# define BASE_CONSTEVAL_IS_NIL
 #endif /* ! #ifdef __cplusplus */
-
-/* What do compound literals look like? */
-#if   defined(BASE_LANG_CPP)
-# define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__}
-#elif defined(BASE_LANG_C)
-# if (BASE_LANG_C > 0L && BASE_LANG_C < BASE_C_99)
-#  error "We need C99 style literals!"
-# endif
-# define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__}
-#else
-# error "C++ and C both undefined!"
-#endif
 
 /* Can we restrict pointers? C++ or C99 style? */
 #ifndef BASE_RESTRICT_IMPL
@@ -351,9 +352,9 @@
 /* Currenly in Base all inline functions are
  * marked "static inline".
  */
-#define BASE_INLINE		static inline
-#define BASE_STRINGIFY_IMPL(s)	#s
-#define BASE_STRINGIFY(s)	BASE_STRINGIFY_IMPL(s)
+#define BASE_INLINE		  static inline
+#define BASE_STRINGIFY_IMPL(Text) #Text
+#define BASE_STRINGIFY(Text)      BASE_STRINGIFY_IMPL(Text)
 
 #ifdef BASE_EXTERN_STATIC_LIB /* Base is being built, or imported as a static library. */
 # define BASE_API /* Nil */
