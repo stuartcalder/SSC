@@ -5,8 +5,7 @@
  * Use Base_Fptr_t as a generic function pointer, that can be
  * cast to specific function pointer types.
  */
-typedef void Base_Func_f ();
-typedef Base_Func_f* Base_Fptr_t;
+typedef void (*Base_Fptr_t) ();
 
 typedef union {
   Base_Fptr_t func;

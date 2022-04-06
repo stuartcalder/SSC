@@ -237,8 +237,8 @@
 # if (BASE_LANG_CPP >= BASE_CPP_20)
 #  define BASE_CONSTEVAL consteval
 # else
-#  define BASE_CONSTEVAL
-#  define BASE_CONSTEVAL_IS_NIL
+#  define BASE_CONSTEVAL constexpr
+#  define BASE_CONSTEVAL_IS_CONSTEXPR
 # endif
 # define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__} /* C++ syntax. */
 # define BASE_CONSTEXPR constexpr
