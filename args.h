@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef BASE_ARGS_H
 #define BASE_ARGS_H
 
@@ -39,7 +42,7 @@ typedef struct {
 	char             ch;
 } Base_Arg_Short;
 #define BASE_ARG_SHORT_NULL_LITERAL      BASE_COMPOUND_LITERAL(Base_Arg_Short, 0)
-#define BASE_ARG_SHORT_LITERAL(proc, ch) BASE_COMPOUND_LITERAL(Base_Arg_Short, proc, ch)
+#define BASE_ARG_SHORT_LITERAL(Proc, Ch) BASE_COMPOUND_LITERAL(Base_Arg_Short, Proc, Ch)
 
 /* Base_Arg_Long
  *   Associate a Base_Arg_Proc_f function pointer
@@ -51,8 +54,8 @@ typedef struct {
 	const char*      str;
 	size_t           str_n;
 } Base_Arg_Long;
-#define BASE_ARG_LONG_NULL_LITERAL           BASE_COMPOUND_LITERAL(Base_Arg_Long, 0)
-#define BASE_ARG_LONG_LITERAL(proc, str_lit) BASE_COMPOUND_LITERAL(Base_Arg_Long, proc, str_lit, (sizeof(str_lit) - 1))
+#define BASE_ARG_LONG_NULL_LITERAL               BASE_COMPOUND_LITERAL(Base_Arg_Long, 0)
+#define BASE_ARG_LONG_LITERAL(Proc, Str_Literal) BASE_COMPOUND_LITERAL(Base_Arg_Long, Proc, Str_Literal, (sizeof(Str_Literal) - 1))
 /* Don't use BASE_ARG_LONG_LITERAL with any string other than a string literal "like this". */
 
 typedef struct {

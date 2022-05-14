@@ -1,4 +1,4 @@
-/* Copyright (c) 2020 Stuart Steven Calder
+/* Copyright (c) 2020-2022 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
 #ifndef BASE_MMAP_H
@@ -10,12 +10,12 @@
 #include "macros.h"
 #if defined(BASE_OS_UNIXLIKE)
 # define BASE_MMAP_SYNC_IMPL_F msync
-# define BASE_MMAP_SYNC_IMPL(m) { return BASE_MMAP_SYNC_IMPL_F(m->ptr, m->size, MS_SYNC); }
+# define BASE_MMAP_SYNC_IMPL(M) { return BASE_MMAP_SYNC_IMPL_F(M->ptr, M->size, MS_SYNC); }
 # define BASE_MMAP_SYNC_INLINE
 # include <sys/mman.h>
 #elif defined(BASE_OS_WINDOWS)
 # define BASE_MMAP_HAS_WIN_FMAPPING
-# define BASE_MMAP_SYNC_IMPL(m) { if (FlushViewOfFile((LPCVOID)m->ptr, m->size)) return 0; return -1; }
+# define BASE_MMAP_SYNC_IMPL(M) { if (FlushViewOfFile((LPCVOID)M->ptr, M->size)) return 0; return -1; }
 # include <memoryapi.h>
 # include <windows.h>
 #else

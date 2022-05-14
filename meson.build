@@ -120,12 +120,12 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
   endif
   if get_option('lua') # Lua support
     lang_flags += _D + 'BASE_EXTERN_LUA'
-	src += [
-	  'impl/lua/lua.c',   # luaopen_Base
-	  'impl/lua/mmap.c',  # luaopen_Base_MMap
-	  'impl/lua/procs.c', # luaopen_Base_Procs
-	  'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
-	]
+    src += [
+      'impl/lua/lua.c',   # luaopen_Base
+      'impl/lua/mmap.c',  # luaopen_Base_MMap
+      'impl/lua/procs.c', # luaopen_Base_Procs
+      'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
+    ]
     lua_dep = compiler.find_library('lua5.4', required: false, static: false, dirs: lib_dir)
     if lua_dep.found() # We are using Lua5.4
       lib_deps += lua_dep
@@ -137,10 +137,9 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
   endif # ! if get_option('lua')
 endif
 if get_option('endian') != 'auto'
-  if get_option('endian') == 'little'
+  if   get_option('endian') == 'little'
     lang_flags += _D + 'BASE_EXTERN_ENDIAN=BASE_ENDIAN_LITTLE'
-  endif
-  if get_option('endian') == 'big'
+  elif get_option('endian') == 'big'
     lang_flags += _D + 'BASE_EXTERN_ENDIAN=BASE_ENDIAN_BIG'
   endif
 endif

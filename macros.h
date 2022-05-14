@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef BASE_MACROS_H
 #define BASE_MACROS_H
 
@@ -27,7 +30,7 @@
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
-#define BASE_COMPILER_IS_GCC_COMPAT (((BASE_COMPILER) == (BASE_COMPILER_GCC)) || ((BASE_COMPILER) == (BASE_COMPILER_CLANG)))
+#define BASE_COMPILER_IS_GCC_COMPAT ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
 
 /* Compiler macros. */
 #if   defined(__clang__)
@@ -122,6 +125,7 @@
 #define BASE_ISA_ARM64   3
 #define BASE_ISA_X86     4
 #define BASE_ISA_ARMV7   5
+#define BASE_ISA_ISVALID(Isa) ((Isa) >= BASE_ISA_UNKNOWN && (Isa) <= BASE_ISA_ARMV7) /* UNKNOWN arch is valid. */
 
 /* Architecture macros. */
 #if (defined(__amd64)  || defined(__amd64__)  || \
@@ -207,6 +211,10 @@
 # error "BASE_ENDIAN_SRC is not defined!"
 #elif !BASE_ENDIAN_SRC_ISVALID(BASE_ENDIAN_SRC)
 # error "BASE_ENDIAN_SRC is an invalid endian source!"
+#elif !defined(BASE_ISA)
+# error "BASE_ISA is not defined!"
+#elif !BASE_ISA_ISVALID(BASE_ISA)
+# error "BASE_ISA is an invalid ISA!"
 #endif
 
 /* C/C++ Interoperability Macros */

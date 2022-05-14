@@ -1,4 +1,4 @@
-/* Copyright (c) 2020 Stuart Steven Calder
+/* Copyright (c) 2020-2022 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
 #ifndef BASE_OPERATIONS_H
@@ -26,23 +26,21 @@
 
 #if BASE_OPERATIONS_USE_CPP20_ROT
 # include <bit>
-# define BASE_ROT_LEFT(value, count, bits)  std::rotl<uint##bits##_t>(value, count)
-# define BASE_ROT_RIGHT(value, count, bits) std::rotr<uint##bits##_t>(value, count)
+# define BASE_ROT_LEFT(Value,  Count, Bits) std::rotl<uint##Bits##_t>(Value, Count)
+# define BASE_ROT_RIGHT(Value, Count, Bits) std::rotr<uint##Bits##_t>(Value, Count)
 #else
 # if (CHAR_BIT != 8)
 #  error "We need 8-bit chars."
 # endif
-# define BASE_ROT_IMPL_UNSIGNED_MASK(bits) \
-         ((uint##bits##_t)(sizeof(uint##bits##_t) * CHAR_BIT) - 1)
-# define BASE_ROT_IMPL_MASKED_COUNT(bits, count) \
-	 (BASE_ROT_IMPL_UNSIGNED_MASK(bits) & count)
-# define BASE_ROT_LEFT(value, count, bits) \
-	 ((value << BASE_ROT_IMPL_MASKED_COUNT(bits, count)) | (value >> ((-BASE_ROT_IMPL_MASKED_COUNT(bits, count)) & BASE_ROT_IMPL_UNSIGNED_MASK(bits))))
-# define BASE_ROT_RIGHT(value, count, bits) \
-	 ((value >> BASE_ROT_IMPL_MASKED_COUNT(bits, count)) | (value << ((-BASE_ROT_IMPL_MASKED_COUNT(bits, count)) & BASE_ROT_IMPL_UNSIGNED_MASK(bits))))
+# define BASE_ROT_IMPL_UNSIGNED_MASK(Bits)       ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT) - 1)
+# define BASE_ROT_IMPL_MASKED_COUNT(Bits, Count) (BASE_ROT_IMPL_UNSIGNED_MASK(Bits) & Count)
+# define BASE_ROT_LEFT(Value, Count, Bits) \
+	 ((Value << BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) | (Value >> ((-BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK(Bits))))
+# define BASE_ROT_RIGHT(Value, Count, Bits) \
+	 ((Value >> BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) | (Value << ((-BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK(Bits))))
 #endif
 
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 /* Use inline functions instead of macros directly to do bitwise rotation. */
 BASE_INLINE uint16_t Base_rotl_16(uint16_t val, int count) { return BASE_ROT_LEFT(val, count, 16); }

@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef BASE_MEM_H
 #define BASE_MEM_H
 
@@ -7,39 +10,39 @@
 #include "swap.h"
 
 #if defined(BASE_OS_UNIXLIKE)
-#  include <unistd.h>
-#  include <stdlib.h>
-#  include <string.h>
+# include <unistd.h>
+# include <stdlib.h>
+# include <string.h>
 /* Base_aligned_malloc */
-#  define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { \
-     void* p; \
-     if (posix_memalign(&p, Alignment, Size)) \
-       return BASE_NULL; \
-     return p; \
-   }
+# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { \
+ void* p; \
+ if (posix_memalign(&p, Alignment, Size)) \
+   return BASE_NULL; \
+ return p; \
+}
 /* Base_aligned_free */
-#  define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
-#  define BASE_ALIGNED_FREE_IS_POSIX_FREE
+# define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
+# define BASE_ALIGNED_FREE_IS_POSIX_FREE
 /* Base_get_pagesize */
-#  define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
-#  define BASE_GET_PAGESIZE_INLINE
+# define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
+# define BASE_GET_PAGESIZE_INLINE
 
 #elif defined(BASE_OS_WINDOWS)
-#  include <malloc.h>
-#  include <sysinfoapi.h>
+# include <malloc.h>
+# include <sysinfoapi.h>
 /* Base_aligned_malloc */
-#  define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
-#  define BASE_ALIGNED_MALLOC_INLINE
+# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
+# define BASE_ALIGNED_MALLOC_INLINE
 /* Base_aligned_free */
-#  define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
+# define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
 /* Base_get_pagesize */
-#  define BASE_GET_PAGESIZE_IMPL { \
-     SYSTEM_INFO si; \
-     GetSystemInfo(&si); \
-     return (size_t)si.dwPageSize; \
-   }
+# define BASE_GET_PAGESIZE_IMPL { \
+ SYSTEM_INFO si; \
+ GetSystemInfo(&si); \
+ return (size_t)si.dwPageSize; \
+}
 #else
-#  error "Unsupported."
+# error "Unsupported."
 #endif
 
 #define R_(p) p BASE_RESTRICT

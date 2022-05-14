@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #include "operations.h"
 
 #define R_(ptr) ptr BASE_RESTRICT

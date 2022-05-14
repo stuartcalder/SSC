@@ -1,4 +1,6 @@
-/* Copyright 2021 Stuart Calder */
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #include <Base/lua/lua.h>
 #include <Base/lua/sbuffer.h>
 

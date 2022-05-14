@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #ifndef BASE_SWAP_H
 #define BASE_SWAP_H
 /* This header implements byte-swapping; reversing the order of bytes in

@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #if !defined(BASE_MLOCK_H) && defined(BASE_EXTERN_MLOCK)
 #define BASE_MLOCK_H
 #define BASE_HAS_MEMORYLOCKING /* TODO: Remove references to this macro, as it is now only here for compatability. */

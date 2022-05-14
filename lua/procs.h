@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2022 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information.
+ */
 #if !defined(BASE_LUA_PROCS_H) && defined(BASE_EXTERN_LUA)
 #define BASE_LUA_PROCS_H
 
