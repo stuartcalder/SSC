@@ -17,34 +17,34 @@
 #define BASE_ERR_S_FAILED(Str)	   "Error: %s failed!\n", Str
 #define BASE_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
 
-#define BASE_ERRX_CODE_LIST_IMPL_GENERIC(code, fmt, arg_list) { \
-  vfprintf(stderr, fmt, arg_list); \
-  va_end(arg_list); \
-  exit(code); \
- }
-#define BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(code, fmt, arg_list) { \
-  verrx(code, fmt, arg_list); \
- }
+#define BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) { \
+ vfprintf(stderr, Fmt, ArgList); \
+ va_end(ArgList); \
+ exit(Code); \
+}
+#define BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList) { \
+ verrx(Code, Fmt, ArgList); \
+}
 
 #ifdef BASE_OS_UNIXLIKE
 # ifdef __has_include
 #  if __has_include(<err.h>)
 #   include <err.h>
-#   define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(code, fmt, arg_list)
+#   define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
 #   define BASE_ERRX_CODE_LIST_INLINE
 #  else /* Unixlike, but we don't have <err.h>. */
-#   define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) BASE_ERRX_CODE_LIST_IMPL_GENERIC(code, fmt, arg_list)
+#   define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
 #  endif
 # else /* We don't have __has_include. */
 #  include <err.h>
-#  define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(code, fmt, arg_list)
+#  define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList)  BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
 #  define BASE_ERRX_CODE_LIST_INLINE
 # endif
 #else
-# define BASE_ERRX_CODE_LIST_IMPL(code, fmt, arg_list) BASE_ERRX_CODE_LIST_IMPL_GENERIC(code, fmt, arg_list)
+# define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
 #endif
 
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 BASE_API    void Base_errx_code_vargs (int, R_(const char*), ...);
 #ifdef BASE_ERRX_CODE_LIST_INLINE
@@ -59,10 +59,10 @@ BASE_END_C_DECLS
 #undef R_
 
 #ifdef BASE_EXTERN_DEBUG
-#  define BASE_ASSERT(boolean) Base_assert(boolean)
+#  define BASE_ASSERT(Boolean) Base_assert(Boolean)
 #  define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
 #else
-#  define BASE_ASSERT(boolean) /* Nil */
+#  define BASE_ASSERT(Boolean) /* Nil */
 #  define BASE_ASSERT_MSG(...) /* Nil */
 #endif
 

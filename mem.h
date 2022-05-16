@@ -20,6 +20,7 @@
    return BASE_NULL; \
  return p; \
 }
+# define BASE_ALIGNED_MALLOC_INLINE
 /* Base_aligned_free */
 # define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
 # define BASE_ALIGNED_FREE_IS_POSIX_FREE

@@ -41,14 +41,14 @@ typedef int Base_File_t;
 #  include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
-#  define BASE_FILE_NULL_LITERAL (INVALID_HANDLE_VALUE)
-#  define BASE_NULL_FILE         BASE_FILE_NULL_LITERAL /* FIXME: Deprecated. */
+# define BASE_FILE_NULL_LITERAL (INVALID_HANDLE_VALUE)
+# define BASE_NULL_FILE         BASE_FILE_NULL_LITERAL /* FIXME: Deprecated. */
 
 #else
 #  error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
-#define R_(ptr) ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
+#define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
 BASE_BEGIN_C_DECLS
 
 BASE_API    int         Base_get_file_size (Base_File_t, R_(size_t*));
