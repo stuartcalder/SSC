@@ -46,48 +46,59 @@
 # error "Unsupported."
 #endif
 
-#define R_(p) p BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
 #ifdef BASE_ALIGNED_MALLOC_INLINE
-BASE_INLINE void*  Base_aligned_malloc (size_t alignment, size_t size) BASE_ALIGNED_MALLOC_IMPL(alignment, size)
+# define API_       BASE_INLINE
+# define IMPL_(...) BASE_ALIGNED_MALLOC_IMPL(__VA_ARGS__)
 #else
-BASE_API    void*  Base_aligned_malloc (size_t alignment, size_t size);
+# define API_       BASE_API
+# define IMPL_(...) ;
 #endif
-BASE_API    void*  Base_aligned_malloc_or_die (size_t alignment, size_t size);
+API_ void* Base_aligned_malloc(size_t alignment, size_t size) IMPL_(alignment, size)
+#undef API_
+#undef IMPL_
 
-BASE_INLINE void   Base_aligned_free (void* p) BASE_ALIGNED_FREE_IMPL(p)
+BASE_API void* Base_aligned_malloc_or_die(size_t alignment, size_t size);
+
+BASE_INLINE void Base_aligned_free (void* p) BASE_ALIGNED_FREE_IMPL(p)
 
 #ifdef BASE_GET_PAGESIZE_INLINE
-BASE_INLINE size_t Base_get_pagesize (void) BASE_GET_PAGESIZE_IMPL
+# define API_  BASE_INLINE
+# define IMPL_ BASE_GET_PAGESIZE_IMPL
 #else
-BASE_API    size_t Base_get_pagesize (void);
+# define API_  BASE_API
+# define IMPL_ ;
 #endif
+API_ size_t Base_get_pagesize(void) IMPL_
+#undef API_
+#undef IMPL_
 
-BASE_API    void* Base_malloc_or_die  (size_t);
-BASE_API    void* Base_calloc_or_die  (size_t n_elem, size_t elem_sz);
-BASE_API    void* Base_realloc_or_die (R_(void*), size_t);
+BASE_API void* Base_malloc_or_die(size_t);
+BASE_API void* Base_calloc_or_die(size_t n_elem, size_t elem_sz);
+BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 
 /* A native load is just memcpy'ing bytes into an automatic variable and returning it. */
-#define BASE_LOAD_NATIVE_IMPL(Ptr, Bits) { \
- uint##Bits##_t val; \
- memcpy(&val, Ptr, sizeof(val)); \
- return val; \
+#define BASE_LOAD_NATIVE_IMPL(Ptr, Bits) {\
+ uint##Bits##_t val;\
+ memcpy(&val, Ptr, sizeof(val));\
+ return val;\
 }
 /* A swap load is memcpy'ing bytes into an automatic variable, byte-swapping it, and returning it. */
-#define BASE_LOAD_SWAP_IMPL(Ptr, Bits) { \
- uint##Bits##_t val; \
- memcpy(&val, Ptr, sizeof(val)); \
- return Base_swap_##Bits(val); \
+#define BASE_LOAD_SWAP_IMPL(Ptr, Bits) {\
+ uint##Bits##_t val;\
+ memcpy(&val, Ptr, sizeof(val));\
+ return Base_swap_##Bits(val);\
 }
 /* A native store is merely a memcpy call. */
-#define BASE_STORE_NATIVE_IMPL(Ptr, Val) { \
- memcpy(Ptr, &Val, sizeof(Val)); \
+#define BASE_STORE_NATIVE_IMPL(Ptr, Val) {\
+ memcpy(Ptr, &Val, sizeof(Val));\
 }
 /* A swap store byte-swaps the bytes before memcpy. */
-#define BASE_STORE_SWAP_IMPL(Ptr, Val, Bits) { \
- Val = Base_swap_##Bits(Val); \
- memcpy(Ptr, &Val, sizeof(Val)); \
+#define BASE_STORE_SWAP_IMPL(Ptr, Val, Bits) {\
+ Val = Base_swap_##Bits(Val);\
+ memcpy(Ptr, &Val, sizeof(Val));\
 }
 
 #ifndef BASE_ENDIAN

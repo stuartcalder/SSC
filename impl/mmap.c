@@ -10,14 +10,12 @@
 # define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
 #elif defined(BASE_OS_WINDOWS)
 # define MAP_FAIL_ ((uint8_t*)BASE_NULL)
-typedef Base_Dw32_t Dw32_t;
+  typedef Base_Dw32_t Dw32_t;
 #else
 # error "Unsupported."
 #endif
 
-int Base_MMap_map
-(Base_MMap* map, bool readonly)
-{
+int Base_MMap_map(Base_MMap* map, bool readonly) {
 #if    defined(BASE_OS_UNIXLIKE)
   const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
   if ((map->ptr = (uint8_t*)mmap(BASE_NULL, map->size, rw, MAP_SHARED, map->file, 0)) == MAP_FAIL_) {
@@ -52,13 +50,11 @@ int Base_MMap_map
   return 0;
 }
 
-void Base_MMap_map_or_die
-(Base_MMap* map, bool readonly)
-{ Base_assert_msg(!Base_MMap_map(map, readonly), "Error: Base_MMap_map failed!\n"); }
+void Base_MMap_map_or_die(Base_MMap* map, bool readonly) {
+ Base_assert_msg(!Base_MMap_map(map, readonly), "Error: Base_MMap_map failed!\n");
+}
 
-int Base_MMap_unmap
-(Base_MMap* map)
-{
+int Base_MMap_unmap(Base_MMap* map) {
   int ret;
 #if defined(BASE_OS_UNIXLIKE)
   ret = munmap(map->ptr, map->size);
@@ -84,13 +80,12 @@ int Base_MMap_unmap
   return ret;
 }
 
-void Base_MMap_unmap_or_die
-(Base_MMap* map)
-{ Base_assert_msg(!Base_MMap_unmap(map), "Error: Base_MMap_unmap failed!\n"); }
+void Base_MMap_unmap_or_die(Base_MMap* map) {
+  Base_assert_msg(!Base_MMap_unmap(map), "Error: Base_MMap_unmap failed!\n");
+}
 
 #ifndef BASE_MMAP_SYNC_INLINE
-int Base_MMap_sync
-(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
+int Base_MMap_sync(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
 #endif /* ~ BASE_MMAP_SYNC_INLINE */
 
 void Base_MMap_sync_or_die

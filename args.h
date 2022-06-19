@@ -22,8 +22,8 @@ typedef int_fast8_t Base_ArgType_t;
  * @offset: Offset into the first word to start reading.
  * @state:  Void pointer to data that will be modified by the procedure.
  * ->int(@x) Represents the number of words consumed.
- *            0 meaning "no additional" words,
- *           -1 meaning only 1 char was consumed.
+ *            0 meaning "no additional" words (i.e. 1 word was consumed),
+ *           -1 meaning only 1 char of 1 word was consumed.
  */
 typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);
 

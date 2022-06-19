@@ -59,28 +59,23 @@ typedef struct {
  )
 #endif
 
-BASE_API int Base_MMap_map
-(Base_MMap* map, bool readonly);
-
-BASE_API void Base_MMap_map_or_die
-(Base_MMap* map, bool readonly);
-
-BASE_API int Base_MMap_unmap
-(Base_MMap* map);
-
-BASE_API void Base_MMap_unmap_or_die
-(Base_MMap* map);
+BASE_API int  Base_MMap_map(Base_MMap* map, bool readonly);
+BASE_API void Base_MMap_map_or_die(Base_MMap* map, bool readonly);
+BASE_API int  Base_MMap_unmap(Base_MMap* map);
+BASE_API void Base_MMap_unmap_or_die(Base_MMap* map);
 
 #ifdef BASE_MMAP_SYNC_INLINE
-BASE_INLINE int Base_MMap_sync
-(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
+# define API_       BASE_INLINE
+# define IMPL_(...) BASE_MMAP_SYNC_IMPL(__VA_ARGS__)
 #else
-BASE_API int Base_MMap_sync
-(const Base_MMap* map);
+# define API_ BASE_API
+# define IMPL_(...) ;
 #endif
+API_ int Base_MMap_sync(const Base_MMap* map) IMPL_(map)
+#undef API_
+#undef IMPL_
 
-BASE_API void Base_MMap_sync_or_die
-(const Base_MMap* map);
+BASE_API void Base_MMap_sync_or_die(const Base_MMap* map);
 
 /* Initialization error codes. */
 enum {
@@ -98,20 +93,21 @@ enum {
 };
 typedef int_fast8_t Base_MMap_Init_Code_t;
 
-BASE_API Base_MMap_Init_Code_t Base_MMap_init
-(Base_MMap* BASE_RESTRICT  map,
+BASE_API Base_MMap_Init_Code_t Base_MMap_init(
+ Base_MMap*  BASE_RESTRICT map,
  const char* BASE_RESTRICT filepath,
  size_t                    size,
- Base_MMap_Init_t          flags);
+ Base_MMap_Init_t          flags
+);
 
-BASE_API void Base_MMap_init_or_die
-(Base_MMap* BASE_RESTRICT  map,
+BASE_API void Base_MMap_init_or_die(
+ Base_MMap*  BASE_RESTRICT map,
  const char* BASE_RESTRICT filepath,
  size_t                    size,
- Base_MMap_Init_t          flags);
+ Base_MMap_Init_t          flags
+);
 
-BASE_API void Base_MMap_del
-(Base_MMap* map);
+BASE_API void Base_MMap_del(Base_MMap* map);
 
 BASE_END_C_DECLS
 #endif /* ~ BASE_MMAP_H */

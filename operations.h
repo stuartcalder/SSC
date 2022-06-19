@@ -26,14 +26,16 @@
 
 #if BASE_OPERATIONS_USE_CPP20_ROT
 # include <bit>
-# define BASE_ROT_LEFT(Value,  Count, Bits) std::rotl<uint##Bits##_t>(Value, Count)
+# define BASE_ROT_LEFT(Value, Count, Bits)  std::rotl<uint##Bits##_t>(Value, Count)
 # define BASE_ROT_RIGHT(Value, Count, Bits) std::rotr<uint##Bits##_t>(Value, Count)
 #else
 # if (CHAR_BIT != 8)
 #  error "We need 8-bit chars."
 # endif
-# define BASE_ROT_IMPL_UNSIGNED_MASK(Bits)       ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT) - 1)
-# define BASE_ROT_IMPL_MASKED_COUNT(Bits, Count) (BASE_ROT_IMPL_UNSIGNED_MASK(Bits) & Count)
+# define BASE_ROT_IMPL_UNSIGNED_MASK(Bits) \
+         ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT) - 1)
+# define BASE_ROT_IMPL_MASKED_COUNT(Bits, Count) \
+	 (BASE_ROT_IMPL_UNSIGNED_MASK(Bits) & Count)
 # define BASE_ROT_LEFT(Value, Count, Bits) \
 	 ((Value << BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) | (Value >> ((-BASE_ROT_IMPL_MASKED_COUNT(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK(Bits))))
 # define BASE_ROT_RIGHT(Value, Count, Bits) \

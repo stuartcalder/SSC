@@ -32,13 +32,13 @@ typedef int Base_File_t;
 
 #elif defined(BASE_OS_WINDOWS)
 # define BASE_CLOSE_FILE_IMPL(f) { if (CloseHandle(f)) return 0; return -1; }
-# define BASE_SET_FILE_SIZE_IMPL(f, n) { \
-     LARGE_INTEGER i; i.QuadPart = n; \
-     if (!SetFilePointerEx(f, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(f)) \
-       return -1; \
-     return 0; \
-   }
-#  include <windows.h>
+# define BASE_SET_FILE_SIZE_IMPL(f, n) {\
+    LARGE_INTEGER i; i.QuadPart = n;\
+    if (!SetFilePointerEx(f, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(f))\
+      return -1;\
+    return 0;\
+  }
+# include <windows.h>
 /* On Windows systems, files are managed through HANDLEs. */
 typedef HANDLE Base_File_t;
 # define BASE_FILE_NULL_LITERAL (INVALID_HANDLE_VALUE)
@@ -61,17 +61,30 @@ BASE_API    int         Base_open_filepath (R_(const char*), bool, R_(Base_File_
 BASE_API    Base_File_t Base_open_filepath_or_die (R_(const char*), bool);
 BASE_API    int         Base_create_filepath (R_(const char*), R_(Base_File_t*));
 BASE_API    Base_File_t Base_create_filepath_or_die (const char*);
+
 #ifdef BASE_CLOSE_FILE_INLINE
-BASE_INLINE int Base_close_file (Base_File_t f) BASE_CLOSE_FILE_IMPL(f)
+# define API_       BASE_INLINE
+# define IMPL_(...) BASE_CLOSE_FILE_IMPL(__VA_ARGS__)
 #else
-BASE_API    int Base_close_file (Base_File_t);
+# define API_       BASE_API
+# define IMPL_(...) ;
 #endif
-BASE_API   void Base_close_file_or_die (Base_File_t);
+API_      int Base_close_file (Base_File_t f) IMPL_(f)
+BASE_API void Base_close_file_or_die (Base_File_t);
+#undef  API_
+#undef IMPL_
+
 #ifdef BASE_SET_FILE_SIZE_INLINE
-BASE_INLINE int Base_set_file_size (Base_File_t f, size_t s) BASE_SET_FILE_SIZE_IMPL(f, s)
+# define API_       BASE_INLINE
+# define IMPL_(...) BASE_SET_FILE_SIZE_IMPL(__VA_ARGS__)
 #else
-BASE_API    int Base_set_file_size (Base_File_t, size_t);
+# define API_       BASE_API
+# define IMPL_(...) ;
 #endif
+API_ int Base_set_file_size (Base_File_t f, size_t s) IMPL_(f, s)
+#undef  API_
+#undef IMPL_
+
 BASE_API   void Base_set_file_size_or_die (Base_File_t, size_t);
 
 BASE_END_C_DECLS
