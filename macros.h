@@ -30,7 +30,8 @@
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
-#define BASE_COMPILER_IS_GCC_COMPAT ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
+#define BASE_COMPILER_IS_GCC_COMPATIBLE ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
+#define BASE_COMPILER_IS_GCC_COMPAT BASE_COMPILER_IS_GCC_COMPATIBLE /*TODO: Remove me. */
 
 /* Compiler macros. */
 #if   defined(__clang__)
@@ -233,13 +234,13 @@
 # if (BASE_LANG_CPP < BASE_CPP_11)
 #  error "When compiled as C++, Base is C++11 or higher only!"
 # endif
-# define BASE_STATIC_ASSERT(boolean, message) static_assert(boolean, message)
-# define BASE_ALIGNAS(v)                      alignas(v)
-# define BASE_ALIGNOF(v)                      alignof(v)
+# define BASE_STATIC_ASSERT(Boolean, Message) static_assert(Boolean, Message)
+# define BASE_ALIGNAS(V)                      alignas(V)
+# define BASE_ALIGNOF(V)                      alignof(V)
 # if (BASE_LANG_CPP >= BASE_CPP_17)
-#  define BASE_STATIC_ASSERT_1(boolean)       static_assert(boolean)
+#  define BASE_STATIC_ASSERT_1(Boolean)       static_assert(Boolean)
 # else
-#  define BASE_STATIC_ASSERT_1(boolean)
+#  define BASE_STATIC_ASSERT_1(Boolean_)
 #  define BASE_STATIC_ASSERT_1_IS_NIL
 # endif
 # if (BASE_LANG_CPP >= BASE_CPP_20)
@@ -268,21 +269,21 @@
 #   define BASE_RESTRICT_IMPL BASE_RESTRICT_IMPL_C
 #  endif
 #  if (BASE_LANG_C >= BASE_C_11)
-#   define BASE_STATIC_ASSERT(boolean, msg) _Static_assert(boolean, msg)
-#   define BASE_ALIGNAS(as)                 _Alignas(as)
-#   define BASE_ALIGNOF(of)                 _Alignof(of)
+#   define BASE_STATIC_ASSERT(Boolean, Msg) _Static_assert(Boolean, Msg)
+#   define BASE_ALIGNAS(As)                 _Alignas(As)
+#   define BASE_ALIGNOF(Of)                 _Alignof(Of)
 #  else
-#   define BASE_STATIC_ASSERT(boolean, msg)
+#   define BASE_STATIC_ASSERT(Boolean_, Msg_)
 #   define BASE_STATIC_ASSERT_IS_NIL
-#   define BASE_ALIGNAS(as)
+#   define BASE_ALIGNAS(As_)
 #   define BASE_ALIGNAS_IS_NIL
-#   define BASE_ALIGNOF(of)
+#   define BASE_ALIGNOF(Of_)
 #   define BASE_ALIGNOF_IS_NIL
 #  endif
 #  if (BASE_LANG_C >= BASE_C_23)
-#   define BASE_STATIC_ASSERT_1(boolean) _Static_assert(boolean)
+#   define BASE_STATIC_ASSERT_1(Boolean) _Static_assert(Boolean)
 #  else
-#   define BASE_STATIC_ASSERT_1(boolean)
+#   define BASE_STATIC_ASSERT_1(Boolean_)
 #   define BASE_STATIC_ASSERT_1_IS_NIL
 #  endif
 # else  /* __STDC_VERSION__ not defined. */
@@ -293,13 +294,13 @@
 #  ifndef BASE_RESTRICT_IMPL
 #   define BASE_RESTRICT_IMPL 0
 #  endif
-#  define BASE_STATIC_ASSERT(boolean, msg)
+#  define BASE_STATIC_ASSERT(Boolean_, Msg_)
 #  define BASE_STATIC_ASSERT_IS_NIL
-#  define BASE_STATIC_ASSERT_1(boolean)
+#  define BASE_STATIC_ASSERT_1(Boolean_)
 #  define BASE_STATIC_ASSERT_1_IS_NIL
-#  define BASE_ALIGNAS(as)
+#  define BASE_ALIGNAS(As_)
 #  define BASE_ALIGNAS_IS_NIL
-#  define BASE_ALIGNOF(of)
+#  define BASE_ALIGNOF(Of_)
 #  define BASE_ALIGNOF_IS_NIL
 # endif /* ! #ifdef __STDC_VERSION__ */
 # define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 syntax. */
@@ -314,8 +315,7 @@
 # define BASE_RESTRICT_IMPL 0
 #endif
 #if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) || \
-     ((BASE_COMPILER == BASE_COMPILER_MSVC) && \
-      (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
+     ((BASE_COMPILER == BASE_COMPILER_MSVC) && (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
 # define BASE_RESTRICT __restrict /* C++/MSVC compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 # define BASE_RESTRICT restrict   /* C99-specified restrict. */
@@ -337,7 +337,7 @@
 # define BASE_EXPORT_IS_NIL
 # define BASE_IMPORT
 # define BASE_IMPORT_IS_NIL
-#elif BASE_COMPILER_IS_GCC_COMPAT
+#elif BASE_COMPILER_IS_GCC_COMPATIBLE
 # if defined(BASE_OS_UNIXLIKE)
 #  define BASE_EXPORT __attribute__ ((visibility ("default")))
 #  define BASE_IMPORT BASE_EXPORT
@@ -391,12 +391,12 @@
 #ifdef	__OpenBSD__
 # include <unistd.h>
 # include "errors.h"
-# define BASE_OPENBSD_PLEDGE(promises, execpromises) Base_assert_msg(!pledge(promises, execpromises), "Failed to pledge()!\n")
-# define BASE_OPENBSD_UNVEIL(path    , permissions)  Base_assert_msg(!unveil(path    , permissions ), "Failed to unveil()!\n")
+# define BASE_OPENBSD_PLEDGE(Promises, Execpromises) Base_assert_msg(!pledge(Promises, Execpromises), "Failed to pledge()!\n")
+# define BASE_OPENBSD_UNVEIL(Path    , Permissions)  Base_assert_msg(!unveil(Path    , Permissions ), "Failed to unveil()!\n")
 #else
 /* These macros define to nothing on non-OpenBSD operating systems. */
-# define BASE_OPENBSD_PLEDGE(promises, execpromises) /* Nil */
-# define BASE_OPENBSD_UNVEIL(path    , permissions)  /* Nil */
+# define BASE_OPENBSD_PLEDGE(Promises_, Execpromises_) /* Nil */
+# define BASE_OPENBSD_UNVEIL(Path_    , Permissions_)  /* Nil */
 #endif /* ! #ifdef __OpenBSD__ */
 
 #endif /* ! #ifndef BASE_MACROS_H */

@@ -12,7 +12,6 @@
 #if defined(BASE_OS_UNIXLIKE)
 # include <unistd.h>
 # include <stdlib.h>
-# include <string.h>
 /* Base_aligned_malloc */
 # define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { \
  void* p; \
@@ -37,10 +36,10 @@
 /* Base_aligned_free */
 # define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
 /* Base_get_pagesize */
-# define BASE_GET_PAGESIZE_IMPL { \
- SYSTEM_INFO si; \
- GetSystemInfo(&si); \
- return (size_t)si.dwPageSize; \
+# define BASE_GET_PAGESIZE_IMPL {\
+ SYSTEM_INFO si;\
+ GetSystemInfo(&si);\
+ return (size_t)si.dwPageSize;\
 }
 #else
 # error "Unsupported."
@@ -62,7 +61,7 @@ API_ void* Base_aligned_malloc(size_t alignment, size_t size) IMPL_(alignment, s
 
 BASE_API void* Base_aligned_malloc_or_die(size_t alignment, size_t size);
 
-BASE_INLINE void Base_aligned_free (void* p) BASE_ALIGNED_FREE_IMPL(p)
+BASE_INLINE void Base_aligned_free(void* p) BASE_ALIGNED_FREE_IMPL(p)
 
 #ifdef BASE_GET_PAGESIZE_INLINE
 # define API_  BASE_INLINE
@@ -80,23 +79,23 @@ BASE_API void* Base_calloc_or_die(size_t n_elem, size_t elem_sz);
 BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 
 /* A native load is just memcpy'ing bytes into an automatic variable and returning it. */
-#define BASE_LOAD_NATIVE_IMPL(Ptr, Bits) {\
+#define BASE_LOAD_NATIVE_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return val;\
 }
 /* A swap load is memcpy'ing bytes into an automatic variable, byte-swapping it, and returning it. */
-#define BASE_LOAD_SWAP_IMPL(Ptr, Bits) {\
+#define BASE_LOAD_SWAP_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return Base_swap_##Bits(val);\
 }
 /* A native store is merely a memcpy call. */
-#define BASE_STORE_NATIVE_IMPL(Ptr, Val) {\
+#define BASE_STORE_NATIVE_IMPL_(Ptr, Val) {\
  memcpy(Ptr, &Val, sizeof(Val));\
 }
 /* A swap store byte-swaps the bytes before memcpy. */
-#define BASE_STORE_SWAP_IMPL(Ptr, Val, Bits) {\
+#define BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits) {\
  Val = Base_swap_##Bits(Val);\
  memcpy(Ptr, &Val, sizeof(Val));\
 }
@@ -104,41 +103,41 @@ BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 #ifndef BASE_ENDIAN
 # error "BASE_ENDIAN undefined!"
 #elif (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
-# define BASE_STORE_LE_IMPL(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL(Ptr, Val)
-# define BASE_LOAD_LE_IMPL(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL(Ptr, Bits)
-# define BASE_STORE_BE_IMPL(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL(Ptr, Val, Bits)
-# define BASE_LOAD_BE_IMPL(Ptr, Bits)        BASE_LOAD_SWAP_IMPL(Ptr, Bits)
+# define BASE_STORE_LE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
+# define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
+# define BASE_STORE_BE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
+# define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
 #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
-# define BASE_STORE_BE_IMPL(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL(Ptr, Val)
-# define BASE_LOAD_BE_IMPL(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL(Ptr, Bits)
-# define BASE_STORE_LE_IMPL(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL(Ptr, Val, Bits)
-# define BASE_LOAD_LE_IMPL(Ptr, Bits)        BASE_LOAD_SWAP_IMPL(Ptr, Bits)
+# define BASE_STORE_BE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
+# define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
+# define BASE_STORE_LE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
+# define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
 #else
 # error "Invalid byte-order!"
 #endif
 
-BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL(mem, val, 16)
-BASE_INLINE void Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL(mem, val, 32)
-BASE_INLINE void Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL(mem, val, 64)
-BASE_INLINE void Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL(mem, val, 16)
-BASE_INLINE void Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL(mem, val, 32)
-BASE_INLINE void Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL(mem, val, 64)
+BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)
+BASE_INLINE void Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL_(mem, val, 32)
+BASE_INLINE void Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL_(mem, val, 64)
+BASE_INLINE void Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL_(mem, val, 16)
+BASE_INLINE void Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL_(mem, val, 32)
+BASE_INLINE void Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL_(mem, val, 64)
 
-BASE_INLINE uint16_t Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL(mem, 16)
-BASE_INLINE uint32_t Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL(mem, 32)
-BASE_INLINE uint64_t Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL(mem, 64)
-BASE_INLINE uint16_t Base_load_be16(const void* mem) BASE_LOAD_BE_IMPL(mem, 16)
-BASE_INLINE uint32_t Base_load_be32(const void* mem) BASE_LOAD_BE_IMPL(mem, 32)
-BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL(mem, 64)
+BASE_INLINE uint16_t Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL_(mem, 16)
+BASE_INLINE uint32_t Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL_(mem, 32)
+BASE_INLINE uint64_t Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL_(mem, 64)
+BASE_INLINE uint16_t Base_load_be16(const void* mem) BASE_LOAD_BE_IMPL_(mem, 16)
+BASE_INLINE uint32_t Base_load_be32(const void* mem) BASE_LOAD_BE_IMPL_(mem, 32)
+BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL_(mem, 64)
 
-#undef BASE_LOAD_LE_IMPL
-#undef BASE_LOAD_BE_IMPL
-#undef BASE_LOAD_NATIVE_IMPL
-#undef BASE_LOAD_SWAP_IMPL
-#undef BASE_STORE_LE_IMPL
-#undef BASE_STORE_BE_IMPL
-#undef BASE_STORE_NATIVE_IMPL
-#undef BASE_STORE_SWAP_IMPL
+#undef BASE_LOAD_LE_IMPL_
+#undef BASE_LOAD_BE_IMPL_
+#undef BASE_LOAD_NATIVE_IMPL_
+#undef BASE_LOAD_SWAP_IMPL_
+#undef BASE_STORE_LE_IMPL_
+#undef BASE_STORE_BE_IMPL_
+#undef BASE_STORE_NATIVE_IMPL_
+#undef BASE_STORE_SWAP_IMPL_
 
 BASE_END_C_DECLS
 #undef R_

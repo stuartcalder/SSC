@@ -10,7 +10,7 @@
 # define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
 #elif defined(BASE_OS_WINDOWS)
 # define MAP_FAIL_ ((uint8_t*)BASE_NULL)
-  typedef Base_Dw32_t Dw32_t;
+  typedef DWORD Dw32_t;
 #else
 # error "Unsupported."
 #endif
@@ -24,7 +24,7 @@ int Base_MMap_map(Base_MMap* map, bool readonly) {
   }
 #elif  defined(BASE_OS_WINDOWS)
   BASE_STATIC_ASSERT(CHAR_BIT                    ==  8, "8-bit bytes required!");
-  BASE_STATIC_ASSERT((sizeof(Dw32_t) * CHAR_BIT) == 32, "Base_Dw32_t should be 32 bits wide!");
+  BASE_STATIC_ASSERT((sizeof(Dw32_t) * CHAR_BIT) == 32, "Dw32_t should be 32 bits wide!");
   Dw32_t high, low, page_rw, map_rw;
 
   high = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);

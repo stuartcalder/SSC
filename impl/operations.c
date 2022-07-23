@@ -27,42 +27,26 @@
   XOR_64_(u8p, cu8p, (0  + start)); \
   XOR_64_(u8p, cu8p, (64 + start))
 
-void
-Base_xor_16
-(R_(void*) base_, R_(const void*) add_)
-{
+void Base_xor_16(R_(void*) base_, R_(const void*) add_) {
   uint8_t*       base = (uint8_t*)      base_;
   const uint8_t* add  = (const uint8_t*)add_;
   XOR_16_(base, add, 0);
 }
-
-void
-Base_xor_32
-(R_(void*) base_, R_(const void*) add_)
-{
+void Base_xor_32(R_(void*) base_, R_(const void*) add_) {
   uint8_t*       base = (uint8_t*)      base_;
   const uint8_t* add  = (const uint8_t*)add_;
   XOR_32_(base, add, 0);
 }
-
-void
-Base_xor_64
-(R_(void*) base_, R_(const void*) add_)
-{
+void Base_xor_64(R_(void*) base_, R_(const void*) add_) {
   uint8_t*       base = (uint8_t*)      base_;
   const uint8_t* add  = (const uint8_t*)add_;
   XOR_64_(base, add, 0);
 }
-
-void
-Base_xor_128
-(R_(void*) base_, R_(const void*) add_)
-{
+void Base_xor_128 (R_(void*) base_, R_(const void*) add_) {
   uint8_t*       base = (uint8_t*)      base_;
   const uint8_t* add  = (const uint8_t*)add_;
   XOR_128_(base, add, 0);
 }
-
 size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size) {
   BASE_ASSERT(v_0 && v_1);
   const uint8_t* const u8_0 = (const uint8_t*)v_0;
@@ -89,23 +73,23 @@ size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size
   return unequal_count;
 }
 bool Base_is_zero (R_(const void*) mem, size_t n_bytes) {
-	BASE_ASSERT(mem);
-	const uint8_t* b = (const uint8_t*)mem;
-	for (size_t i = 0; i < n_bytes; ++i)
-	  if (b[i])
-	    return false;
-	return true;
+  BASE_ASSERT(mem);
+  const uint8_t* b = (const uint8_t*)mem;
+  for (size_t i = 0; i < n_bytes; ++i)
+    if (b[i])
+      return false;
+  return true;
 }
 bool Base_ctime_is_zero (R_(const void*) mem, size_t n_bytes) {
-	BASE_ASSERT(mem);
-	const uint8_t* cu8p = (const uint8_t*)mem;
-	uint8_t zero_test = 0;
-	for (size_t i = 0; i < n_bytes; ++i) {
-	  /* @zero_test absorbs all the 1 bits. */
-	  zero_test |= cu8p[i];
-	}
-	/* If any 1 bits were absorbed, the memory range
-	 * was not all zero'd.
-	 */
-	return !zero_test;
+  BASE_ASSERT(mem);
+  const uint8_t* cu8p = (const uint8_t*)mem;
+  uint8_t zero_test = 0;
+  for (size_t i = 0; i < n_bytes; ++i) {
+    /* @zero_test absorbs all the 1 bits. */
+    zero_test |= cu8p[i];
+  }
+  /* If any 1 bits were absorbed, the memory range
+   * was not all zeroes.
+   */
+  return !zero_test;
 }
