@@ -37,7 +37,7 @@
 #if   defined(__clang__)
 # define BASE_COMPILER BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
-# define BASE_COMPILER BASE_COMPILER_MSVC
+# define BASE_COMPILER   BASE_COMPILER_MSVC
 # define BASE_COMPILER_V _MSC_VER
 #elif defined(__GNUC__)
 # define BASE_COMPILER BASE_COMPILER_GCC
@@ -100,7 +100,7 @@
 # define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_EXTERN
 #endif
 
-/* GCC/Clang provide __BYTE_ORDER__ for us to check endian directly. Use this when possible. */
+/* GCC/Clang provide __BYTE_ORDER__ for us to check byte endianness directly. Use this when possible. */
 #if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) && \
      defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
 # if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
@@ -288,8 +288,7 @@
 #  endif
 # else  /* __STDC_VERSION__ not defined. */
   /* We use C99 features, so if we can't detect a C version just pray
-   * everything doesn't break.
-   */
+   * everything doesn't break. */
 #  define BASE_LANG_C 0L
 #  ifndef BASE_RESTRICT_IMPL
 #   define BASE_RESTRICT_IMPL 0
@@ -314,8 +313,8 @@
 #ifndef BASE_RESTRICT_IMPL
 # define BASE_RESTRICT_IMPL 0
 #endif
-#if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) || \
-     ((BASE_COMPILER == BASE_COMPILER_MSVC) && (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
+#if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) ||\
+ ((BASE_COMPILER == BASE_COMPILER_MSVC) && (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
 # define BASE_RESTRICT __restrict /* C++/MSVC compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
 # define BASE_RESTRICT restrict   /* C99-specified restrict. */

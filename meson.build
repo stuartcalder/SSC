@@ -25,16 +25,16 @@ assert(os in SUPPORTED_OPERATING_SYSTEMS,
 assert(compiler.get_id() in SUPPORTED_COMPILERS,
   'You are trying to build ' + PROJECT + ' using an unsupported compiler!')
 
-lib_dirs = {
+_LIB_DIRS = {
   'bsd':   ['/usr/lib', '/usr/local/lib'],
-  'linux': ['/usr/lib', '/usr/lib64'],
+  'linux': ['/usr/lib64', '/usr/lib'],
   'windows': 'C:\lib'
 }
 
 if os in ['openbsd', 'freebsd', 'netbsd', 'darwin']
-  lib_dir = lib_dirs.get('bsd')
+  lib_dir = _LIB_DIRS.get('bsd')
 elif os in ['linux', 'windows']
-  lib_dir = lib_dirs.get(os)
+  lib_dir = _LIB_DIRS.get(os)
 else
   assert(false, 'Unsupported OS.')
 endif
@@ -89,53 +89,55 @@ if get_option('mlock') and os != 'openbsd'
 	lang_flags += _D + 'BASE_EXTERN_MLOCK_THREADSAFE'
   endif
 endif
-# On {Open,Free}BSD and MacOS...
+
+_INCLUDE_DIRS = {
+  'bsd': '/usr/local/include',
+  'netbsd': '/usr/pkg/include',
+  'linux': '/usr/include',
+  'windows': 'C:\include'
+}
+
 if os in ['openbsd', 'freebsd', 'darwin']
-  include_install = '/usr/local/include'
-  include_dirs += '/usr/local/include'
-  lib_deps += compiler.find_library('ncurses')
-# On NetBSD...
+  include_install = _INCLUDE_DIRS.get('bsd')
+  include_dirs   += _INCLUDE_DIRS.get('bsd')
 elif os == 'netbsd'
-  include_install = '/usr/local/include'
-  include_dirs += '/usr/pkg/include'
-  lib_deps += compiler.find_library('ncurses')
-# On GNU/Linux...
-elif os == 'linux'
-  include_install = '/usr/include'
-  lib_deps += compiler.find_library('ncurses')
-  lib_deps += compiler.find_library('tinfo')
-# On Windows...
-elif os == 'windows'
-  lib_deps += compiler.find_library('bcrypt')
-  include_install = 'C:/include'
+  include_install = _INCLUDE_DIRS.get('bsd')
+  include_dirs   += _INCLUDE_DIRS.get('netbsd')
+else
+  include_install = _INCLUDE_DIRS.get(os)
+  include_dirs   += _INCLUDE_DIRS.get(os)
 endif
-# Unixlike options
+
 if os in UNIXLIKE_OPERATING_SYSTEMS
-  if compiler.get_id() in GCC_COMPATIBLE_COMPILERS # GCC, Clang
-    if get_option('native_optimize') # -march=native
+  lib_deps += compiler.find_library('ncurses', dirs: lib_dir)
+  if os == 'linux'
+    lib_deps += compiler.find_library('tinfo', dirs: lib_dir)
+  endif
+  if compiler.get_id() in GCC_COMPATIBLE_COMPILERS
+    if get_option('native_optimize')
       lang_flags += '-march=native'
     endif
     lang_flags += GCC_COMPATIBLE_FLAGS
-    # We're UNIXLIKE and GCC compatible. Define feature test macros.
   endif
-  if get_option('lua') # Lua support
+  if get_option('lua')
     lang_flags += _D + 'BASE_EXTERN_LUA'
     src += [
-      'impl/lua/lua.c',   # luaopen_Base
-      'impl/lua/mmap.c',  # luaopen_Base_MMap
-      'impl/lua/procs.c', # luaopen_Base_Procs
-      'impl/lua/sbuffer.c'# luaopen_Base_SBuffer
+      'impl/lua/lua.c',    # luaopen_Base
+      'impl/lua/mmap.c',   # luaopen_Base_MMap
+      'impl/lua/procs.c',  # luaopen_Base_Procs
+      'impl/lua/sbuffer.c' # luaopen_Base_SBuffer
     ]
     lua_dep = compiler.find_library('lua5.4', required: false, static: false, dirs: lib_dir)
-    if lua_dep.found() # We are using Lua5.4
+    if lua_dep.found()
       lib_deps += lua_dep
       lang_flags += _D + 'BASE_EXTERN_LUA_5_4'
-    else # We will try using Lua5.3
+    else
       lib_deps += compiler.find_library('lua5.3', static: false, dirs: lib_dir)
       lang_flags += _D + 'BASE_EXTERN_LUA_5_3'
     endif
-  endif # ! if get_option('lua')
+  endif
 endif
+
 if get_option('endian') != 'auto'
   if   get_option('endian') == 'little'
     lang_flags += _D + 'BASE_EXTERN_ENDIAN=BASE_ENDIAN_LITTLE'
@@ -151,14 +153,14 @@ install_subdir('../Base', install_dir: include_install, exclude_directories: ['b
 if get_option('static')
   if os == 'windows'
     static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
-      name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:/lib')
+      name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:\lib')
   else
     static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
   endif
 else
   if os == 'windows'
     shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
-      name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:/lib')
+      name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:\lib')
   else
     shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
   endif

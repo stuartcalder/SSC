@@ -66,13 +66,13 @@ BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 # if (!defined(__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1))
 #  error "We needed __STDC_WANT_LIB_EXT1__ defined to 1, for access to memset_s!"
 # endif
-# define SECURE_ZERO_IMPL_(Mem, Size) { memset_s(Mem, Size, 0, Size); }
+# define SECURE_ZERO_IMPL_(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
 #elif defined(__NetBSD__)
-# define SECURE_ZERO_IMPL_(Mem, Size) { explicit_memset(Mem, 0, Size); }
+# define SECURE_ZERO_IMPL_(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
 #elif defined(BASE_OS_UNIXLIKE)
-# define SECURE_ZERO_IMPL_(Mem, Size) { explicit_bzero(Mem, Size); }
+# define SECURE_ZERO_IMPL_(Ptr, Size) { explicit_bzero(Ptr, Size); }
 #elif defined(BASE_OS_WINDOWS)
-# define SECURE_ZERO_IMPL_(Mem, Size) { SecureZeroMemory(Mem, Size); }
+# define SECURE_ZERO_IMPL_(Ptr, Size) { SecureZeroMemory(Ptr, Size); }
 #else
 # error "Unsupported!"
 #endif

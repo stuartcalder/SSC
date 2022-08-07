@@ -8,7 +8,7 @@
 #if   defined(BASE_OS_UNIXLIKE)
 typedef struct stat Stat_t;
 #elif defined(BASE_OS_WINDOWS)
-typedef LARGE_INTEGER Li_t;
+typedef LARGE_INTEGER LargeInt_t;
 typedef DWORD         Dw32_t;
 #endif
 
@@ -21,7 +21,7 @@ int Base_get_file_size
     return -1;
   *size_p = (size_t)s.st_size;
 #elif  defined(BASE_OS_WINDOWS)
-  Li_t li;
+  LargeInt_t li;
   if (!GetFileSizeEx(file, &li))
     return -1;
   *size_p = (size_t)li.QuadPart;
@@ -96,7 +96,11 @@ int Base_open_filepath
   const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
   *file = open(filepath, read_write_rights, (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
+# ifdef BASE_STATIC_ASSERT_IS_NIL
+  Base_assert_msg(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!"); /* Sucks this has to be runtime. */
+# else
   BASE_STATIC_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!");
+# endif
   const Dw32_t read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
   *file = CreateFileA(filepath, read_write_rights, 0, BASE_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else

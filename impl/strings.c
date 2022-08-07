@@ -8,12 +8,7 @@
 
 #define R_(ptr) ptr BASE_RESTRICT
 
-/* @str:	A null-terminated string.
- * @size:	The number of non-null characters in the string @str.
- * returns:	The number of digit characters shifted to the left. */
-int
-Base_shift_left_digits
-(R_(char*) str, const int size)
+int Base_shift_left_digits(R_(char*) str, const int size)
 {
   BASE_ASSERT(str);
   int index = 0;
@@ -25,25 +20,30 @@ Base_shift_left_digits
   return index;
 }
 
-int
-Base_String_init
-(Base_String* base_s, R_(const char*) c_s, size_t num_chars)
+int Base_String_init(Base_String* ctx, R_(const char*) str, size_t size)
 {
-  BASE_ASSERT(base_s);
-  if (!(base_s->c_str = (char*)malloc(num_chars + 1)))
+  BASE_ASSERT(ctx);
+  if (!(ctx->c_str = (char*)calloc(size + 1, 1)))
     return -1;
-  if (c_s)
-    strcpy(base_s->c_str, c_s);
-  else
-    memset(base_s->c_str, 0, num_chars + 1);
-  base_s->size = num_chars;
+  if (str) {
+    size_t len = strlen(str);
+    memcpy(ctx->c_str, str, size + 1);
+    ctx->size = len;
+  } else {
+    memset(ctx->c_str, 0, size + 1);
+    ctx->size = size;
+  }
   return 0;
 }
-void Base_String_init_or_die (Base_String* base_s, R_(const char*) cstr, size_t num_chars) {
-	Base_assert_msg(!Base_String_init(base_s, cstr, num_chars), BASE_ERR_S_FAILED("Base_String_init"));
+
+void Base_String_init_or_die (Base_String* base_s, R_(const char*) cstr, size_t num_chars)
+{
+  Base_assert_msg(!Base_String_init(base_s, cstr, num_chars), BASE_ERR_S_FAILED("Base_String_init"));
 }
-void Base_String_del (Base_String* s) {
-	BASE_ASSERT(s);
-	free(s->c_str);
-	*s = BASE_STRING_NULL_LITERAL;
+
+void Base_String_del (Base_String* s)
+{
+  BASE_ASSERT(s);
+  free(s->c_str);
+  *s = BASE_STRING_NULL_LITERAL;
 }

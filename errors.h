@@ -17,13 +17,13 @@
 #define BASE_ERR_S_FAILED(Str)	   "Error: %s failed!\n", Str
 #define BASE_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
 
-#define BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) { \
- vfprintf(stderr, Fmt, ArgList); \
- va_end(ArgList); \
- exit(Code); \
+#define BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) {\
+ vfprintf(stderr, Fmt, ArgList);\
+ va_end(ArgList);\
+ exit(Code);\
 }
-#define BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList) { \
- verrx(Code, Fmt, ArgList); \
+#define BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList) {\
+ verrx(Code, Fmt, ArgList);\
 }
 
 #ifdef BASE_OS_UNIXLIKE
@@ -59,7 +59,7 @@ BASE_END_C_DECLS
 #undef R_
 
 #ifdef BASE_EXTERN_DEBUG
-#  define BASE_ASSERT(Boolean) Base_assert(Boolean)
+#  define BASE_ASSERT(Bool)    Base_assert(Bool)
 #  define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
 #else
 #  define BASE_ASSERT(Boolean) /* Nil */

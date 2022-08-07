@@ -22,6 +22,7 @@
 # error "Unsupported operating system."
 #endif /* ~ if defined(BASE_OS_UNIXLIKE) or defined(BASE_OS_WINDOWS) */
 
+#define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
 /* Initialization flags. */
@@ -36,27 +37,21 @@ BASE_BEGIN_C_DECLS
 typedef uint_fast8_t Base_MMap_Init_t;
 
 typedef struct {
-  uint8_t*     ptr;
-  size_t       size;
-  Base_File_t  file;
+  uint8_t*    ptr;
+  size_t      size;
+  Base_File_t file;
   #ifdef BASE_MMAP_HAS_WIN_FMAPPING
-  Base_File_t  win_fmapping;
+  Base_File_t win_fmapping;
   #endif /* ~ ifdef BASE_OS_WINDOWS */
-  bool         readonly;
+  bool        readonly;
 } Base_MMap;
 
 #ifdef BASE_MMAP_HAS_WIN_FMAPPING
 # define BASE_MMAP_NULL_LITERAL \
- BASE_COMPOUND_LITERAL(\
-  Base_MMap,\
-  BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, BASE_FILE_NULL_LITERAL, false\
- )
+ BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, BASE_FILE_NULL_LITERAL, false)
 #else
 # define BASE_MMAP_NULL_LITERAL \
- BASE_COMPOUND_LITERAL(\
-  Base_MMap,\
-  BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false\
- )
+ BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false)
 #endif
 
 BASE_API int  Base_MMap_map(Base_MMap* map, bool readonly);
@@ -72,7 +67,7 @@ BASE_API void Base_MMap_unmap_or_die(Base_MMap* map);
 # define IMPL_(...) ;
 #endif
 API_ int Base_MMap_sync(const Base_MMap* map) IMPL_(map)
-#undef API_
+#undef  API_
 #undef IMPL_
 
 BASE_API void Base_MMap_sync_or_die(const Base_MMap* map);
@@ -90,24 +85,22 @@ enum {
   BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE =   -8,
   BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE =   -9,
   BASE_MMAP_INIT_CODE_ERR_MAP =            -10,
-};
-typedef int_fast8_t Base_MMap_Init_Code_t;
+}; typedef int_fast8_t Base_MMap_Init_Code_t;
 
-BASE_API Base_MMap_Init_Code_t Base_MMap_init(
- Base_MMap*  BASE_RESTRICT map,
- const char* BASE_RESTRICT filepath,
- size_t                    size,
- Base_MMap_Init_t          flags
-);
+BASE_API Base_MMap_Init_Code_t Base_MMap_init
+(R_(Base_MMap*)   map,
+ R_(const char*)  filepath,
+ size_t           size,
+ Base_MMap_Init_t flags);
 
-BASE_API void Base_MMap_init_or_die(
- Base_MMap*  BASE_RESTRICT map,
- const char* BASE_RESTRICT filepath,
- size_t                    size,
- Base_MMap_Init_t          flags
-);
+BASE_API void Base_MMap_init_or_die
+(R_(Base_MMap*)   map,
+ R_(const char*)  filepath,
+ size_t           size,
+ Base_MMap_Init_t flags);
 
 BASE_API void Base_MMap_del(Base_MMap* map);
 
 BASE_END_C_DECLS
+#undef R_
 #endif /* ~ BASE_MMAP_H */

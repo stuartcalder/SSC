@@ -13,11 +13,11 @@
 # include <unistd.h>
 # include <stdlib.h>
 /* Base_aligned_malloc */
-# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { \
- void* p; \
- if (posix_memalign(&p, Alignment, Size)) \
-   return BASE_NULL; \
- return p; \
+# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) {\
+ void* p;\
+ if (posix_memalign(&p, Alignment, Size))\
+   return BASE_NULL;\
+ return p;\
 }
 # define BASE_ALIGNED_MALLOC_INLINE
 /* Base_aligned_free */
@@ -41,6 +41,7 @@
  GetSystemInfo(&si);\
  return (size_t)si.dwPageSize;\
 }
+# define BASE_GET_PAGESIZE_INLINE
 #else
 # error "Unsupported."
 #endif

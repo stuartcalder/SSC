@@ -15,7 +15,8 @@
 # error "Unsupported."
 #endif
 
-int Base_MMap_map(Base_MMap* map, bool readonly) {
+int Base_MMap_map(Base_MMap* map, bool readonly) 
+{
 #if    defined(BASE_OS_UNIXLIKE)
   const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
   if ((map->ptr = (uint8_t*)mmap(BASE_NULL, map->size, rw, MAP_SHARED, map->file, 0)) == MAP_FAIL_) {
@@ -23,8 +24,13 @@ int Base_MMap_map(Base_MMap* map, bool readonly) {
     return -1;
   }
 #elif  defined(BASE_OS_WINDOWS)
-  BASE_STATIC_ASSERT(CHAR_BIT                    ==  8, "8-bit bytes required!");
-  BASE_STATIC_ASSERT((sizeof(Dw32_t) * CHAR_BIT) == 32, "Dw32_t should be 32 bits wide!");
+# ifdef BASE_STATIC_ASSERT_IS_NIL
+  if (CHAR_BIT != 8)       Base_errx("CHAR_BIT must be 8 on line %d of file %s!", __LINE__, __FILE__);
+  if (sizeof(Dw32_t) != 4) Base_errx("Dw32_t should be 4 bytes on line %d of file %s!", __LINE__, __FILE__);
+# else
+  BASE_STATIC_ASSERT(CHAR_BIT == 8, "CHAR_BIT must be 8!");
+  BASE_STATIC_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t should be 4 bytes!");
+# endif
   Dw32_t high, low, page_rw, map_rw;
 
   high = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
@@ -50,7 +56,8 @@ int Base_MMap_map(Base_MMap* map, bool readonly) {
   return 0;
 }
 
-void Base_MMap_map_or_die(Base_MMap* map, bool readonly) {
+void Base_MMap_map_or_die(Base_MMap* map, bool readonly)
+{
  Base_assert_msg(!Base_MMap_map(map, readonly), "Error: Base_MMap_map failed!\n");
 }
 
@@ -80,7 +87,8 @@ int Base_MMap_unmap(Base_MMap* map) {
   return ret;
 }
 
-void Base_MMap_unmap_or_die(Base_MMap* map) {
+void Base_MMap_unmap_or_die(Base_MMap* map)
+{
   Base_assert_msg(!Base_MMap_unmap(map), "Error: Base_MMap_unmap failed!\n");
 }
 
@@ -88,27 +96,28 @@ void Base_MMap_unmap_or_die(Base_MMap* map) {
 int Base_MMap_sync(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
 #endif /* ~ BASE_MMAP_SYNC_INLINE */
 
-void Base_MMap_sync_or_die
-(const Base_MMap* map)
-{ Base_assert_msg(!Base_MMap_sync(map), "Error: Base_MMap_sync failed!\n"); }
+void Base_MMap_sync_or_die(const Base_MMap* map)
+{
+  Base_assert_msg(!Base_MMap_sync(map), "Error: Base_MMap_sync failed!\n");
+}
 
-#define RONLY_       BASE_MMAP_INIT_READONLY
-#define ALLOWSHRINK_ BASE_MMAP_INIT_ALLOWSHRINK
-#define FEXIST_      BASE_MMAP_INIT_FORCE_EXIST
-#define FEXIST_Y_    BASE_MMAP_INIT_FORCE_EXIST_YES
+#define RONLY_           BASE_MMAP_INIT_READONLY
+#define ALLOWSHRINK_     BASE_MMAP_INIT_ALLOWSHRINK
+#define FEXIST_          BASE_MMAP_INIT_FORCE_EXIST
+#define FEXIST_Y_        BASE_MMAP_INIT_FORCE_EXIST_YES
 typedef Base_MMap_Init_t Init_t;
 
-#define OK_                  BASE_MMAP_INIT_CODE_OK
-#define ERR_FEXIST_NO_       BASE_MMAP_INIT_CODE_ERR_FEXIST_NO
-#define ERR_FEXIST_YES_      BASE_MMAP_INIT_CODE_ERR_FEXIST_YES
-#define ERR_READONLY_        BASE_MMAP_INIT_CODE_ERR_READONLY
-#define ERR_SHRINK_          BASE_MMAP_INIT_CODE_ERR_SHRINK
-#define ERR_NOSIZE_          BASE_MMAP_INIT_CODE_ERR_NOSIZE
-#define ERR_OPEN_FILEPATH_   BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH
-#define ERR_CREATE_FILEPATH_ BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH
-#define ERR_GET_FILE_SIZE_   BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE
-#define ERR_SET_FILE_SIZE_   BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE
-#define ERR_MAP_             BASE_MMAP_INIT_CODE_ERR_MAP
+#define OK_                   BASE_MMAP_INIT_CODE_OK
+#define ERR_FEXIST_NO_        BASE_MMAP_INIT_CODE_ERR_FEXIST_NO
+#define ERR_FEXIST_YES_       BASE_MMAP_INIT_CODE_ERR_FEXIST_YES
+#define ERR_READONLY_         BASE_MMAP_INIT_CODE_ERR_READONLY
+#define ERR_SHRINK_           BASE_MMAP_INIT_CODE_ERR_SHRINK
+#define ERR_NOSIZE_           BASE_MMAP_INIT_CODE_ERR_NOSIZE
+#define ERR_OPEN_FILEPATH_    BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH
+#define ERR_CREATE_FILEPATH_  BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH
+#define ERR_GET_FILE_SIZE_    BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE
+#define ERR_SET_FILE_SIZE_    BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE
+#define ERR_MAP_              BASE_MMAP_INIT_CODE_ERR_MAP
 typedef Base_MMap_Init_Code_t Init_Code_t;
 
 Init_Code_t Base_MMap_init
@@ -123,8 +132,7 @@ Init_Code_t Base_MMap_init
   readonly = exists && (flags & RONLY_);
   allowshrink = (flags & ALLOWSHRINK_);
   /* We will set the size when the filepath
-   * doesn't exist, and when it does exist and a size has been requested.
-   */
+   * doesn't exist, and when it does exist and a size has been requested. */
   setsize = !readonly && (!exists || (size > 0));
   if (flags & FEXIST_) {
     if (flags & FEXIST_Y_) {
@@ -212,7 +220,7 @@ void Base_MMap_init_or_die
       err_str = "Base_MMap_map failed";
       break;
     default:
-      err_str = "Invalid Init_Code_t";
+      err_str = "Invalid Init_t";
       break;
   }
   Base_errx(BASE_ERR_S_IN(err_str));
@@ -220,8 +228,7 @@ void Base_MMap_init_or_die
 
 #define FAILED_IN_(Sub, Main) "Error: %s failed in %s!\n", Sub, Main
 
-void Base_MMap_del
-(Base_MMap* map)
+void Base_MMap_del(Base_MMap* map)
 {
   if (map->ptr && Base_MMap_unmap(map))
     Base_errx(FAILED_IN_("Base_MMap_unmap", "Base_MMap_del"));

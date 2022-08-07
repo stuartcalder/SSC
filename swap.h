@@ -22,8 +22,7 @@
 # define BASE_SWAP_IMPL BASE_SWAP_IMPL_GNUC
 #endif
 /* If using C++23 or higher, next prefer std::byteswap. */
-#if (!defined(BASE_SWAP_IMPL) && \
-     defined(BASE_LANG_CPP) && BASE_LANG_CPP >= BASE_CPP_23)
+#if !defined(BASE_SWAP_IMPL) && defined(BASE_LANG_CPP) && (BASE_LANG_CPP >= BASE_CPP_23)
 # define BASE_SWAP_IMPL BASE_SWAP_IMPL_CPP23
 #endif
 /* On OSX we will use the provided OSByteOrder.h
