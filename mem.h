@@ -1,6 +1,10 @@
 /* Copyright (c) 2020-2022 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
+/* In this file, we define procedures for allocating aligned memory,
+ * determining the memory page size of the OS.
+ * The *_or_die(...) procedures call exit() on failure.
+ */
 #ifndef BASE_MEM_H
 #define BASE_MEM_H
 
@@ -79,23 +83,23 @@ BASE_API void* Base_malloc_or_die(size_t);
 BASE_API void* Base_calloc_or_die(size_t n_elem, size_t elem_sz);
 BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 
-/* A native load is just memcpy'ing bytes into an automatic variable and returning it. */
+/* Copy the bytes in whatever byte order they are, and return as an unsigned integral type. */
 #define BASE_LOAD_NATIVE_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return val;\
 }
-/* A swap load is memcpy'ing bytes into an automatic variable, byte-swapping it, and returning it. */
+/* Reverse the byte order of the bytes beginning at @Ptr, and return as an unsigned integral type. */
 #define BASE_LOAD_SWAP_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return Base_swap_##Bits(val);\
 }
-/* A native store is merely a memcpy call. */
+/* Copy all the bytes of @Val to @Ptr. */
 #define BASE_STORE_NATIVE_IMPL_(Ptr, Val) {\
  memcpy(Ptr, &Val, sizeof(Val));\
 }
-/* A swap store byte-swaps the bytes before memcpy. */
+/* Reverse the byte order of @Val, and copy those bytes to @Ptr. */
 #define BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits) {\
  Val = Base_swap_##Bits(Val);\
  memcpy(Ptr, &Val, sizeof(Val));\
@@ -103,6 +107,8 @@ BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 
 #ifndef BASE_ENDIAN
 # error "BASE_ENDIAN undefined!"
+#elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
+# error "BASE_ENDIAN is invalid!"
 #elif (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
 # define BASE_STORE_LE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
 # define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
@@ -114,7 +120,7 @@ BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 # define BASE_STORE_LE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
 # define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
 #else
-# error "Invalid byte-order!"
+# error "BASE_ENDIAN is an invalid byte order!"
 #endif
 
 BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)

@@ -12,8 +12,7 @@ typedef LARGE_INTEGER LargeInt_t;
 typedef DWORD         Dw32_t;
 #endif
 
-int Base_get_file_size
-(Base_File_t file, R_(size_t*) size_p)
+int Base_get_file_size(Base_File_t file, R_(size_t*) size_p)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   Stat_t s;
@@ -31,16 +30,14 @@ int Base_get_file_size
   return 0;
 }
 
-size_t Base_get_file_size_or_die
-(Base_File_t file)
+size_t Base_get_file_size_or_die(Base_File_t file)
 {
   size_t size;
   Base_assert_msg(!Base_get_file_size(file, &size), "Error: Base_enforce_get_file_size failed!\n");
   return size;
 }
 
-int Base_get_filepath_size
-(R_(const char*) fpath, R_(size_t*) size_p)
+int Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) size_p)
 {
 #ifdef BASE_OS_UNIXLIKE
   Stat_t s;
@@ -60,16 +57,14 @@ int Base_get_filepath_size
 #endif
 }
 
-size_t Base_get_filepath_size_or_die
-(const char* filepath)
+size_t Base_get_filepath_size_or_die(const char* filepath)
 {
   size_t size;
   Base_assert_msg(!Base_get_filepath_size(filepath, &size), "Error: Base_get_filepath_size failed with filepath `%s`!\n", filepath);
   return size;
 }
 
-bool Base_filepath_exists
-(const char* filepath)
+bool Base_filepath_exists(const char* filepath)
 {
   bool exists = false;
   FILE* test = fopen(filepath, "r");
@@ -80,8 +75,7 @@ bool Base_filepath_exists
   return exists;
 }
 
-void Base_force_filepath_existence_or_die
-(R_(const char*) filepath, bool force_to_exist)
+void Base_force_filepath_existence_or_die(R_(const char*) filepath, bool force_to_exist)
 {
   if (force_to_exist)
     Base_assert_msg(Base_filepath_exists(filepath) , "Error: The filepath %s does not seem to exist.\n", filepath);
@@ -89,8 +83,7 @@ void Base_force_filepath_existence_or_die
     Base_assert_msg(!Base_filepath_exists(filepath), "Error: The filepath %s seems to already exist.\n", filepath);
 }
 
-int Base_open_filepath
-(R_(const char*) filepath, bool readonly, R_(Base_File_t*) file)
+int Base_open_filepath(R_(const char*) filepath, bool readonly, R_(Base_File_t*) file)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
@@ -109,16 +102,14 @@ int Base_open_filepath
   return (*file != BASE_FILE_NULL_LITERAL) ? 0 : -1;
 }
 
-Base_File_t Base_open_filepath_or_die
-(R_(const char*) filepath, bool readonly)
+Base_File_t Base_open_filepath_or_die(R_(const char*) filepath, bool readonly)
 {
   Base_File_t file;
   Base_assert_msg(!Base_open_filepath(filepath, readonly, &file), "Error: Base_enforce_open_filepath failed with filepath '%s'.\n", filepath);
   return file;
 }
 
-int Base_create_filepath
-(R_(const char*) filepath, R_(Base_File_t*) file)
+int Base_create_filepath(R_(const char*) filepath, R_(Base_File_t*) file)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   *file = open(filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600);
@@ -130,8 +121,7 @@ int Base_create_filepath
   return (*file != BASE_FILE_NULL_LITERAL) ? 0 : -1;
 }
 
-Base_File_t Base_create_filepath_or_die
-(const char* filepath)
+Base_File_t Base_create_filepath_or_die(const char* filepath)
 {
   Base_File_t file;
   Base_assert_msg(!Base_create_filepath(filepath, &file), "Error: Base_enforce_create_filepath failed with filepath '%s'.\n", filepath);
@@ -139,8 +129,7 @@ Base_File_t Base_create_filepath_or_die
 }
 
 #ifndef BASE_CLOSE_FILE_INLINE
-int Base_close_file
-(Base_File_t file)
+int Base_close_file(Base_File_t file)
 BASE_CLOSE_FILE_IMPL(file)
 #endif /* ~ BASE_INLINE_CLOSE_FILE */
 
@@ -149,14 +138,12 @@ BASE_CLOSE_FILE_IMPL(file)
 #else
 # define ERROR_ "Error: Base_enforce_close_file failed!\n"
 #endif /* ~ BASE_OS_UNIXLIKE */
-void Base_close_file_or_die
-(Base_File_t file)
+void Base_close_file_or_die(Base_File_t file)
 { Base_assert_msg(!Base_close_file(file), ERROR_); }
 #undef ERROR_
 
 #ifndef BASE_SET_FILE_SIZE_INLINE
-int Base_set_file_size
-(Base_File_t file, size_t size)
+int Base_set_file_size(Base_File_t file, size_t size)
 BASE_SET_FILE_SIZE_IMPL(file, size)
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */
 
@@ -165,6 +152,5 @@ BASE_SET_FILE_SIZE_IMPL(file, size)
 #else
 # define ERROR_	"Error: Base_enforce_set_file_size failed with size %zu.\n", size
 #endif
-void Base_set_file_size_or_die
-(Base_File_t file, size_t size)
+void Base_set_file_size_or_die(Base_File_t file, size_t size)
 { Base_assert_msg(!Base_set_file_size(file, size), ERROR_); }

@@ -24,13 +24,8 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
     return -1;
   }
 #elif  defined(BASE_OS_WINDOWS)
-# ifdef BASE_STATIC_ASSERT_IS_NIL
-  if (CHAR_BIT != 8)       Base_errx("CHAR_BIT must be 8 on line %d of file %s!", __LINE__, __FILE__);
-  if (sizeof(Dw32_t) != 4) Base_errx("Dw32_t should be 4 bytes on line %d of file %s!", __LINE__, __FILE__);
-# else
-  BASE_STATIC_ASSERT(CHAR_BIT == 8, "CHAR_BIT must be 8!");
-  BASE_STATIC_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t should be 4 bytes!");
-# endif
+  BASE_ANY_ASSERT(CHAR_BIT == 8      , "CHAR_BIT must be 8!\n");
+  BASE_ANY_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t should be 4 bytes\n");
   Dw32_t high, low, page_rw, map_rw;
 
   high = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);

@@ -16,15 +16,15 @@
 #define BASE_ENDIAN_LITTLE 1
 #define BASE_ENDIAN_BIG    2
 #define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
-#define BASE_ENDIAN_ISVALID(Endian) ((Endian) == BASE_ENDIAN_LITTLE || (Endian) == BASE_ENDIAN_BIG)
+#define BASE_ENDIAN_ISVALID(Endian) ((Endian) == BASE_ENDIAN_LITTLE || (Endian) == BASE_ENDIAN_BIG) /* NONE is invalid. */
 /* How are we determining endianness? */
 #define BASE_ENDIAN_SRC_NONE     0
 #define BASE_ENDIAN_SRC_EXTERN   1
 #define BASE_ENDIAN_SRC_ISA      2
 #define BASE_ENDIAN_SRC_COMPILER 3
 #define BASE_ENDIAN_SRC_DEFAULT  4
-#define BASE_ENDIAN_SRC_ISVALID(EndSrc) ((EndSrc) >= BASE_ENDIAN_SRC_EXTERN && (EndSrc) <= BASE_ENDIAN_SRC_DEFAULT)
-
+#define BASE_ENDIAN_SRC_ISVALID(EndSrc) ((EndSrc) >= BASE_ENDIAN_SRC_EXTERN && (EndSrc) <= BASE_ENDIAN_SRC_DEFAULT) /* NONE is invalid. */
+/* What is the compiler? */
 #define BASE_COMPILER_UNKNOWN 0
 #define BASE_COMPILER_GCC     1
 #define BASE_COMPILER_CLANG   2
@@ -33,7 +33,7 @@
 #define BASE_COMPILER_IS_GCC_COMPATIBLE ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
 #define BASE_COMPILER_IS_GCC_COMPAT BASE_COMPILER_IS_GCC_COMPATIBLE /*TODO: Remove me. */
 
-/* Compiler macros. */
+/* Which compiler are we using? */
 #if   defined(__clang__)
 # define BASE_COMPILER BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
@@ -52,11 +52,11 @@
 #endif /* ! #if defined (__APPLE__) and defined (__MACH__) */
 
 /* More unixlikes could go here without too much code change, probably. */
-#if (defined(BASE_OS_MAC)   || \
-     defined(__Dragonfly__) || \
-     defined(__FreeBSD__)   || \
-     defined(__gnu_linux__) || \
-     defined(__NetBSD__)    || \
+#if (defined(BASE_OS_MAC)   ||\
+     defined(__Dragonfly__) ||\
+     defined(__FreeBSD__)   ||\
+     defined(__gnu_linux__) ||\
+     defined(__NetBSD__)    ||\
      defined(__OpenBSD__))
 # define BASE_OS_UNIXLIKE
 /* Define MS Windows, naming scheme consistent with the above. */
@@ -119,7 +119,6 @@
  *   If not explicitly defined in this file,
  *   BASE_ISA will default to BASE_ISA_UNKNOWN.
  */
-
 #define BASE_ISA_UNKNOWN 0
 #define BASE_ISA_AMD64   1
 #define BASE_ISA_RISCV   2
@@ -204,6 +203,8 @@
 #  define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_DEFAULT
 # endif
 #endif
+
+/* Sanity assertions. */
 #if   !defined(BASE_ENDIAN)
 # error "BASE_ENDIAN is not defined!"
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
@@ -243,13 +244,15 @@
 #  define BASE_STATIC_ASSERT_1(Boolean_)
 #  define BASE_STATIC_ASSERT_1_IS_NIL
 # endif
+  /* consteval is similar to, but distinct from, constexpr.
+   * Be aware of that when using BASE_CONSTEVAL or BASE_CONSTEXPR in the first place. */
 # if (BASE_LANG_CPP >= BASE_CPP_20)
 #  define BASE_CONSTEVAL consteval
 # else
 #  define BASE_CONSTEVAL constexpr
-#  define BASE_CONSTEVAL_IS_CONSTEXPR
+#  define BASE_CONSTEVAL_IS_CONSTEXPR /* We have constexpr but not consteval. Assume constexpr is a `downgrade` from consteval.*/
 # endif
-# define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__} /* C++ syntax. */
+# define BASE_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__} /* C++ literal syntax. */
 # define BASE_CONSTEXPR constexpr
 #else /* Not C++. We are using C. */
 # define BASE_LANG BASE_LANG_C
@@ -308,6 +311,23 @@
 # define BASE_CONSTEVAL
 # define BASE_CONSTEVAL_IS_NIL
 #endif /* ! #ifdef __cplusplus */
+
+/* If we can do a compile-time assertion, BASE_ANY_ASSERT()
+ * is equivalent to BASE_STATIC_ASSERT(). If we cannot, the assertion
+ * is runtime. Only pass compile-time strings as @Msg. */
+#ifdef BASE_STATIC_ASSERT_IS_NIL
+ #define BASE_ANY_ASSERT(Bool, Msg) Base_assert_msg(Bool, Msg)
+#else
+ #define BASE_ANY_ASSERT(Bool, Msg) BASE_STATIC_ASSERT(Bool, Msg)
+#endif
+/* If we can do a compile-time assertion, BASE_ANY_ASSERT_1()
+ * is equivalent to BASE_STATIC_ASSERT_1(). If we cannot, the assertion
+ * is runtime. Only pass compile-time strings as @Msg.*/
+#ifdef BASE_STATIC_ASSERT_1_IS_NIL
+# define BASE_ANY_ASSERT_1(Bool) Base_assert(Bool)
+#else
+# define BASE_ANY_ASSERT_1(Bool) BASE_STATIC_ASSERT_1(Bool)
+#endif
 
 /* Can we restrict pointers? C++ or C99 style? */
 #ifndef BASE_RESTRICT_IMPL

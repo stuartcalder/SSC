@@ -30,7 +30,7 @@
 # define BASE_ROT_RIGHT_(Value, Count, Bits) std::rotr<uint##Bits##_t>(Value, Count)
 #else
 # if (CHAR_BIT != 8)
-#  error "We need 8-bit chars."
+#  error "We need 8-bit chars!"
 # endif
 # define BASE_ROT_IMPL_UNSIGNED_MASK_(Bits) \
          ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT) - 1)
@@ -39,7 +39,7 @@
 # define BASE_ROT_LEFT_(Value, Count, Bits) \
 	 ( (Value << BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value >> ((-BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK_(Bits))) )
 # define BASE_ROT_RIGHT_(Value, Count, Bits) \
-	 ((Value >> BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value << ((-BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK_(Bits))))
+	 ( (Value >> BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value << ((-BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK_(Bits))) )
 #endif
 
 #define R_(Ptr) Ptr BASE_RESTRICT
@@ -55,6 +55,7 @@ BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIG
 #undef BASE_ROT_RIGHT_
 #undef BASE_ROT_IMPL_MASKED_COUNT_
 #undef BASE_ROT_IMPL_UNSIGNED_MASK_
+
 /* Base_xor_n(write_to, read_from)
  * XOR n bytes beginning at both addresses, and store in @write_to. */
 BASE_API void Base_xor_16  (R_(void*) writeto, R_(const void*) readfrom);
@@ -66,16 +67,23 @@ BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 # if (!defined(__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1))
 #  error "We needed __STDC_WANT_LIB_EXT1__ defined to 1, for access to memset_s!"
 # endif
+# include <string.h>
 # define SECURE_ZERO_IMPL_(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
 #elif defined(__NetBSD__)
+# include <string.h>
 # define SECURE_ZERO_IMPL_(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
 #elif defined(BASE_OS_UNIXLIKE)
+# include <strings.h>
 # define SECURE_ZERO_IMPL_(Ptr, Size) { explicit_bzero(Ptr, Size); }
 #elif defined(BASE_OS_WINDOWS)
+# include <windows.h>
 # define SECURE_ZERO_IMPL_(Ptr, Size) { SecureZeroMemory(Ptr, Size); }
 #else
 # error "Unsupported!"
 #endif
+
+#undef  R_
+#define R_(Ptr) Ptr BASE_RESTRICT
 
 /* Base_secure_zero(mem, n)
  * Zero over the memory @mem with @n zero bytes.
