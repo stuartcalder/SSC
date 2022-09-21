@@ -3,7 +3,7 @@
  */
 #include "files.h"
 
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointer aliasing if we can. */
 
 #if   defined(BASE_OS_UNIXLIKE)
 typedef struct stat Stat_t;
@@ -25,7 +25,7 @@ int Base_get_file_size(Base_File_t file, R_(size_t*) size_p)
     return -1;
   *size_p = (size_t)li.QuadPart;
 #else
-#	error "Unsupported operating system."
+ #error "Unsupported operating system."
 #endif
   return 0;
 }
@@ -89,15 +89,11 @@ int Base_open_filepath(R_(const char*) filepath, bool readonly, R_(Base_File_t*)
   const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
   *file = open(filepath, read_write_rights, (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
-# ifdef BASE_STATIC_ASSERT_IS_NIL
-  Base_assert_msg(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!"); /* Sucks this has to be runtime. */
-# else
-  BASE_STATIC_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!");
-# endif
+  BASE_ANY_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!");
   const Dw32_t read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
   *file = CreateFileA(filepath, read_write_rights, 0, BASE_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
-# error "Unsupported operating system."
+ #error "Unsupported operating system."
 #endif
   return (*file != BASE_FILE_NULL_LITERAL) ? 0 : -1;
 }
@@ -116,7 +112,7 @@ int Base_create_filepath(R_(const char*) filepath, R_(Base_File_t*) file)
 #elif  defined(BASE_OS_WINDOWS)
   *file = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), 0, BASE_NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
-# error "Unsupported operating system."
+ #error "Unsupported operating system."
 #endif
   return (*file != BASE_FILE_NULL_LITERAL) ? 0 : -1;
 }
@@ -129,28 +125,26 @@ Base_File_t Base_create_filepath_or_die(const char* filepath)
 }
 
 #ifndef BASE_CLOSE_FILE_INLINE
-int Base_close_file(Base_File_t file)
-BASE_CLOSE_FILE_IMPL(file)
+int Base_close_file(Base_File_t file) BASE_CLOSE_FILE_IMPL(file)
 #endif /* ~ BASE_INLINE_CLOSE_FILE */
 
 #ifdef BASE_OS_UNIXLIKE
-# define ERROR_ "Error: Base_enforce_close_file failed with fd: %i\n.", file
+ #define ERROR_ "Error: Base_enforce_close_file failed with fd: %i\n.", file
 #else
-# define ERROR_ "Error: Base_enforce_close_file failed!\n"
+ #define ERROR_ "Error: Base_enforce_close_file failed!\n"
 #endif /* ~ BASE_OS_UNIXLIKE */
 void Base_close_file_or_die(Base_File_t file)
 { Base_assert_msg(!Base_close_file(file), ERROR_); }
 #undef ERROR_
 
 #ifndef BASE_SET_FILE_SIZE_INLINE
-int Base_set_file_size(Base_File_t file, size_t size)
-BASE_SET_FILE_SIZE_IMPL(file, size)
+int Base_set_file_size(Base_File_t file, size_t size) BASE_SET_FILE_SIZE_IMPL(file, size)
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */
 
 #ifdef BASE_OS_UNIXLIKE
-# define ERROR_	"Error: Base_enforce_set_file_size failed with fd %i; size %zu.\n", file, size
+ #define ERROR_	"Error: Base_enforce_set_file_size failed with fd %i; size %zu.\n", file, size
 #else
-# define ERROR_	"Error: Base_enforce_set_file_size failed with size %zu.\n", size
+ #define ERROR_	"Error: Base_enforce_set_file_size failed with size %zu.\n", size
 #endif
 void Base_set_file_size_or_die(Base_File_t file, size_t size)
 { Base_assert_msg(!Base_set_file_size(file, size), ERROR_); }

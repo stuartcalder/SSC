@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "macros.h"
 #include "strings.h"
+
 #define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
@@ -85,15 +86,13 @@ BASE_API void Base_process_args(
  const int argc,   R_(char**) argv,
  const int shortc, R_(const Base_Arg_Short*) shortv,
  const int longc,  R_(const Base_Arg_Long*) longv,
- R_(void*) state,  Base_Arg_Proc_f* alone
-);
+ R_(void*) state,  Base_Arg_Proc_f* alone);
 
 BASE_API void Base_Arg_Parser_init(
  R_(Base_Arg_Parser*) ctx,
  R_(char*)            start,
  const int            argc,
- R_(char**)           argv
-);
+ R_(char**)           argv);
 
 BASE_INLINE int Base_1opt(const char ch) {
   return ch ? BASE_ARG_PROC_ONECHAR : 0;

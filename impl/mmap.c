@@ -215,7 +215,7 @@ void Base_MMap_init_or_die
       err_str = "Base_MMap_map failed";
       break;
     default:
-      err_str = "Invalid Init_t";
+      err_str = "Invalid Init_Code_t";
       break;
   }
   Base_errx(BASE_ERR_S_IN(err_str));

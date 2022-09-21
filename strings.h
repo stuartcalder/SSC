@@ -7,55 +7,83 @@
 #include "macros.h"
 #include "mem.h"
 
-#undef  R_
 #define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
-typedef struct {
-	char*  c_str; /* -> [@size+1] */
-	size_t size;
-} Base_String;
-#define BASE_STRING_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_String, BASE_NULL, 0)
+/* Base_String's cannot exceed (2^32) - 1 bytes. */
+#define BASE_STRING_PREFIXBITS  32
+#define BASE_STRING_PREFIXBYTES 4
+/* Base_String's use the first 8 bytes to store the amount of memory allocated and
+ * the string's current length. */
+#define BASE_STRING_MAXSTRLEN   (UINT32_MAX - (BASE_STRING_PREFIXBYTES * 2))
+#define BASE_STRING_MAXBUFSIZE  UINT32_MAX
+/* Segments of any Base_String relative to a base pointer. */
+#define BASE_STRING_ALLOCLEN(BasePtr)  ((char*)BasePtr)
+#define BASE_STRING_CURSTRLEN(BasePtr) (((char*)BasePtr) + BASE_STRING_PREFIXBYTES)
+#define BASE_STRING_PAYLOAD(BasePtr)   (((char*)BasePtr) + (BASE_STRING_PREFIXBYTES * 2))
+typedef uint32_t Base_String_Size_t;
 
-/* @str: Pointer to Null-Terminated String.
- * @size: The length of the string pointed to by @str.
- * Scan through @size many bytes of @str, shifting all the digit
- * characters encountered to the beginning of @str.
+/* Memory: [total memory allocated ][current string length  ][string bytes]
+ * Size:   [BASE_STRING_PREFIXBYTES][BASE_STRING_PREFIXBYTES][current string length] */
+
+/* @ctxp: We will store a new pointer from malloc at *@ctxp.
+ * @size: The Base_String will occupy @size bytes in total.
+ * @cstr: If not NULL, copy the characters of this C-string as initialization data.
+ * @cstr_len: The length of the C-string to copy in. Ignored if @cstr is NULL. */
+BASE_API int
+Base_String_init(
+ R_(char**) ctxp, const Base_String_Size_t size,
+ R_(const char*) cstr, const Base_String_Size_t cstr_len);
+
+BASE_INLINE void
+Base_String_init_or_die(
+ R_(char**) ctxp, const Base_String_Size_t size,
+ R_(const char*) cstr, const Base_String_Size_t cstr_len)
+{
+  Base_assert_msg(!Base_String_init(ctxp, size, cstr, cstr_len), "Base_String_init_or_die failed!\n");
+}
+
+
+BASE_INLINE Base_String_Size_t
+Base_String_getbufsize(char* ctx)
+{
+  Base_String_Size_t sz;
+  memcpy(&sz, ctx, sizeof(sz));
+  return sz;
+}
+
+BASE_INLINE Base_String_Size_t
+Base_String_getstrsize(char* ctx)
+{
+  Base_String_Size_t sz;
+  memcpy(&sz, ctx + BASE_STRING_PREFIXBYTES, sizeof(sz));
+  return sz;
+}
+
+BASE_INLINE char*
+Base_String_getdata(char* ctx)
+{
+  return ctx + (BASE_STRING_PREFIXBYTES * 2);
+}
+
+#define BASE_STRING_DEL_SECUREZERO 0x01
+
+/* Delete the string, and pass optional flags
+ * obviated by the shorthand inline function below. */
+BASE_API void
+Base_String_del_flag(R_(char*) ctx, int flag);
+
+BASE_INLINE void
+Base_String_del(char* ctx)
+{ Base_String_del_flag(ctx, 0); }
+
+/* @cstr: Pointer to Null-Terminated String.
+ * @size: The length of the string pointed to by @cstr.
+ * Scan through @size many bytes of @cstr, shifting all the digit
+ * characters encountered to the beginning of @cstr.
  * Return the number of digits shifted. */
-BASE_API int Base_shift_left_digits(R_(char*) str, int size);
-
-/* @ctx: Pointer to a Base_String, as context.
- * @str: Null-terminated string, or NULL.
- *
- * Initialize @ctx.
- * Allocate @size + 1 bytes of memory to store the string.
- * If @str is not NULL...
- *   Copy all the bytes including the null terminator.
- * else...
- *   Zero @size + 1 bytes.
- * Return 0 on success, -1 on failure. */
-BASE_API int  Base_String_init (Base_String* ctx, R_(const char*) str, size_t size);
-
-/* Try to initialize @ctx. On Failure, call exit(EXIT_FAILURE). */
-BASE_API void Base_String_init_or_die (Base_String* ctx, R_(const char*) str, size_t size);
-
-/* TODO
- */
-BASE_API void Base_String_del (Base_String*);
-
-#define BASE_LPFX_PREFIXBITS  16
-#define BASE_LPFX_PREFIXBYTES 2
-#define BAES_LPFX_ENDIAN      BASE_ENDIAN_LITTLE
-#define BASE_LPFX_PFX_T       uint16_t
-typedef BASE_LPFX_PFX_T       Base_Lpfx_Pfx_t;
-
-BASE_API Base_Lpfx_Pfx_t Base_lpfx_getsize(const char* lpstr);//TODO
-
-BASE_API int Base_lpfx_strcmp(const char* first, const char* second);//TODO
-
-BASE_API int Base_lpfx_strcpy(R_(char*) writeto, R_(const char*) readfrom);//TODO
-
-BASE_API size_t Base_lpfx_strlen(const char* lpstr);//TODO
+BASE_API int
+Base_shift_left_digits(R_(char*) cstr, int size);
 
 BASE_END_C_DECLS
 #undef R_

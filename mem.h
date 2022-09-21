@@ -14,51 +14,50 @@
 #include "swap.h"
 
 #if defined(BASE_OS_UNIXLIKE)
-# include <unistd.h>
-# include <stdlib.h>
+ #include <unistd.h>
+ #include <stdlib.h>
 /* Base_aligned_malloc */
-# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) {\
- void* p;\
- if (posix_memalign(&p, Alignment, Size))\
-   return BASE_NULL;\
- return p;\
-}
-# define BASE_ALIGNED_MALLOC_INLINE
-/* Base_aligned_free */
-# define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
-# define BASE_ALIGNED_FREE_IS_POSIX_FREE
-/* Base_get_pagesize */
-# define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
-# define BASE_GET_PAGESIZE_INLINE
-
+ #define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) {\
+  void* p;\
+  if (posix_memalign(&p, Alignment, Size))\
+    return BASE_NULL;\
+  return p;\
+ }
+ #define BASE_ALIGNED_MALLOC_INLINE
+ /* Base_aligned_free */
+ #define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
+ #define BASE_ALIGNED_FREE_IS_POSIX_FREE
+ /* Base_get_pagesize */
+ #define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
+ #define BASE_GET_PAGESIZE_INLINE
 #elif defined(BASE_OS_WINDOWS)
-# include <malloc.h>
-# include <sysinfoapi.h>
-/* Base_aligned_malloc */
-# define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
-# define BASE_ALIGNED_MALLOC_INLINE
-/* Base_aligned_free */
-# define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
-/* Base_get_pagesize */
-# define BASE_GET_PAGESIZE_IMPL {\
- SYSTEM_INFO si;\
- GetSystemInfo(&si);\
- return (size_t)si.dwPageSize;\
-}
-# define BASE_GET_PAGESIZE_INLINE
+ #include <malloc.h>
+ #include <sysinfoapi.h>
+ /* Base_aligned_malloc */
+ #define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
+ #define BASE_ALIGNED_MALLOC_INLINE
+ /* Base_aligned_free */
+ #define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
+ /* Base_get_pagesize */
+ #define BASE_GET_PAGESIZE_IMPL {\
+  SYSTEM_INFO si;\
+  GetSystemInfo(&si);\
+  return (size_t)si.dwPageSize;\
+ }
+ #define BASE_GET_PAGESIZE_INLINE
 #else
-# error "Unsupported."
+ #error "Unsupported."
 #endif
 
 #define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
 #ifdef BASE_ALIGNED_MALLOC_INLINE
-# define API_       BASE_INLINE
-# define IMPL_(...) BASE_ALIGNED_MALLOC_IMPL(__VA_ARGS__)
+ #define API_       BASE_INLINE
+ #define IMPL_(...) BASE_ALIGNED_MALLOC_IMPL(__VA_ARGS__)
 #else
-# define API_       BASE_API
-# define IMPL_(...) ;
+ #define API_       BASE_API
+ #define IMPL_(...) ;
 #endif
 API_ void* Base_aligned_malloc(size_t alignment, size_t size) IMPL_(alignment, size)
 #undef API_
@@ -69,11 +68,11 @@ BASE_API void* Base_aligned_malloc_or_die(size_t alignment, size_t size);
 BASE_INLINE void Base_aligned_free(void* p) BASE_ALIGNED_FREE_IMPL(p)
 
 #ifdef BASE_GET_PAGESIZE_INLINE
-# define API_  BASE_INLINE
-# define IMPL_ BASE_GET_PAGESIZE_IMPL
+ #define API_  BASE_INLINE
+ #define IMPL_ BASE_GET_PAGESIZE_IMPL
 #else
-# define API_  BASE_API
-# define IMPL_ ;
+ #define API_  BASE_API
+ #define IMPL_ ;
 #endif
 API_ size_t Base_get_pagesize(void) IMPL_
 #undef API_
@@ -106,21 +105,21 @@ BASE_API void* Base_realloc_or_die(R_(void*), size_t);
 }
 
 #ifndef BASE_ENDIAN
-# error "BASE_ENDIAN undefined!"
+ #error "BASE_ENDIAN undefined!"
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
-# error "BASE_ENDIAN is invalid!"
+ #error "BASE_ENDIAN is invalid!"
 #elif (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
-# define BASE_STORE_LE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
-# define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
-# define BASE_STORE_BE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
-# define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
+ #define BASE_STORE_LE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
+ #define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
+ #define BASE_STORE_BE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
+ #define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
 #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
-# define BASE_STORE_BE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
-# define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
-# define BASE_STORE_LE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
-# define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
+ #define BASE_STORE_BE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
+ #define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
+ #define BASE_STORE_LE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
+ #define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
 #else
-# error "BASE_ENDIAN is an invalid byte order!"
+ #error "BASE_ENDIAN is an invalid byte order!"
 #endif
 
 BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)

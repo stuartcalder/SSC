@@ -5,7 +5,7 @@
 #include "args.h"
 #include "errors.h"
 
-#define R_(p) p BASE_RESTRICT
+#define R_(Ptr) Ptr BASE_RESTRICT
 
 typedef Base_Arg_Short         Short_t;
 typedef Base_Arg_Long          Long_t;
