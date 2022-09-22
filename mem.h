@@ -23,19 +23,16 @@
     return BASE_NULL;\
   return p;\
  }
- #define BASE_ALIGNED_MALLOC_INLINE
  /* Base_aligned_free */
  #define BASE_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
  #define BASE_ALIGNED_FREE_IS_POSIX_FREE
  /* Base_get_pagesize */
  #define BASE_GET_PAGESIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
- #define BASE_GET_PAGESIZE_INLINE
 #elif defined(BASE_OS_WINDOWS)
  #include <malloc.h>
  #include <sysinfoapi.h>
  /* Base_aligned_malloc */
  #define BASE_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
- #define BASE_ALIGNED_MALLOC_INLINE
  /* Base_aligned_free */
  #define BASE_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
  /* Base_get_pagesize */
@@ -44,7 +41,6 @@
   GetSystemInfo(&si);\
   return (size_t)si.dwPageSize;\
  }
- #define BASE_GET_PAGESIZE_INLINE
 #else
  #error "Unsupported."
 #endif
@@ -52,35 +48,32 @@
 #define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
-#ifdef BASE_ALIGNED_MALLOC_INLINE
- #define API_       BASE_INLINE
- #define IMPL_(...) BASE_ALIGNED_MALLOC_IMPL(__VA_ARGS__)
-#else
- #define API_       BASE_API
- #define IMPL_(...) ;
-#endif
-API_ void* Base_aligned_malloc(size_t alignment, size_t size) IMPL_(alignment, size)
-#undef API_
-#undef IMPL_
+/* Return an object pointer to @size heap bytes, aligned to @alignment. */
+BASE_INLINE void*
+Base_aligned_malloc(size_t alignment, size_t size) BASE_ALIGNED_MALLOC_IMPL(alignment, size)
 
-BASE_API void* Base_aligned_malloc_or_die(size_t alignment, size_t size);
+BASE_API void*
+Base_aligned_malloc_or_die(size_t alignment, size_t size);
 
-BASE_INLINE void Base_aligned_free(void* p) BASE_ALIGNED_FREE_IMPL(p)
+/* Free memory allocated with Base_aligned_malloc* */
+BASE_INLINE void
+Base_aligned_free(void* p) BASE_ALIGNED_FREE_IMPL(p)
 
-#ifdef BASE_GET_PAGESIZE_INLINE
- #define API_  BASE_INLINE
- #define IMPL_ BASE_GET_PAGESIZE_IMPL
-#else
- #define API_  BASE_API
- #define IMPL_ ;
-#endif
-API_ size_t Base_get_pagesize(void) IMPL_
-#undef API_
-#undef IMPL_
+/* How big are the memory pages? */
+BASE_INLINE size_t
+Base_get_pagesize(void) BASE_GET_PAGESIZE_IMPL
 
-BASE_API void* Base_malloc_or_die(size_t);
-BASE_API void* Base_calloc_or_die(size_t n_elem, size_t elem_sz);
-BASE_API void* Base_realloc_or_die(R_(void*), size_t);
+/* Allocate @n bytes on the heap successfully, or terminate the program. */
+BASE_API void*
+Base_malloc_or_die(size_t n);
+
+/* Allocate (@n_elem * @elem_sz) bytes on the heap successfully, or terminate the program. */
+BASE_API void*
+Base_calloc_or_die(size_t n_elem, size_t elem_sz);
+
+/* Change the size of @mem to be @n bytes successfully, or terminate the program. */
+BASE_API void*
+Base_realloc_or_die(R_(void*) mem, size_t n);
 
 /* Copy the bytes in whatever byte order they are, and return as an unsigned integral type. */
 #define BASE_LOAD_NATIVE_IMPL_(Ptr, Bits) {\
@@ -122,13 +115,14 @@ BASE_API void* Base_realloc_or_die(R_(void*), size_t);
  #error "BASE_ENDIAN is an invalid byte order!"
 #endif
 
+/* Little and big endian stores. */
 BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)
 BASE_INLINE void Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL_(mem, val, 32)
 BASE_INLINE void Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL_(mem, val, 64)
 BASE_INLINE void Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL_(mem, val, 16)
 BASE_INLINE void Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL_(mem, val, 32)
 BASE_INLINE void Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL_(mem, val, 64)
-
+/* Little and big endian loads. */
 BASE_INLINE uint16_t Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL_(mem, 16)
 BASE_INLINE uint32_t Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL_(mem, 32)
 BASE_INLINE uint64_t Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL_(mem, 64)

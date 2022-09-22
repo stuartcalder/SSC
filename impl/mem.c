@@ -6,20 +6,12 @@
 
 #define R_(Ptr) Ptr BASE_RESTRICT
 
-#ifndef BASE_ALIGNED_MALLOC_INLINE
-void* Base_aligned_malloc(size_t alignment, size_t size) BASE_ALIGNED_MALLOC_IMPL(alignment, size)
-#endif
-
 void* Base_aligned_malloc_or_die(size_t alignment, size_t size)
 {
   void* p = Base_aligned_malloc(alignment, size);
   Base_assert_msg(p != BASE_NULL, "Error: Base_aligned_malloc failed.\n");
   return p;
 }
-
-#ifndef BASE_GET_PAGESIZE_INLINE
-size_t Base_get_pagesize(void) BASE_GET_PAGESIZE_IMPL
-#endif
 
 void* Base_malloc_or_die(size_t num_bytes)
 {
