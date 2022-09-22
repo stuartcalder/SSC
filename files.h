@@ -71,9 +71,9 @@ BASE_API Base_File_t Base_create_filepath_or_die(const char* fpath);
  #define IMPL_(...) ;
 #endif
 API_      int Base_close_file(Base_File_t fhandle) IMPL_(fhandle)
-BASE_API void Base_close_file_or_die(Base_File_t fhandle);
 #undef  API_
 #undef IMPL_
+BASE_API void Base_close_file_or_die(Base_File_t fhandle);
 
 #ifdef BASE_SET_FILE_SIZE_INLINE
  #define API_       BASE_INLINE
@@ -85,7 +85,6 @@ BASE_API void Base_close_file_or_die(Base_File_t fhandle);
 API_ int Base_set_file_size(Base_File_t fhandle, size_t size) IMPL_(fhandle, size)
 #undef  API_
 #undef IMPL_
-
 BASE_API void Base_set_file_size_or_die(Base_File_t fhandle, size_t size);
 
 BASE_END_C_DECLS

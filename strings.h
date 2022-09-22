@@ -73,6 +73,16 @@ Base_String_getdata(char* ctx)
 BASE_API void
 Base_String_del_flag(R_(char*) ctx, int flag);
 
+/* If there is enough room in the data segment
+ * to make the data a C-string, we will null the byte
+ * just past the data segment and return 0.
+ * Otherwise return -1. */
+BASE_API int
+Base_String_make_cstr(char* ctx);
+
+BASE_API void
+Base_String_make_cstr_or_die(char* ctx);
+
 BASE_INLINE void
 Base_String_del(char* ctx)
 { Base_String_del_flag(ctx, 0); }

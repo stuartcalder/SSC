@@ -26,20 +26,20 @@ Base_String_init(
   /* Copy in the total number of bytes allocated. */
   memcpy(ctx, &size, sizeof(size));
   ctx += sizeof(size);
-  /* If we were given a C-string, get that data otherwise the rest is undefined. */
+  /* If we were given a C-string, get that data. */
   if (cstr != BASE_NULL) {
     memcpy(ctx, &cstr_len, sizeof(cstr_len));
     ctx += sizeof(cstr_len);
     memcpy(ctx, cstr, cstr_len);
   } else {
     memset(ctx, 0x00, sizeof(Size_t));
-    ctx += sizeof(Size_t);
+    /* The rest is undefined. */
   }
 
   return 0;
 }
 
-BASE_API void
+void
 Base_String_del_flag(R_(char*) ctx, int flag)
 {
   if (ctx == BASE_NULL)
@@ -49,6 +49,26 @@ Base_String_del_flag(R_(char*) ctx, int flag)
     Base_secure_zero(ctx, sz);
   }
   free(ctx);
+}
+
+int
+Base_String_make_cstr(char* ctx)
+{
+  Size_t bufsize = Base_String_getbufsize(ctx);
+  Size_t strsize = Base_String_getstrsize(ctx);
+  /* Is there enough room to null terminate what is there? */
+  if (strsize + 1 < bufsize - (BASE_STRING_PREFIXBYTES * 2)) {
+    char* p = Base_String_getdata(ctx) + strsize;
+    *p = '\0';
+    return 0;
+  }
+  return -1;
+}
+
+void
+Base_String_make_cstr_or_die(char* ctx)
+{
+  Base_assert_msg(!Base_String_make_cstr(ctx), BASE_ERR_S_IN("Base_String_make_cstr failed"));
 }
 
 int Base_shift_left_digits(R_(char*) str, const int size)
