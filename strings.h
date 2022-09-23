@@ -17,10 +17,6 @@ BASE_BEGIN_C_DECLS
  * the string's current length. */
 #define BASE_STRING_MAXSTRLEN   (UINT32_MAX - (BASE_STRING_PREFIXBYTES * 2))
 #define BASE_STRING_MAXBUFSIZE  UINT32_MAX
-/* Segments of any Base_String relative to a base pointer. */
-#define BASE_STRING_ALLOCLEN(BasePtr)  ((char*)BasePtr)
-#define BASE_STRING_CURSTRLEN(BasePtr) (((char*)BasePtr) + BASE_STRING_PREFIXBYTES)
-#define BASE_STRING_PAYLOAD(BasePtr)   (((char*)BasePtr) + (BASE_STRING_PREFIXBYTES * 2))
 typedef uint32_t Base_String_Size_t;
 
 /* Memory: [total memory allocated ][current string length  ][string bytes]

@@ -15,10 +15,9 @@
 #define BASE_FILES_DEFAULT_NEWFILE_SIZE 0
 
 #if defined(BASE_OS_UNIXLIKE)
- #define BASE_CLOSE_FILE_IMPL_F close
+ #define BASE_CLOSE_FILE_IMPL_F  close
  #define BASE_CLOSE_FILE_IMPL(F) { return BASE_CLOSE_FILE_IMPL_F(F); }
- #define BASE_CLOSE_FILE_INLINE
- #define BASE_SET_FILE_SIZE_IMPL_F ftruncate
+ #define BASE_SET_FILE_SIZE_IMPL_F     ftruncate
  #define BASE_SET_FILE_SIZE_IMPL(F, N) { return BASE_SET_FILE_SIZE_IMPL_F(F, N); }
  #define BASE_SET_FILE_SIZE_INLINE
  #include <fcntl.h>
@@ -43,7 +42,6 @@
 #else
  #error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
-#define BASE_NULL_FILE BASE_FILE_NULL_LITERAL /* FIXME: Deprecated. */
 
 #define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
 BASE_BEGIN_C_DECLS
@@ -63,17 +61,11 @@ BASE_API Base_File_t Base_open_filepath_or_die(R_(const char*) fpath, bool ronly
 BASE_API int         Base_create_filepath(R_(const char*) fpath, R_(Base_File_t*) fhptr);
 BASE_API Base_File_t Base_create_filepath_or_die(const char* fpath);
 
-#ifdef BASE_CLOSE_FILE_INLINE
- #define API_       BASE_INLINE
- #define IMPL_(...) BASE_CLOSE_FILE_IMPL(__VA_ARGS__)
-#else
- #define API_       BASE_API
- #define IMPL_(...) ;
-#endif
-API_      int Base_close_file(Base_File_t fhandle) IMPL_(fhandle)
-#undef  API_
-#undef IMPL_
-BASE_API void Base_close_file_or_die(Base_File_t fhandle);
+BASE_INLINE int
+Base_close_file(Base_File_t fhandle) BASE_CLOSE_FILE_IMPL(fhandle)
+
+BASE_API void
+Base_close_file_or_die(Base_File_t fhandle);
 
 #ifdef BASE_SET_FILE_SIZE_INLINE
  #define API_       BASE_INLINE

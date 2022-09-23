@@ -124,10 +124,6 @@ Base_File_t Base_create_filepath_or_die(const char* filepath)
   return file;
 }
 
-#ifndef BASE_CLOSE_FILE_INLINE
-int Base_close_file(Base_File_t file) BASE_CLOSE_FILE_IMPL(file)
-#endif /* ~ BASE_INLINE_CLOSE_FILE */
-
 #ifdef BASE_OS_UNIXLIKE
  #define ERROR_ "Error: Base_enforce_close_file failed with fd: %i\n.", file
 #else

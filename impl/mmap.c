@@ -7,12 +7,12 @@
 #define R_(Ptr) Ptr BASE_RESTRICT
 
 #if   defined(BASE_OS_UNIXLIKE)
-# define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
+ #define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
 #elif defined(BASE_OS_WINDOWS)
-# define MAP_FAIL_ ((uint8_t*)BASE_NULL)
-  typedef DWORD Dw32_t;
+ #define MAP_FAIL_ ((uint8_t*)BASE_NULL)
+ typedef DWORD Dw32_t;
 #else
-# error "Unsupported."
+ #error "Unsupported."
 #endif
 
 int Base_MMap_map(Base_MMap* map, bool readonly) 
@@ -53,7 +53,7 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
 
 void Base_MMap_map_or_die(Base_MMap* map, bool readonly)
 {
- Base_assert_msg(!Base_MMap_map(map, readonly), "Error: Base_MMap_map failed!\n");
+  Base_assert_msg(!Base_MMap_map(map, readonly), BASE_ERR_S_FAILED_IN("Base_MMap_map"));
 }
 
 int Base_MMap_unmap(Base_MMap* map) {
@@ -84,16 +84,12 @@ int Base_MMap_unmap(Base_MMap* map) {
 
 void Base_MMap_unmap_or_die(Base_MMap* map)
 {
-  Base_assert_msg(!Base_MMap_unmap(map), "Error: Base_MMap_unmap failed!\n");
+  Base_assert_msg(!Base_MMap_unmap(map), BASE_ERR_S_FAILED_IN("Base_MMap_unmap"));
 }
-
-#ifndef BASE_MMAP_SYNC_INLINE
-int Base_MMap_sync(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
-#endif /* ~ BASE_MMAP_SYNC_INLINE */
 
 void Base_MMap_sync_or_die(const Base_MMap* map)
 {
-  Base_assert_msg(!Base_MMap_sync(map), "Error: Base_MMap_sync failed!\n");
+  Base_assert_msg(!Base_MMap_sync(map), BASE_ERR_S_FAILED_IN("Base_MMap_Sync"));
 }
 
 #define RONLY_           BASE_MMAP_INIT_READONLY
