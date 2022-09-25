@@ -116,26 +116,42 @@ Base_realloc_or_die(R_(void*) mem, size_t n);
 #endif
 
 /* Little and big endian stores. */
-BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)
-BASE_INLINE void Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL_(mem, val, 16)
-BASE_INLINE void Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL_(mem, val, 32)
-BASE_INLINE void Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL_(mem, val, 32)
-BASE_INLINE void Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL_(mem, val, 64)
-BASE_INLINE void Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL_(mem, val, 64)
+BASE_INLINE void
+Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)
+BASE_INLINE void
+Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL_(mem, val, 16)
+
+BASE_INLINE void
+Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL_(mem, val, 32)
+BASE_INLINE void
+Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL_(mem, val, 32)
+
+BASE_INLINE void
+Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL_(mem, val, 64)
+BASE_INLINE void
+Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL_(mem, val, 64)
 /* Little and big endian loads. */
-BASE_INLINE uint16_t Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL_(mem, 16)
-BASE_INLINE uint16_t Base_load_be16(const void* mem) BASE_LOAD_BE_IMPL_(mem, 16)
-BASE_INLINE uint32_t Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL_(mem, 32)
-BASE_INLINE uint32_t Base_load_be32(const void* mem) BASE_LOAD_BE_IMPL_(mem, 32)
-BASE_INLINE uint64_t Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL_(mem, 64)
-BASE_INLINE uint64_t Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL_(mem, 64)
+BASE_INLINE uint16_t
+Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL_(mem, 16)
+BASE_INLINE uint16_t
+Base_load_be16(const void* mem) BASE_LOAD_BE_IMPL_(mem, 16)
+
+BASE_INLINE uint32_t
+Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL_(mem, 32)
+BASE_INLINE uint32_t
+Base_load_be32(const void* mem) BASE_LOAD_BE_IMPL_(mem, 32)
+
+BASE_INLINE uint64_t
+Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL_(mem, 64)
+BASE_INLINE uint64_t
+Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL_(mem, 64)
 
 #undef BASE_LOAD_LE_IMPL_
 #undef BASE_LOAD_BE_IMPL_
-#undef BASE_LOAD_NATIVE_IMPL_
-#undef BASE_LOAD_SWAP_IMPL_
 #undef BASE_STORE_LE_IMPL_
 #undef BASE_STORE_BE_IMPL_
+#undef BASE_LOAD_NATIVE_IMPL_
+#undef BASE_LOAD_SWAP_IMPL_
 #undef BASE_STORE_NATIVE_IMPL_
 #undef BASE_STORE_SWAP_IMPL_
 

@@ -57,7 +57,7 @@ Base_String_make_cstr(char* ctx)
   Size_t bufsize = Base_String_getbufsize(ctx);
   Size_t strsize = Base_String_getstrsize(ctx);
   /* Is there enough room to null terminate what is there? */
-  if (strsize + 1 < bufsize - (BASE_STRING_PREFIXBYTES * 2)) {
+  if (bufsize - (BASE_STRING_PREFIXBYTES * 2) >= strsize + 1) {
     char* p = Base_String_getdata(ctx) + strsize;
     *p = '\0';
     return 0;

@@ -17,6 +17,7 @@ GCC_COMPATIBLE_FLAGS = [
 
 compiler = meson.get_compiler(LANG)
 os = host_machine.system()
+build_os = build_machine.system()
 if os != 'netbsd' and compiler.get_id() != 'clang'
   GCC_COMPATIBLE_FLAGS += '-flto'
 endif
@@ -31,10 +32,10 @@ _LIB_DIRS = {
   'windows': 'C:\lib'
 }
 
-if os in ['openbsd', 'freebsd', 'netbsd', 'darwin']
+if build_os in ['openbsd', 'freebsd', 'netbsd', 'darwin']
   lib_dir = _LIB_DIRS.get('bsd')
-elif os in ['linux', 'windows']
-  lib_dir = _LIB_DIRS.get(os)
+elif build_os in ['linux', 'windows']
+  lib_dir = _LIB_DIRS.get(build_os)
 else
   assert(false, 'Unsupported OS.')
 endif
@@ -42,9 +43,9 @@ endif
 
 # Compiler Constants
 if os == 'windows' and compiler.get_id() == 'msvc'
-	_D = '/D'
+  _D = '/D'
 else
-	_D = '-D'
+  _D = '-D'
 endif
 # Source Code Files
 src =  [
@@ -104,8 +105,8 @@ elif os == 'netbsd'
   include_install = _INCLUDE_DIRS.get('bsd')
   include_dirs   += _INCLUDE_DIRS.get('netbsd')
 else
-  include_install = _INCLUDE_DIRS.get(os)
-  include_dirs   += _INCLUDE_DIRS.get(os)
+  include_install = _INCLUDE_DIRS.get(build_os)
+  include_dirs   += _INCLUDE_DIRS.get(build_os)
 endif
 
 if os in UNIXLIKE_OPERATING_SYSTEMS
@@ -137,6 +138,9 @@ if os in UNIXLIKE_OPERATING_SYSTEMS
     endif
   endif
 endif
+if os == 'windows'
+  lib_deps += compiler.find_library('bcrypt')
+endif
 
 if get_option('endian') != 'auto'
   if   get_option('endian') == 'little'
@@ -148,20 +152,44 @@ endif
 
 include_dirs += '..'
 # Install the base folder into the system header directory
-install_subdir('../Base', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md'])
+install_subdir('../Base', install_dir: include_install, exclude_directories: ['builddir', '.git', 'impl'], exclude_files: ['.gitignore', 'meson.build', 'README.md', 'cross_file.txt', 'meson_options.txt', 'LICENSE'])
+_INC_DIRS = {
+  'windows': 'C:\lib'
+}
+if build_os != os
+  is_cross = true
+else
+  is_cross = false
+endif
 
 if get_option('static')
   if os == 'windows'
-    static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
-      name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:\lib')
+    if is_cross
+      static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, name_suffix: 'lib', name_prefix: '', install: false)
+    else
+      static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+        name_suffix: 'lib', name_prefix: '', install: true, install_dir: 'C:\lib')
+    endif
   else
-    static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    if is_cross
+      static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, install: false)
+    else
+      static_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    endif
   endif
 else
   if os == 'windows'
-    shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
-      name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:\lib')
+    if is_cross
+      shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, name_suffix: 'dll', name_prefix: '', install: false)
+    else
+      shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs,
+        name_suffix: 'dll', name_prefix: '', install: true, install_dir: 'C:\lib')
+    endif
   else
-    shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    if is_cross
+      shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, install: false)
+    else
+      shared_library('Base', sources: src, dependencies: lib_deps, c_args: lang_flags, include_directories: include_dirs, install: true)
+    endif
   endif
 endif

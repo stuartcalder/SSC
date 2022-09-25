@@ -7,9 +7,9 @@
  * unsigned integers.
  */
 
-#include <stdlib.h>
 #include "errors.h"
 #include "macros.h"
+#include <stdlib.h>
 
 /* Which implementation will we use? */
 #define BASE_SWAP_IMPL_RAW           0 /* We will implement it ourselves. */
