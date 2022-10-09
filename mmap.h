@@ -93,7 +93,8 @@ enum {
   BASE_MMAP_INIT_CODE_ERR_MAP =            -10,
 }; typedef int_fast8_t Code_t_;
 
-/* Open a file at @filepath with constraints passed as init flags in @flags.
+/* Open a file at @filepath with constraints passed as init flags in @flags,
+ * then map the file into memory.
  * If a file does not exist at @filepath, an attempt will be made to create one there.
  * Return 0 on success, or one of the error codes above otherwise. */
 BASE_API Code_t_ Base_MMap_init(

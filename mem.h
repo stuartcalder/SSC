@@ -1,7 +1,7 @@
 /* Copyright (c) 2020-2022 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
- */
-/* In this file, we define procedures for allocating aligned memory,
+ *
+ * In this file, we define procedures for allocating aligned memory,
  * determining the memory page size of the OS.
  * The *_or_die(...) procedures call exit() on failure.
  */
@@ -52,8 +52,12 @@ BASE_BEGIN_C_DECLS
 BASE_INLINE void*
 Base_aligned_malloc(size_t alignment, size_t size) BASE_ALIGNED_MALLOC_IMPL(alignment, size)
 
-BASE_API void*
-Base_aligned_malloc_or_die(size_t alignment, size_t size);
+BASE_INLINE void*
+Base_aligned_malloc_or_die(size_t alignment, size_t sz) {
+  void* p = Base_aligned_malloc(alignment, sz);
+  Base_assert_msg(p != BASE_NULL, "Error: Base_aligned_malloc_or_die died!\n");
+  return p;
+}
 
 /* Free memory allocated with Base_aligned_malloc* */
 BASE_INLINE void
@@ -64,35 +68,47 @@ BASE_INLINE size_t
 Base_get_pagesize(void) BASE_GET_PAGESIZE_IMPL
 
 /* Allocate @n bytes on the heap successfully, or terminate the program. */
-BASE_API void*
-Base_malloc_or_die(size_t n);
+BASE_INLINE void*
+Base_malloc_or_die(size_t n) {
+  void* p = malloc(n);
+  Base_assert_msg(p != BASE_NULL, "Error: Base_malloc_or_die died!\n");
+  return p;
+}
 
 /* Allocate (@n_elem * @elem_sz) bytes on the heap successfully, or terminate the program. */
-BASE_API void*
-Base_calloc_or_die(size_t n_elem, size_t elem_sz);
+BASE_INLINE void*
+Base_calloc_or_die(size_t n_elem, size_t elem_sz) {
+  void* p = calloc(n_elem, elem_sz);
+  Base_assert_msg(p != BASE_NULL, "Error: Base_calloc_or_die died!\n");
+  return p;
+}
 
 /* Change the size of @mem to be @n bytes successfully, or terminate the program. */
-BASE_API void*
-Base_realloc_or_die(R_(void*) mem, size_t n);
+BASE_INLINE void*
+Base_realloc_or_die(R_(void*) mem, size_t n) {
+  void* p = realloc(mem, n);
+  Base_assert_msg(mem != BASE_NULL, "Error: Base_realloc_or_die died!\n");
+  return p;
+}
 
 /* Copy the bytes in whatever byte order they are, and return as an unsigned integral type. */
-#define BASE_LOAD_NATIVE_IMPL_(Ptr, Bits) {\
+#define LOAD_NATIVE_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return val;\
 }
 /* Reverse the byte order of the bytes beginning at @Ptr, and return as an unsigned integral type. */
-#define BASE_LOAD_SWAP_IMPL_(Ptr, Bits) {\
+#define LOAD_SWAP_IMPL_(Ptr, Bits) {\
  uint##Bits##_t val;\
  memcpy(&val, Ptr, sizeof(val));\
  return Base_swap_##Bits(val);\
 }
 /* Copy all the bytes of @Val to @Ptr. */
-#define BASE_STORE_NATIVE_IMPL_(Ptr, Val) {\
+#define STORE_NATIVE_IMPL_(Ptr, Val) {\
  memcpy(Ptr, &Val, sizeof(Val));\
 }
 /* Reverse the byte order of @Val, and copy those bytes to @Ptr. */
-#define BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits) {\
+#define STORE_SWAP_IMPL_(Ptr, Val, Bits) {\
  Val = Base_swap_##Bits(Val);\
  memcpy(Ptr, &Val, sizeof(Val));\
 }
@@ -102,58 +118,58 @@ Base_realloc_or_die(R_(void*) mem, size_t n);
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
  #error "BASE_ENDIAN is invalid!"
 #elif (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
- #define BASE_STORE_LE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
- #define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
- #define BASE_STORE_BE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
- #define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
+ #define STORE_LE_IMPL_(Ptr, Val, Bits_) STORE_NATIVE_IMPL_(Ptr, Val)
+ #define LOAD_LE_IMPL_(Ptr, Bits)        LOAD_NATIVE_IMPL_(Ptr, Bits)
+ #define STORE_BE_IMPL_(Ptr, Val, Bits)  STORE_SWAP_IMPL_(Ptr, Val, Bits)
+ #define LOAD_BE_IMPL_(Ptr, Bits)        LOAD_SWAP_IMPL_(Ptr, Bits)
 #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
- #define BASE_STORE_BE_IMPL_(Ptr, Val, Bits_) BASE_STORE_NATIVE_IMPL_(Ptr, Val)
- #define BASE_LOAD_BE_IMPL_(Ptr, Bits)        BASE_LOAD_NATIVE_IMPL_(Ptr, Bits)
- #define BASE_STORE_LE_IMPL_(Ptr, Val, Bits)  BASE_STORE_SWAP_IMPL_(Ptr, Val, Bits)
- #define BASE_LOAD_LE_IMPL_(Ptr, Bits)        BASE_LOAD_SWAP_IMPL_(Ptr, Bits)
+ #define STORE_BE_IMPL_(Ptr, Val, Bits_) STORE_NATIVE_IMPL_(Ptr, Val)
+ #define LOAD_BE_IMPL_(Ptr, Bits)        LOAD_NATIVE_IMPL_(Ptr, Bits)
+ #define STORE_LE_IMPL_(Ptr, Val, Bits)  STORE_SWAP_IMPL_(Ptr, Val, Bits)
+ #define LOAD_LE_IMPL_(Ptr, Bits)        LOAD_SWAP_IMPL_(Ptr, Bits)
 #else
  #error "BASE_ENDIAN is an invalid byte order!"
 #endif
 
 /* Little and big endian stores. */
 BASE_INLINE void
-Base_store_le16(R_(void*) mem, uint16_t val) BASE_STORE_LE_IMPL_(mem, val, 16)
+Base_store_le16(R_(void*) mem, uint16_t val) STORE_LE_IMPL_(mem, val, 16)
 BASE_INLINE void
-Base_store_be16(R_(void*) mem, uint16_t val) BASE_STORE_BE_IMPL_(mem, val, 16)
+Base_store_be16(R_(void*) mem, uint16_t val) STORE_BE_IMPL_(mem, val, 16)
 
 BASE_INLINE void
-Base_store_le32(R_(void*) mem, uint32_t val) BASE_STORE_LE_IMPL_(mem, val, 32)
+Base_store_le32(R_(void*) mem, uint32_t val) STORE_LE_IMPL_(mem, val, 32)
 BASE_INLINE void
-Base_store_be32(R_(void*) mem, uint32_t val) BASE_STORE_BE_IMPL_(mem, val, 32)
+Base_store_be32(R_(void*) mem, uint32_t val) STORE_BE_IMPL_(mem, val, 32)
 
 BASE_INLINE void
-Base_store_le64(R_(void*) mem, uint64_t val) BASE_STORE_LE_IMPL_(mem, val, 64)
+Base_store_le64(R_(void*) mem, uint64_t val) STORE_LE_IMPL_(mem, val, 64)
 BASE_INLINE void
-Base_store_be64(R_(void*) mem, uint64_t val) BASE_STORE_BE_IMPL_(mem, val, 64)
+Base_store_be64(R_(void*) mem, uint64_t val) STORE_BE_IMPL_(mem, val, 64)
 /* Little and big endian loads. */
 BASE_INLINE uint16_t
-Base_load_le16(const void* mem) BASE_LOAD_LE_IMPL_(mem, 16)
+Base_load_le16(const void* mem) LOAD_LE_IMPL_(mem, 16)
 BASE_INLINE uint16_t
-Base_load_be16(const void* mem) BASE_LOAD_BE_IMPL_(mem, 16)
+Base_load_be16(const void* mem) LOAD_BE_IMPL_(mem, 16)
 
 BASE_INLINE uint32_t
-Base_load_le32(const void* mem) BASE_LOAD_LE_IMPL_(mem, 32)
+Base_load_le32(const void* mem) LOAD_LE_IMPL_(mem, 32)
 BASE_INLINE uint32_t
-Base_load_be32(const void* mem) BASE_LOAD_BE_IMPL_(mem, 32)
+Base_load_be32(const void* mem) LOAD_BE_IMPL_(mem, 32)
 
 BASE_INLINE uint64_t
-Base_load_le64(const void* mem) BASE_LOAD_LE_IMPL_(mem, 64)
+Base_load_le64(const void* mem) LOAD_LE_IMPL_(mem, 64)
 BASE_INLINE uint64_t
-Base_load_be64(const void* mem) BASE_LOAD_BE_IMPL_(mem, 64)
+Base_load_be64(const void* mem) LOAD_BE_IMPL_(mem, 64)
 
-#undef BASE_LOAD_LE_IMPL_
-#undef BASE_LOAD_BE_IMPL_
-#undef BASE_STORE_LE_IMPL_
-#undef BASE_STORE_BE_IMPL_
-#undef BASE_LOAD_NATIVE_IMPL_
-#undef BASE_LOAD_SWAP_IMPL_
-#undef BASE_STORE_NATIVE_IMPL_
-#undef BASE_STORE_SWAP_IMPL_
+#undef LOAD_LE_IMPL_
+#undef LOAD_BE_IMPL_
+#undef STORE_LE_IMPL_
+#undef STORE_BE_IMPL_
+#undef LOAD_NATIVE_IMPL_
+#undef LOAD_SWAP_IMPL_
+#undef STORE_NATIVE_IMPL_
+#undef STORE_SWAP_IMPL_
 
 BASE_END_C_DECLS
 #undef R_

@@ -25,20 +25,20 @@ static int long_match_(const int, R_(const Long_t*), size_t, R_(char*));
 
 static int process_shorts_(const int, R_(char**), const int, R_(const Short_t*), R_(void*));
 
-static int process_longs_flag_
-(const BAP_Flag_t flag,
- const int argc,
- R_(char**) argv,
- const int longc,
+static int process_longs_flag_(
+ const BAP_Flag_t  flag,
+ const int         argc,
+ R_(char**)        argv,
+ const int         longc,
  R_(const Long_t*) longv,
- R_(void*) state);
+ R_(void*)         state);
 
-BASE_INLINE int process_longs_
-(const int argc,
- R_(char**) argv,
- const int longc,
+BASE_INLINE int process_longs_(
+ const int         argc,
+ R_(char**)        argv,
+ const int         longc,
  R_(const Long_t*) longv,
- R_(void*) state)
+ R_(void*)         state)
 {
   return process_longs_flag_(BASE_ARG_PARSER_FLAG_NONE, argc, argv, longc, longv, state);
 }
@@ -196,8 +196,8 @@ void Base_process_args
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
 } /* ! Base_process_args */
 
-void Base_Arg_Parser_init
-(R_(Parser_t*) ctx,
+void Base_Arg_Parser_init(
+ R_(Parser_t*) ctx,
  R_(char*)     start,
  const int     argc,
  R_(char**)    argv)

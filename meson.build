@@ -52,7 +52,6 @@ src =  [
 'impl/args.c',
 'impl/errors.c',
 'impl/files.c',
-'impl/mem.c',
 'impl/mlock.c',
 'impl/mmap.c',
 'impl/operations.c',

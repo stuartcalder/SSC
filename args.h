@@ -13,10 +13,9 @@ BASE_BEGIN_C_DECLS
 
 enum {
   BASE_ARGTYPE_NONE  = 0,
-  BASE_ARGTYPE_SHORT = 1,
-  BASE_ARGTYPE_LONG  = 2
-};
-typedef int_fast8_t Base_ArgType_t;
+  BASE_ARGTYPE_SHORT = 1, /* i.e. -e -f -g, etc. */
+  BASE_ARGTYPE_LONG  = 2 /*  i.e. --encrypt --force --guard, etc. */
+}; typedef int_fast8_t Base_ArgType_t;
 
 /* @wordc: Number words: (--encrypt -iptext --output ctext).
  * @wordv: Word vector.
@@ -24,20 +23,17 @@ typedef int_fast8_t Base_ArgType_t;
  * @state:  Void pointer to data that will be modified by the procedure.
  * ->int(@x) Represents the number of words consumed.
  *            0 meaning "no additional" words (i.e. 1 word was consumed),
- *           -1 meaning only 1 char of 1 word was consumed.
- */
+ *           -1 meaning only 1 char of 1 word was consumed. */
 typedef int Base_Arg_Proc_f(const int wordc, R_(char**) wordv, const int offset, R_(void*) state);
 
 /* Return BASE_ARG_PROC_ONECHAR when processing
  * short options, and we consume only 1 char
- * during processing.
- */
+ * during processing. */
 enum { BASE_ARG_PROC_ONECHAR = -1 };
 
 /* Base_Arg_Short
  *   Associate a Base_Arg_Proc_f function pointer
- *   with a single character.
- */
+ *   with a single character. */
 typedef struct {
 	Base_Arg_Proc_f* proc;
 	char             ch;
@@ -48,16 +44,17 @@ typedef struct {
 /* Base_Arg_Long
  *   Associate a Base_Arg_Proc_f function pointer
  *   with a null-terminated string.
- *   Store also the length of the string (null-terminator not included).
- */
+ *   Store also the length of the string (null-terminator not included). */
 typedef struct {
 	Base_Arg_Proc_f* proc;
 	const char*      str;
 	size_t           str_n;
 } Base_Arg_Long;
 #define BASE_ARG_LONG_NULL_LITERAL               BASE_COMPOUND_LITERAL(Base_Arg_Long, 0)
+/* Don't use BASE_ARG_LONG_LITERAL with any string
+ * other than a string literal "like this", or our
+ * use of sizeof is going to be a problem. */
 #define BASE_ARG_LONG_LITERAL(Proc, Str_Literal) BASE_COMPOUND_LITERAL(Base_Arg_Long, Proc, Str_Literal, (sizeof(Str_Literal) - 1))
-/* Don't use BASE_ARG_LONG_LITERAL with any string other than a string literal "like this". */
 
 typedef struct {
 	char*  to_read;
@@ -94,9 +91,8 @@ BASE_API void Base_Arg_Parser_init(
  const int            argc,
  R_(char**)           argv);
 
-BASE_INLINE int Base_1opt(const char ch) {
-  return ch ? BASE_ARG_PROC_ONECHAR : 0;
-}
+BASE_INLINE int Base_1opt(const char ch)
+{ return ch ? BASE_ARG_PROC_ONECHAR : 0; }
 
 BASE_END_C_DECLS
 

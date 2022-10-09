@@ -30,8 +30,6 @@
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
-#define BASE_COMPILER_IS_GCC_COMPATIBLE ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
-#define BASE_COMPILER_IS_GCC_COMPAT BASE_COMPILER_IS_GCC_COMPATIBLE /*TODO: Remove me. */
 
 /* Which compiler are we using? */
 #if   defined(__clang__)
@@ -45,6 +43,10 @@
  #define BASE_COMPILER BASE_COMPILER_UNKNOWN
  #warning "BASE_COMPILER unknown!"
 #endif
+
+/* Is our compiler a gcc-compatible compiler? */
+#define BASE_COMPILER_IS_GCC_COMPATIBLE ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
+#define BASE_COMPILER_IS_GCC_COMPAT BASE_COMPILER_IS_GCC_COMPATIBLE /*TODO: Remove me. */
 
 /* Operating system macros */
 #if defined(__APPLE__) && defined(__MACH__)
@@ -205,7 +207,11 @@
 #endif
 
 /* Sanity assertions. */
-#if   !defined(BASE_ENDIAN)
+#if   !defined(BASE_COMPILER)
+# error "BASE_COMPILER is not defined!"
+#elif !BASE_COMPILER_ISVALID(BASE_COMPILER)
+# error "BASE_COMPILER is an invalid compiler!"
+#elif !defined(BASE_ENDIAN)
  #error "BASE_ENDIAN is not defined!"
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
  #error "BASE_ENDIAN is an invalid endianness!"
