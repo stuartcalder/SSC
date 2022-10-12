@@ -51,11 +51,6 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
   return 0;
 }
 
-void Base_MMap_map_or_die(Base_MMap* map, bool readonly)
-{
-  Base_assert_msg(!Base_MMap_map(map, readonly), BASE_ERR_S_FAILED_IN("Base_MMap_map"));
-}
-
 int Base_MMap_unmap(Base_MMap* map) {
   int ret;
 #if defined(BASE_OS_UNIXLIKE)
@@ -80,16 +75,6 @@ int Base_MMap_unmap(Base_MMap* map) {
 # error "Unsupported operating system."
 #endif
   return ret;
-}
-
-void Base_MMap_unmap_or_die(Base_MMap* map)
-{
-  Base_assert_msg(!Base_MMap_unmap(map), BASE_ERR_S_FAILED_IN("Base_MMap_unmap"));
-}
-
-void Base_MMap_sync_or_die(const Base_MMap* map)
-{
-  Base_assert_msg(!Base_MMap_sync(map), BASE_ERR_S_FAILED_IN("Base_MMap_Sync"));
 }
 
 #define RONLY_           BASE_MMAP_INIT_READONLY

@@ -357,6 +357,8 @@
 /* Symbol Visibility, Export/Import Macros */
 #if !defined(BASE_COMPILER)
  #error "BASE_COMPILER undefined!"
+#elif !BASE_COMPILER_ISVALID(BASE_COMPILER)
+# error "BASE_COMPILER is invalid!"
 #elif (BASE_COMPILER == BASE_COMPILER_UNKNOWN)
  #warning "Compiler unknown: NIL-ing import/export attributes!"
  #define BASE_EXPORT

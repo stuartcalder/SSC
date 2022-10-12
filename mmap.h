@@ -50,24 +50,30 @@ typedef struct {
 BASE_API int 
 Base_MMap_map(Base_MMap* map, bool readonly);
 
-BASE_API void
-Base_MMap_map_or_die(Base_MMap* map, bool readonly);
+BASE_INLINE void
+Base_MMap_map_or_die(Base_MMap* map, bool readonly) {
+  Base_assert_msg(!Base_MMap_map(map, readonly), BASE_ERR_S_FAILED_IN("Base_MMap_map()"));
+}
 
 /* Attempt to unmap the #file of @map.
  * Return 0 on success, -1 on failure. */
 BASE_API int
 Base_MMap_unmap(Base_MMap* map);
 
-BASE_API void
-Base_MMap_unmap_or_die(Base_MMap* map);
+BASE_INLINE void
+Base_MMap_unmap_or_die(Base_MMap* map) {
+  Base_assert_msg(!Base_MMap_unmap(map), BASE_ERR_S_FAILED_IN("Base_MMap_unmap()"));
+}
 
 /* Synchronize mapped memory with the filesystem.
  * Return 0 on success, -1 on failure. */
 BASE_INLINE int
 Base_MMap_sync(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
 
-BASE_API void
-Base_MMap_sync_or_die(const Base_MMap* map);
+BASE_INLINE void
+Base_MMap_sync_or_die(const Base_MMap* map) {
+  Base_assert_msg(!Base_MMap_sync(map), BASE_ERR_S_FAILED_IN("Base_MMap_sync()"));
+}
 
 /* Initialization flags. */
 #define BASE_MMAP_INIT_READONLY        UINT8_C(0x01) /* Is the memorymap readonly? */

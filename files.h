@@ -53,16 +53,24 @@ BASE_BEGIN_C_DECLS
 BASE_API int
 Base_get_file_size(Base_File_t fhandle, R_(size_t*) sizeptr);
 
-BASE_API size_t
-Base_get_file_size_or_die(Base_File_t fhandle);
+BASE_INLINE size_t
+Base_get_file_size_or_die(Base_File_t fhandle) {
+  size_t s;
+  Base_assert_msg(!Base_get_file_size(fhandle, &s), BASE_ERR_S_FAILED_IN("Base_get_file_size()"));
+  return s;
+}
 
 /* Store the size of the file at @fpath into the memory address @sizeptr.
  * Return 0 on success, -1 on failure. */
 BASE_API int
 Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) sizeptr);
 
-BASE_API size_t
-Base_get_filepath_size_or_die(const char* fpath);
+BASE_INLINE size_t
+Base_get_filepath_size_or_die(const char* fpath) {
+  size_t s;
+  Base_assert_msg(!Base_get_filepath_size(fpath, &s), BASE_ERR_S_FAILED_IN("Base_get_filepath_size()"));
+  return s;
+}
 
 /* Return true if a file exists at @fpath, false otherwise. */
 BASE_API bool
@@ -79,23 +87,33 @@ Base_force_filepath_existence_or_die(R_(const char*) fpath, bool control);
 BASE_API int
 Base_open_filepath(R_(const char*) fpath, bool ronly, R_(Base_File_t*) fhptr);
 
-BASE_API Base_File_t
-Base_open_filepath_or_die(R_(const char*) fpath, bool ronly);
+BASE_INLINE Base_File_t
+Base_open_filepath_or_die(R_(const char*) fpath, bool ronly) {
+  Base_File_t f;
+  Base_assert_msg(!Base_open_filepath(fpath, ronly, &f), BASE_ERR_S_FAILED_IN("Base_open_filepath()"));
+  return f;
+}
 
 /* Create a file at @fpath, and store the handle at @fhptr.
  * Return 0 on success, -1 on failure. */
 BASE_API int
 Base_create_filepath(R_(const char*) fpath, R_(Base_File_t*) fhptr);
 
-BASE_API Base_File_t
-Base_create_filepath_or_die(const char* fpath);
+BASE_INLINE Base_File_t
+Base_create_filepath_or_die(const char* fpath) {
+  Base_File_t f;
+  Base_assert_msg(!Base_create_filepath(fpath, &f), BASE_ERR_S_FAILED_IN("Base_create_filepath()"));
+  return f;
+}
 
 /* Close the file associated with the @fhandle. */
 BASE_INLINE int
 Base_close_file(Base_File_t fhandle) BASE_CLOSE_FILE_IMPL(fhandle)
 
-BASE_API void
-Base_close_file_or_die(Base_File_t fhandle);
+BASE_INLINE void
+Base_close_file_or_die(Base_File_t fhandle) {
+  Base_assert_msg(!Base_close_file(fhandle), BASE_ERR_S_FAILED_IN("Base_close_file()"));
+}
 
 #ifdef BASE_SET_FILE_SIZE_INLINE
  #define  API_      BASE_INLINE
@@ -111,7 +129,10 @@ Base_set_file_size(Base_File_t fhandle, size_t size) IMPL_(fhandle, size)
 #undef  API_
 #undef IMPL_
 
-BASE_API void Base_set_file_size_or_die(Base_File_t fhandle, size_t size);
+BASE_INLINE void
+Base_set_file_size_or_die(Base_File_t fhandle, size_t size) {
+  Base_assert_msg(!Base_set_file_size(fhandle, size), BASE_ERR_S_FAILED_IN("Base_set_file_size()"));
+}
 
 BASE_END_C_DECLS
 #undef R_
