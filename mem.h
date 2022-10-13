@@ -87,7 +87,7 @@ Base_calloc_or_die(size_t n_elem, size_t elem_sz) {
 BASE_INLINE void*
 Base_realloc_or_die(R_(void*) mem, size_t n) {
   void* p = realloc(mem, n);
-  Base_assert_msg(mem != BASE_NULL, "Error: Base_realloc_or_die died!\n");
+  Base_assert_msg(p != BASE_NULL, "Error: Base_realloc_or_die died!\n");
   return p;
 }
 
