@@ -72,7 +72,7 @@ int Base_MMap_unmap(Base_MMap* map) {
   if (!ret)
     map->readonly = false;
 #else
-# error "Unsupported operating system."
+ #error "Unsupported operating system."
 #endif
   return ret;
 }
@@ -202,17 +202,15 @@ void Base_MMap_init_or_die
   Base_errx(BASE_ERR_S_IN(err_str));
 }
 
-#define FAILED_IN_(Sub, Main) "Error: %s failed in %s!\n", Sub, Main
-
 void Base_MMap_del(Base_MMap* map)
 {
   if (map->ptr && Base_MMap_unmap(map))
-    Base_errx(FAILED_IN_("Base_MMap_unmap", "Base_MMap_del"));
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_MMap_unmap"));
   if ((map->file != BASE_FILE_NULL_LITERAL) && Base_close_file(map->file))
-    Base_errx(FAILED_IN_("Base_close_file","Base_MMap_del"));
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file"));
   #ifdef BASE_MMAP_HAS_WIN_FMAPPING
   if ((map->win_fmapping != BASE_FILE_NULL_LITERAL) && Base_close_file(map->win_fmapping))
-    Base_errx("Error: Base_close_file failed for win_fmapping in Base_MMap_del!\n");
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file"));
   #endif
   *map = BASE_MMAP_NULL_LITERAL;
 }

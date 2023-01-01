@@ -8,9 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Flags to indicate support for restricting pointers. */
-#define BASE_RESTRICT_IMPL_C    0x01
-#define BASE_RESTRICT_IMPL_CPP  0x02
 /* Endianness. */
 #define BASE_ENDIAN_NONE   0
 #define BASE_ENDIAN_LITTLE 1
@@ -30,15 +27,18 @@
 #define BASE_COMPILER_CLANG   2
 #define BASE_COMPILER_MSVC    3
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
+/* Pointer-aliasing restrict support bits. */
+#define BASE_RESTRICT_IMPL_C    0x01 /* C99 restrict. */
+#define BASE_RESTRICT_IMPL_CPP  0x02 /* C++/MSVC restrict. */
 
 /* Which compiler are we using? */
 #if   defined(__clang__)
- #define BASE_COMPILER BASE_COMPILER_CLANG
+ #define BASE_COMPILER   BASE_COMPILER_CLANG
 #elif defined(_MSC_VER)
  #define BASE_COMPILER   BASE_COMPILER_MSVC
  #define BASE_COMPILER_V _MSC_VER
 #elif defined(__GNUC__)
- #define BASE_COMPILER BASE_COMPILER_GCC
+ #define BASE_COMPILER   BASE_COMPILER_GCC
 #else
  #define BASE_COMPILER BASE_COMPILER_UNKNOWN
  #warning "BASE_COMPILER unknown!"
@@ -46,7 +46,6 @@
 
 /* Is our compiler a gcc-compatible compiler? */
 #define BASE_COMPILER_IS_GCC_COMPATIBLE ((BASE_COMPILER == BASE_COMPILER_GCC) || (BASE_COMPILER == BASE_COMPILER_CLANG))
-#define BASE_COMPILER_IS_GCC_COMPAT BASE_COMPILER_IS_GCC_COMPATIBLE /*TODO: Remove me. */
 
 /* Operating system macros */
 #if defined(__APPLE__) && defined(__MACH__)
@@ -104,7 +103,7 @@
 
 /* GCC/Clang provide __BYTE_ORDER__ for us to check byte endianness directly. Use this when possible. */
 #if (!defined(BASE_ENDIAN) && defined(__GNUC__) && defined(__BYTE_ORDER__) &&\
-     defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__))
+     defined(__ORDER_LITTLE_ENDIAN__) && defined(__ORDER_BIG_ENDIAN__))
  #if   (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
   #define BASE_ENDIAN BASE_ENDIAN_LITTLE
  #elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -130,8 +129,8 @@
 #define BASE_ISA_ISVALID(Isa) ((Isa) >= BASE_ISA_UNKNOWN && (Isa) <= BASE_ISA_ARMV7) /* UNKNOWN arch is valid. */
 
 /* Architecture macros. */
-#if (defined(__amd64)  || defined(__amd64__)  || \
-     defined(__x86_64) || defined(__x86_64__) || \
+#if (defined(__amd64)  || defined(__amd64__)  ||\
+     defined(__x86_64) || defined(__x86_64__) ||\
      defined(_M_X64)   || defined(_M_AMD64))
  #define BASE_ISA BASE_ISA_AMD64
  #ifndef BASE_ENDIAN
@@ -158,7 +157,7 @@
    #elif (BASE_ENDIAN_DEFAULT == BASE_ENDIAN_BIG)
     #warning "Aarch64 is bi-endian, and BASE_ENDIAN is still not yet defined! Using default endianness (Big)."
    #else
-    #error "BASE_ENDIAN is invalid!"
+    #error "BASE_ENDIAN_DEFAULT is invalid!"
    #endif
    #define BASE_ENDIAN     BASE_ENDIAN_DEFAULT
    #define BASE_ENDIAN_SRC BASE_ENDIAN_SRC_DEFAULT
@@ -208,9 +207,9 @@
 
 /* Sanity assertions. */
 #if   !defined(BASE_COMPILER)
-# error "BASE_COMPILER is not defined!"
+ #error "BASE_COMPILER is not defined!"
 #elif !BASE_COMPILER_ISVALID(BASE_COMPILER)
-# error "BASE_COMPILER is an invalid compiler!"
+ #error "BASE_COMPILER is an invalid compiler!"
 #elif !defined(BASE_ENDIAN)
  #error "BASE_ENDIAN is not defined!"
 #elif !BASE_ENDIAN_ISVALID(BASE_ENDIAN)
@@ -358,7 +357,7 @@
 #if !defined(BASE_COMPILER)
  #error "BASE_COMPILER undefined!"
 #elif !BASE_COMPILER_ISVALID(BASE_COMPILER)
-# error "BASE_COMPILER is invalid!"
+ #error "BASE_COMPILER is invalid!"
 #elif (BASE_COMPILER == BASE_COMPILER_UNKNOWN)
  #warning "Compiler unknown: NIL-ing import/export attributes!"
  #define BASE_EXPORT
@@ -385,8 +384,7 @@
  #error "Unaccounted for compiler."
 #endif
 
-/* Currenly in Base all inline functions are
- * marked "static inline". */
+/* Currenly in Base all inline functions are static inline. */
 #define BASE_INLINE		  static inline
 #define BASE_STRINGIFY_IMPL(Text) #Text
 #define BASE_STRINGIFY(Text)      BASE_STRINGIFY_IMPL(Text)

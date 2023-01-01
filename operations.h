@@ -62,14 +62,15 @@ BASE_API void Base_xor_32  (R_(void*) writeto, R_(const void*) readfrom);
 BASE_API void Base_xor_64  (R_(void*) writeto, R_(const void*) readfrom);
 BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 
-#if defined(BASE_OS_MAC)
+#include <string.h>
+#if defined(BASE_LANG_C) && (BASE_LANG_C >= BASE_C_23)
+ #define SECURE_ZERO_IMPL_(Ptr, Size) { memset_explicit(Ptr, 0, Size); }
+#elif defined(BASE_OS_MAC)
  #if (!defined(__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1))
   #error "We needed __STDC_WANT_LIB_EXT1__ defined to 1, for access to memset_s!"
  #endif
- #include <string.h>
  #define SECURE_ZERO_IMPL_(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
 #elif defined(__NetBSD__)
- #include <string.h>
  #define SECURE_ZERO_IMPL_(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
 #elif defined(BASE_OS_UNIXLIKE)
  #include <strings.h>

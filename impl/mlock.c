@@ -5,27 +5,27 @@
 #include "mem.h"
 #include "errors.h"
 #ifdef BASE_MLOCK_H /* When memorylocking is disabled, the entire header is discarded. */
-#if    defined(BASE_OS_UNIXLIKE)
-#  include <sys/types.h>
-#  include <sys/time.h>
-#  include <sys/resource.h>
-#  include <sys/mman.h>
-#  ifndef RLIMIT_MEMLOCK
-#    error "RLIMIT_MEMLOCK not defined!"
-#  endif
-#elif  defined(BASE_OS_WINDOWS)
-#  include "files.h"
-#  include <windows.h>
-#  include <memoryapi.h>
+#if defined(BASE_OS_UNIXLIKE)
+# include <sys/types.h>
+# include <sys/time.h>
+# include <sys/resource.h>
+# include <sys/mman.h>
+# ifndef RLIMIT_MEMLOCK
+#  error "RLIMIT_MEMLOCK not defined!"
+# endif
+#elif defined(BASE_OS_WINDOWS)
+# include "files.h"
+# include <windows.h>
+# include <memoryapi.h>
 #else
-#  error "Unsupported."
+# error "Unsupported."
 #endif
 
 Base_MLock Base_MLock_g;
 
 #define R_(p) p BASE_RESTRICT
 
-static uint64_t num_locked_bytes_ (uint64_t, uint64_t);
+static uint64_t num_locked_bytes_(uint64_t, uint64_t);
 
 /* Initialize a Base_MLock struct.
  * This must be called on a Base_MLock structure before using it.
@@ -55,7 +55,7 @@ int Base_MLock_init (Base_MLock* ml) {
 		ml->limit = (uint64_t)minimum - ml->page_size;
 	}
 #else
-#  error "Unsupported."
+# error "Unsupported."
 #endif
 	ml->n = 0;
 #ifdef BASE_EXTERN_MLOCK_THREADSAFE

@@ -6,7 +6,7 @@
 #define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointer aliasing if we can. */
 
 #if   defined(BASE_OS_UNIXLIKE)
-typedef struct stat Stat_t;
+typedef struct stat   Stat_t;
 #elif defined(BASE_OS_WINDOWS)
 typedef LARGE_INTEGER LargeInt_t;
 typedef DWORD         Dw32_t;
@@ -97,5 +97,7 @@ int Base_create_filepath(R_(const char*) filepath, R_(Base_File_t*) file)
 }
 
 #ifndef BASE_SET_FILE_SIZE_INLINE
-int Base_set_file_size(Base_File_t file, size_t size) BASE_SET_FILE_SIZE_IMPL(file, size)
+int
+Base_set_file_size(Base_File_t file, size_t size)
+BASE_SET_FILE_SIZE_IMPL(file, size)
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */

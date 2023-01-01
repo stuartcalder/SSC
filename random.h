@@ -8,21 +8,21 @@
 #include "macros.h"
 
 #if defined(BASE_OS_MAC) || defined(__NetBSD__) || defined(__Dragonfly__)
-# include "files.h"
-# ifdef BASE_OS_MAC
-#  define BASE_RANDOM_DEV "/dev/random"
-# else
-#  define BASE_RANDOM_DEV "/dev/urandom"
-# endif
-# define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
- Base_File_t dev = Base_open_filepath_or_die(BASE_RANDOM_DEV, true); \
- Base_assert_msg((read(dev, Ptr, Size) == (ssize_t)Size), BASE_ERR_S_FAILED("Base_get_os_entropy: read")); \
- Base_close_file_or_die(dev); \
-}
+ #include "files.h"
+ #ifdef BASE_OS_MAC
+  #define BASE_RANDOM_DEV "/dev/random"
+ #else
+  #define BASE_RANDOM_DEV "/dev/urandom"
+ #endif
+ #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) {\
+  Base_File_t dev = Base_open_filepath_or_die(BASE_RANDOM_DEV, true);\
+  Base_assert_msg((read(dev, Ptr, Size) == (ssize_t)Size), BASE_ERR_S_FAILED("Base_get_os_entropy: read"));\
+  Base_close_file_or_die(dev);\
+ }
 #elif defined(__gnu_linux__) || defined(__FreeBSD__)
-# include <sys/random.h>
-# define BASE_RANDOM_MAX 256
-# define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
+ #include <sys/random.h>
+ #define BASE_RANDOM_MAX 256
+ #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
  uint8_t* p = (uint8_t*)Ptr; \
  while (Size > BASE_RANDOM_MAX) { \
    if (getrandom(p, BASE_RANDOM_MAX, 0) != (ssize_t)BASE_RANDOM_MAX) \

@@ -9,7 +9,7 @@
 #include "files.h"
 #include "macros.h"
 #if defined(BASE_OS_UNIXLIKE)
- #define BASE_MMAP_SYNC_IMPL_F msync
+ #define BASE_MMAP_SYNC_IMPL_F  msync
  #define BASE_MMAP_SYNC_IMPL(M) { return BASE_MMAP_SYNC_IMPL_F(M->ptr, M->size, MS_SYNC); }
  #include <sys/mman.h>
 #elif defined(BASE_OS_WINDOWS)
@@ -37,11 +37,9 @@ typedef struct {
 } Base_MMap;
 
 #ifdef BASE_MMAP_HAS_WIN_FMAPPING
- #define BASE_MMAP_NULL_LITERAL \
-  BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, BASE_FILE_NULL_LITERAL, false)
+ #define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, BASE_FILE_NULL_LITERAL, false)
 #else
- #define BASE_MMAP_NULL_LITERAL \
-  BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false)
+ #define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false)
 #endif
 
 /* Assuming the #file, #size, and #win_fmapping (if applicable) fields
@@ -117,6 +115,10 @@ BASE_API void Base_MMap_init_or_die(
 
 /* Unmap memory and close opened files. */
 BASE_API void Base_MMap_del(Base_MMap* map);
+
+BASE_INLINE bool Base_MMap_is_null(Base_MMap* map) {
+  return map->ptr == BASE_NULL;
+}
 
 BASE_END_C_DECLS
 #undef R_
