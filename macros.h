@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #ifndef BASE_MACROS_H
 #define BASE_MACROS_H
 
@@ -9,24 +8,24 @@
 #include <stdint.h>
 
 /* Endianness. */
-#define BASE_ENDIAN_NONE   0
-#define BASE_ENDIAN_LITTLE 1
-#define BASE_ENDIAN_BIG    2
-#define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE
+#define BASE_ENDIAN_NONE   0 /* Endianness unestablished. */
+#define BASE_ENDIAN_LITTLE 1 /* Least-Significant-Byte-First Ordering. */
+#define BASE_ENDIAN_BIG    2 /* Most-Significant-Byte-First Ordering. */
+#define BASE_ENDIAN_DEFAULT BASE_ENDIAN_LITTLE /* For now just assume little endian if unspecified. */
 #define BASE_ENDIAN_ISVALID(Endian) ((Endian) == BASE_ENDIAN_LITTLE || (Endian) == BASE_ENDIAN_BIG) /* NONE is invalid. */
 /* How are we determining endianness? */
-#define BASE_ENDIAN_SRC_NONE     0
-#define BASE_ENDIAN_SRC_EXTERN   1
-#define BASE_ENDIAN_SRC_ISA      2
-#define BASE_ENDIAN_SRC_COMPILER 3
-#define BASE_ENDIAN_SRC_DEFAULT  4
+#define BASE_ENDIAN_SRC_NONE     0 /* Endian source unestablished. */
+#define BASE_ENDIAN_SRC_EXTERN   1 /* Endianness was specified externally, in BASE_EXTERN_ENDIAN. */
+#define BASE_ENDIAN_SRC_ISA      2 /* Endianness was determined by the ISA of the CPU. */
+#define BASE_ENDIAN_SRC_COMPILER 3 /* Endianness was specified by the compiler. */
+#define BASE_ENDIAN_SRC_DEFAULT  4 /* Endianness was set to defaults. */
 #define BASE_ENDIAN_SRC_ISVALID(EndSrc) ((EndSrc) >= BASE_ENDIAN_SRC_EXTERN && (EndSrc) <= BASE_ENDIAN_SRC_DEFAULT) /* NONE is invalid. */
 /* What is the compiler? */
-#define BASE_COMPILER_UNKNOWN 0
-#define BASE_COMPILER_GCC     1
-#define BASE_COMPILER_CLANG   2
-#define BASE_COMPILER_MSVC    3
-#define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is considered valid. */
+#define BASE_COMPILER_UNKNOWN 0 /* Unrecognized compiler. */
+#define BASE_COMPILER_GCC     1 /* GNU C/C++ compiler. */
+#define BASE_COMPILER_CLANG   2 /* Clang C/C++ compiler. */
+#define BASE_COMPILER_MSVC    3 /* Microsoft Visual C compiler. */
+#define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is valid. */
 /* Pointer-aliasing restrict support bits. */
 #define BASE_RESTRICT_IMPL_C    0x01 /* C99 restrict. */
 #define BASE_RESTRICT_IMPL_CPP  0x02 /* C++/MSVC restrict. */
@@ -90,8 +89,7 @@
  * int
  *   Defines the native byte order.
  *   May be defined outside by the BASE_EXTERN_ENDIAN macro.
- *   Must equal to BASE_ENDIAN_LITTLE, or BASE_ENDIAN_BIG.
- */
+ *   Must equal to BASE_ENDIAN_LITTLE, or BASE_ENDIAN_BIG. */
 #if !defined(BASE_ENDIAN) && defined(BASE_EXTERN_ENDIAN)
  #if !BASE_ENDIAN_ISVALID(BASE_EXTERN_ENDIAN)
   #error "BASE_EXTERN_ENDIAN is an invalid endianness!"
@@ -118,8 +116,7 @@
  * int
  *   The instruction set architecture of the system.
  *   If not explicitly defined in this file,
- *   BASE_ISA will default to BASE_ISA_UNKNOWN.
- */
+ *   BASE_ISA will default to BASE_ISA_UNKNOWN. */
 #define BASE_ISA_UNKNOWN 0
 #define BASE_ISA_AMD64   1
 #define BASE_ISA_RISCV   2

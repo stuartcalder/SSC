@@ -9,12 +9,14 @@
 #include "errors.h"
 #include "macros.h"
 
+#define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
-BASE_API void Base_print_bytes
+BASE_API void Base_print_bytes(
 /* Print bytes in hexadecimal format. */
-(const void* BASE_RESTRICT bytes, size_t nbytes);
+ const R_(void*) bytes,size_t nbytes);
 
 BASE_END_C_DECLS
+#undef R_
 
 #endif // ~ BASE_PRINT_H

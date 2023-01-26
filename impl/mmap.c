@@ -19,7 +19,8 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
-  if ((map->ptr = (uint8_t*)mmap(BASE_NULL, map->size, rw, MAP_SHARED, map->file, 0)) == MAP_FAIL_) {
+  map->ptr = (uint8_t*)mmap(BASE_NULL, map->size, rw, MAP_SHARED, map->file, 0);
+  if (map->ptr == MAP_FAIL_) {
     map->ptr = BASE_NULL;
     return -1;
   }
@@ -37,15 +38,17 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
     page_rw = PAGE_READWRITE;
     map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);
   }
-  if ((map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high, low, BASE_NULL)) == BASE_FILE_NULL_LITERAL)
+  map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high, low, BASE_NULL);
+  if (map->win_mapping == BASE_FILE_NULL_LITERAL)
     return -1;
-  if ((map->ptr = (uint8_t*)MapViewOfFile(map->win_fmapping, map_rw, 0, 0, map->size)) == MAP_FAIL_) {
+  map->ptr = (uint8_t*)MapViewOfFile(map->win_fmapping, map_rw, 0, 0, map->size);
+  if (map->ptr == MAP_FAIL_) {
     if (!Base_close_file(map->win_fmapping))
       map->win_fmapping = BASE_FILE_NULL_LITERAL;
     return -1;
   }
 #else
-# error "Unsupported operating system."
+ #error "Unsupported operating system."
 #endif
   map->readonly = readonly;
   return 0;

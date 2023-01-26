@@ -16,6 +16,7 @@
 #define BASE_ERR_S_IN(Str)         "Error: %s in function %s!\n", Str, __func__
 #define BASE_ERR_S_FAILED(Str)	   "Error: %s failed!\n", Str
 #define BASE_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
+typedef int Base_Error_t;
 
 #define BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) {\
  vfprintf(stderr, Fmt, ArgList);\
@@ -27,21 +28,21 @@
 }
 
 #ifdef BASE_OS_UNIXLIKE
-# ifdef __has_include
-#  if __has_include(<err.h>)
-#   include <err.h>
-#   define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
-#   define BASE_ERRX_CODE_LIST_INLINE
-#  else /* Unixlike, but we don't have <err.h>. */
-#   define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
-#  endif
-# else /* We don't have __has_include. */
-#  include <err.h>
-#  define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList)  BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
-#  define BASE_ERRX_CODE_LIST_INLINE
-# endif
+ #ifdef __has_include
+  #if __has_include(<err.h>)
+   #include <err.h>
+   #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
+   #define BASE_ERRX_CODE_LIST_INLINE
+  #else /* Unixlike, but we don't have <err.h>. */
+   #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
+  #endif
+ #else /* We don't have __has_include. */
+  #include <err.h>
+  #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList)  BASE_ERRX_CODE_LIST_IMPL_UNIXLIKE(Code, Fmt, ArgList)
+  #define BASE_ERRX_CODE_LIST_INLINE
+ #endif
 #else
-# define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
+ #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
 #endif
 
 #define R_(Ptr) Ptr BASE_RESTRICT

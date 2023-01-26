@@ -119,24 +119,23 @@
   #error "We need 8-bit bytes!"
  #endif
  #define BASE_SWAP_16_IMPL(VarU16) {\
-  return ( (VarU16 & UINT16_C(0xff00)) >> 8 |\
-           (VarU16 & UINT16_C(0x00ff)) << 8 );\
+  return (VarU16 >> 8) | (VarU16 << 8);\
  }
  #define BASE_SWAP_32_IMPL(VarU32) {\
-  return ( (VarU32 & UINT32_C(0xff000000)) >> (8 * 3) |\
+  return ( (VarU32                       ) >> (8 * 3) |\
            (VarU32 & UINT32_C(0x00ff0000)) >> (8 * 1) |\
 	   (VarU32 & UINT32_C(0x0000ff00)) << (8 * 1) |\
-	   (VarU32 & UINT32_C(0x000000ff)) << (8 * 3) );\
+	   (VarU32                       ) << (8 * 3) );\
   }
  #define BASE_SWAP_64_IMPL(VarU64) {\
-  return ( (VarU64 & UINT64_C(0xff00000000000000)) >> (8 * 7) |\
+  return ( (VarU64                               ) >> (8 * 7) |\
            (VarU64 & UINT64_C(0x00ff000000000000)) >> (8 * 5) |\
 	   (VarU64 & UINT64_C(0x0000ff0000000000)) >> (8 * 3) |\
 	   (VarU64 & UINT64_C(0x000000ff00000000)) >> (8 * 1) |\
 	   (VarU64 & UINT64_C(0x00000000ff000000)) << (8 * 1) |\
 	   (VarU64 & UINT64_C(0x0000000000ff0000)) << (8 * 3) |\
 	   (VarU64 & UINT64_C(0x000000000000ff00)) << (8 * 5) |\
-	   (VarU64 & UINT64_C(0x00000000000000ff)) << (8 * 7) );\
+	   (VarU64                               ) << (8 * 7) );\
   }
 #else
  #error "Invalid BASE_SWAP_IMPL!"

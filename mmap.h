@@ -13,7 +13,7 @@
  #define BASE_MMAP_SYNC_IMPL(M) { return BASE_MMAP_SYNC_IMPL_F(M->ptr, M->size, MS_SYNC); }
  #include <sys/mman.h>
 #elif defined(BASE_OS_WINDOWS)
- #define BASE_MMAP_HAS_WIN_FMAPPING
+ #define BASE_MMAP_HAS_WIN_FMAPPING /* #win_fmapping */
  #define BASE_MMAP_SYNC_IMPL(M) { if (FlushViewOfFile((LPCVOID)M->ptr, M->size)) return 0; return -1; }
  #include <memoryapi.h>
  #include <windows.h>
@@ -21,8 +21,6 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined(BASE_OS_UNIXLIKE) or defined(BASE_OS_WINDOWS) */
 
-#define Init_t_ Base_MMap_Init_t
-#define Code_t_ Base_MMap_Init_Code_t
 #define R_(Ptr) Ptr BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
@@ -42,24 +40,26 @@ typedef struct {
  #define BASE_MMAP_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_MMap, BASE_NULL, 0u, BASE_FILE_NULL_LITERAL, false)
 #endif
 
-/* Assuming the #file, #size, and #win_fmapping (if applicable) fields
- * of @map are initialized, attempt to map the file into memory.
- * Return 0 on success, -1 on failure. */
-BASE_API int 
-Base_MMap_map(Base_MMap* map, bool readonly);
+BASE_API int Base_MMap_map(
+/* Assuming @map->file, @map->size, and @map->win_fmapping
+ * (if applicable) fields of @map are initialized, attempt to map the
+ * file into memory. Return 0 on success, -1 on failure. */
+ Base_MMap* map, bool readonly);
 
-BASE_INLINE void
-Base_MMap_map_or_die(Base_MMap* map, bool readonly) {
+BASE_INLINE void Base_MMap_map_or_die(
+ Base_MMap* map, bool readonly)
+{
   Base_assert_msg(!Base_MMap_map(map, readonly), BASE_ERR_S_FAILED_IN("Base_MMap_map()"));
 }
 
-/* Attempt to unmap the #file of @map.
- * Return 0 on success, -1 on failure. */
-BASE_API int
-Base_MMap_unmap(Base_MMap* map);
+BASE_API int Base_MMap_unmap(
+/* Attempt to unmap @map->file.
+ * ->0   : Success
+ * ->(-1): Failure */
+ Base_MMap* map);
 
-BASE_INLINE void
-Base_MMap_unmap_or_die(Base_MMap* map) {
+BASE_INLINE void Base_MMap_unmap_or_die(Base_MMap* map)
+{
   Base_assert_msg(!Base_MMap_unmap(map), BASE_ERR_S_FAILED_IN("Base_MMap_unmap()"));
 }
 
@@ -81,7 +81,7 @@ Base_MMap_sync_or_die(const Base_MMap* map) {
  * if BASE_MMAP_INIT_FORCE_EXIST_YES is on, enforce that the file already exists.
  * else, enforce that the file DOESN'T already exist. */
 #define BASE_MMAP_INIT_FORCE_EXIST_YES UINT8_C(0x08)
-typedef uint_fast8_t Init_t_;
+typedef uint_fast8_t Base_MMap_Init_t;
 /* Initialization error codes. */
 enum {
   BASE_MMAP_INIT_CODE_OK =                   0,
@@ -95,33 +95,32 @@ enum {
   BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE =   -8,
   BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE =   -9,
   BASE_MMAP_INIT_CODE_ERR_MAP =            -10,
-}; typedef int_fast8_t Code_t_;
+}; typedef int_fast8_t Base_MMap_Init_Code_t;
 
 /* Open a file at @filepath with constraints passed as init flags in @flags,
  * then map the file into memory.
  * If a file does not exist at @filepath, an attempt will be made to create one there.
  * Return 0 on success, or one of the error codes above otherwise. */
-BASE_API Code_t_ Base_MMap_init(
- R_(Base_MMap*)  map,
- R_(const char*) filepath,
- size_t          size,
- Init_t_         flags);
+BASE_API Base_MMap_Init_Code_t Base_MMap_init(
+ R_(Base_MMap*)   map,
+ R_(const char*)  filepath,
+ size_t           size,
+ Base_MMap_Init_t flags);
 
 BASE_API void Base_MMap_init_or_die(
- R_(Base_MMap*)  map,
- R_(const char*) filepath,
- size_t          size,
- Init_t_         flags);
+ R_(Base_MMap*)   map,
+ R_(const char*)  filepath,
+ size_t           size,
+ Base_MMap_Init_t flags);
 
 /* Unmap memory and close opened files. */
 BASE_API void Base_MMap_del(Base_MMap* map);
 
-BASE_INLINE bool Base_MMap_is_null(Base_MMap* map) {
+BASE_INLINE bool Base_MMap_is_null(Base_MMap* map)
+{
   return map->ptr == BASE_NULL;
 }
 
 BASE_END_C_DECLS
 #undef R_
-#undef Code_t_
-#undef Init_t_
 #endif /* ~ BASE_MMAP_H */

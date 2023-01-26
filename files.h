@@ -24,7 +24,7 @@
  #include <unistd.h>
  #include <sys/stat.h>
  #include <sys/types.h>
- /* On Unix-like systems, files are managed through handles, represented by integers. */
+ /* On Unix-like systems, files are managed through integer handles, "file descriptors". */
  typedef int Base_File_t;
  #define BASE_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor, often representing failure. */
 #elif defined(BASE_OS_WINDOWS)
@@ -46,15 +46,15 @@
 #define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
 BASE_BEGIN_C_DECLS
 
+BASE_API int Base_get_file_size(
 /* @fhandle: The Base_File_t we want to know the size of.
  * @sizeptr: Where the size will be stored if successful.
  * ->0   : Successfully stored the size of @fhandle in @sizeptr.
  * ->(-1): Failed. */
-BASE_API int
-Base_get_file_size(Base_File_t fhandle, R_(size_t*) sizeptr);
+ Base_File_t fhandle, R_(size_t*) sizeptr);
 
-BASE_INLINE size_t
-Base_get_file_size_or_die(Base_File_t fhandle) {
+BASE_INLINE size_t Base_get_file_size_or_die(Base_File_t fhandle)
+{
   size_t s;
   Base_assert_msg(!Base_get_file_size(fhandle, &s), BASE_ERR_S_FAILED_IN("Base_get_file_size()"));
   return s;
@@ -66,7 +66,8 @@ BASE_API int
 Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) sizeptr);
 
 BASE_INLINE size_t
-Base_get_filepath_size_or_die(const char* fpath) {
+Base_get_filepath_size_or_die(const char* fpath)
+{
   size_t s;
   Base_assert_msg(!Base_get_filepath_size(fpath, &s), BASE_ERR_S_FAILED_IN("Base_get_filepath_size()"));
   return s;

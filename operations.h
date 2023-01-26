@@ -66,8 +66,10 @@ BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 #if defined(BASE_LANG_C) && (BASE_LANG_C >= BASE_C_23)
  #define SECURE_ZERO_IMPL_(Ptr, Size) { memset_explicit(Ptr, 0, Size); }
 #elif defined(BASE_OS_MAC)
- #if (!defined(__STDC_WANT_LIB_EXT1__) || (__STDC_WANT_LIB_EXT1__ != 1))
-  #error "We needed __STDC_WANT_LIB_EXT1__ defined to 1, for access to memset_s!"
+ #if !defined(__STDC_WANT_LIB_EXT1__)
+  #error "__STDC_WANT_LIB_EXT1__ not defined!"
+ #elif __STDC_WANT_LIB_EXT1__ != 1
+  #error "__STDC_WANT_LIB_EXT1__ != 1!"
  #endif
  #define SECURE_ZERO_IMPL_(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
 #elif defined(__NetBSD__)
@@ -85,35 +87,34 @@ BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 #undef  R_
 #define R_(Ptr) Ptr BASE_RESTRICT
 
-/* Base_secure_zero(mem, n)
- * Zero over the memory @mem with @n zero bytes.
+/* Zero over the memory @mem with @n zero bytes.
  * Do not optimize away the zeroing. */
-BASE_INLINE void
-Base_secure_zero(R_(void*) mem, size_t n) SECURE_ZERO_IMPL_(mem, n)
+BASE_INLINE void Base_secure_zero(R_(void*) mem, size_t n) SECURE_ZERO_IMPL_(mem, n)
 #undef SECURE_ZERO_IMPL_
-/* Base_ctime_memdiff(m_0, m_1, num_bytes)
- * Compare the first @num_bytes bytes of @m_0 and @m_1.
- * Return the number of bytes that differed between @m_0 and @m_1.
- * Do the comparison in constant (worst case) time.
- */
+
 BASE_API size_t
-Base_ctime_memdiff(R_(const void*) mem0, R_(const void*) mem1, size_t size);
-/* Base_is_zero(mem, num_bytes)
- * Compare the first @num_bytes bytes of @mem with 0.
- * Return false immediately upon detecting a non-zero byte.
- * Return true if all bytes are zero.
- */
+Base_ctime_memdiff(
+/* Compare the first @size bytes of @mem0 and @mem1.
+ * Return the number of bytes that differed between @mem0 and @mem1.
+ * Do the comparison in constant (worst case) time. */
+ R_(const void*) mem0, R_(const void*) mem1, size_t size);
+
 BASE_API bool
-Base_is_zero(R_(const void*) mem, size_t size);
-/* Base_ctime_is_zero(mem, num_bytes)
- * Compare the first @num_bytes bytes of @mem with 0.
- * This comparison is constant time. All @num_bytes bytes will be scanned,
+Base_is_zero(
+/* Compare the first @size bytes of @mem with 0.
+ * Return false immediately upon detecting a non-zero byte.
+ * Return true if all bytes are zero. */
+ R_(const void*) mem, size_t size);
+
+BASE_API bool
+Base_ctime_is_zero(
+/* Compare the first @size bytes of @mem with 0.
+ * This comparison is constant time. All @size bytes will be scanned,
  * before determining whether they were all zero or not.
  * Return false if one or more of the @mem bytes were non-zero.
- * Return true if all of the @mem bytes were zero.
- */
-BASE_API bool
-Base_ctime_is_zero(R_(const void*) mem, size_t size);
+ * Return true if all of the @mem bytes were zero. */
+ R_(const void*) mem, size_t size);
+
 BASE_END_C_DECLS
 #undef R_
 

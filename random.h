@@ -22,50 +22,47 @@
 #elif defined(__gnu_linux__) || defined(__FreeBSD__)
  #include <sys/random.h>
  #define BASE_RANDOM_MAX 256
- #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
- uint8_t* p = (uint8_t*)Ptr; \
- while (Size > BASE_RANDOM_MAX) { \
-   if (getrandom(p, BASE_RANDOM_MAX, 0) != (ssize_t)BASE_RANDOM_MAX) \
-     Base_errx(BASE_ERR_S_FAILED("getrandom")); \
-   Size -= BASE_RANDOM_MAX; \
-   p    += BASE_RANDOM_MAX; \
- } \
- if (getrandom(p, Size, 0) != (ssize_t)Size) \
-   Base_errx(BASE_ERR_S_FAILED("getrandom")); \
-}
+ #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) {\
+  uint8_t* p = (uint8_t*)Ptr;\
+  while (Size > BASE_RANDOM_MAX) {\
+    Base_assert_msg(getrandom(p, BASE_RANDOM_MAX, 0) == BASE_RANDOM_MAX,\
+     BASE_ERR_S_FAILED_IN("getrandom"));\
+    Size -= BASE_RANDOM_MAX;\
+    p    += BASE_RANDOM_MAX;\
+  }\
+  Base_assert_msg(getrandom(p, Size, 0) == Size, BASE_ERR_S_FAILED_IN("getrandom"));\
+ }
 #elif defined(__OpenBSD__)
-# include <unistd.h>
-# define BASE_RANDOM_MAX 256
-# define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
- uint8_t* p = (uint8_t*)Ptr; \
- while (Size > BASE_RANDOM_MAX) { \
-   if (getentropy(p, BASE_RANDOM_MAX)) \
-     Base_errx(BASE_ERR_S_FAILED("getentropy")); \
-   Size -= BASE_RANDOM_MAX; \
-   p    += BASE_RANDOM_MAX; \
- } \
- if (getentropy(p, size)) \
-   Base_errx(BASE_ERR_S_FAILED("getentropy")); \
-}
+ #include <unistd.h>
+ #define BASE_RANDOM_MAX 256
+ #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) {\
+  uint8_t* p = (uint8_t*)Ptr;\
+  while (Size > BASE_RANDOM_MAX) {\
+    Base_assert_msg(!getentropy(p, BASE_RANDOM_MAX), BASE_ERR_S_FAILED_IN("getentropy"));\
+    Size -= BASE_RANDOM_MAX;\
+    p    += BASE_RANDOM_MAX;\
+  }\
+  Base_assert_msg(!getentropy(p, Size), BASE_ERR_S_FAILED_IN("getentropy"));\
+ }
 #elif defined(BASE_OS_WINDOWS)
-# include <windows.h>
-# include <ntstatus.h>
-# include <bcrypt.h>
-# define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) { \
-  BCRYPT_ALG_HANDLE h; \
-  Base_assert_msg(BCryptOpenAlgorithmProvider(&h, L"RNG", BASE_NULL, 0) == STATUS_SUCCESS, \
-   BASE_ERR_S_FAILED("BCryptOpenAlgorithmProvider")); \
-  Base_assert_msg(BCryptGenRandom(h, Ptr, Size, 0) == STATUS_SUCCESS, \
-   BASE_ERR_S_FAILED("BCryptGenRandom")); \
-  Base_assert_msg(BCryptCloseAlgorithmProvider(h, 0) == STATUS_SUCCESS, \
-   BASE_ERR_S_FAILED("BCryptCloseAlgorithmProvider")); \
+ #include <windows.h>
+ #include <ntstatus.h>
+ #include <bcrypt.h>
+ #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) {\
+  BCRYPT_ALG_HANDLE h;\
+  Base_assert_msg(BCryptOpenAlgorithmProvider(&h, L"RNG", BASE_NULL, 0) == STATUS_SUCCESS,\
+   BASE_ERR_S_FAILED("BCryptOpenAlgorithmProvider"));\
+  Base_assert_msg(BCryptGenRandom(h, Ptr, Size, 0) == STATUS_SUCCESS,\
+   BASE_ERR_S_FAILED("BCryptGenRandom"));\
+  Base_assert_msg(BCryptCloseAlgorithmProvider(h, 0) == STATUS_SUCCESS,\
+   BASE_ERR_S_FAILED("BCryptCloseAlgorithmProvider"));\
 }
 #else
-#	error "Unsupported OS."
+ #error "Unsupported OS."
 #endif
 
 BASE_BEGIN_C_DECLS
-BASE_API void Base_get_os_entropy(void* BASE_RESTRICT, size_t);
+BASE_API void Base_get_os_entropy(void* BASE_RESTRICT ptr, size_t size);
 BASE_END_C_DECLS
 
 #endif
