@@ -37,7 +37,7 @@ Base_MMap_map(Base_MMap* map, bool readonly)
     map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);
   }
   map->win_fmapping = CreateFileMappingA(map->file, BASE_NULL, page_rw, high, low, BASE_NULL);
-  if (map->win_mapping == BASE_FILE_NULL_LITERAL)
+  if (map->win_fmapping == BASE_FILE_NULL_LITERAL)
     return -1;
   map->ptr = (uint8_t*)MapViewOfFile(map->win_fmapping, map_rw, 0, 0, map->size);
   if (map->ptr == MAP_FAIL_) {
