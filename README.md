@@ -1,6 +1,6 @@
 # Base
 # General C Library.
-C Wrapper Library, and miscellaneous general-purpose utilities.
+POSIX/Win32 wrapper library.
 ## Purpose
 Provide a simple, generalized interface between operating systems for file manipulation,
 memory-mapping, memory-locking, etc.

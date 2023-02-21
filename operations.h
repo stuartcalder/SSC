@@ -18,7 +18,7 @@
 #include "swap.h"
 
 #if defined(BASE_LANG_CPP) && (BASE_LANG_CPP >= BASE_CPP_20)
-  /* C++20 provides functions for bitwise rotation. */
+ /* C++20 provides functions for bitwise rotation. */
  #define BASE_OPERATIONS_USE_CPP20_ROT 1
 #else
  #define BASE_OPERATIONS_USE_CPP20_ROT 0
@@ -40,7 +40,7 @@
   ( (Value >> BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value << ((-BASE_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & BASE_ROT_IMPL_UNSIGNED_MASK_(Bits))) )
 #endif
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS
 /* Use inline functions instead of macros directly to do bitwise rotation. */
 BASE_INLINE uint16_t Base_rotl_16(uint16_t val, int count) { return BASE_ROT_LEFT_(val, count, 16); }
@@ -57,10 +57,10 @@ BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIG
 
 /* Base_xor_n(write_to, read_from)
  * XOR n bytes beginning at both addresses, and store in @write_to. */
-BASE_API void Base_xor_16  (R_(void*) writeto, R_(const void*) readfrom);
-BASE_API void Base_xor_32  (R_(void*) writeto, R_(const void*) readfrom);
-BASE_API void Base_xor_64  (R_(void*) writeto, R_(const void*) readfrom);
-BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
+BASE_API void Base_xor_16(void*  R_ writeto, const void* R_ readfrom);
+BASE_API void Base_xor_32(void*  R_ writeto, const void* R_ readfrom);
+BASE_API void Base_xor_64(void*  R_ writeto, const void* R_ readfrom);
+BASE_API void Base_xor_128(void* R_ writeto, const void* R_ readfrom);
 
 #include <string.h>
 #if defined(BASE_LANG_C) && (BASE_LANG_C >= BASE_C_23)
@@ -85,35 +85,35 @@ BASE_API void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom);
 #endif
 
 #undef  R_
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 
 /* Zero over the memory @mem with @n zero bytes.
  * Do not optimize away the zeroing. */
-BASE_INLINE void Base_secure_zero(R_(void*) mem, size_t n) SECURE_ZERO_IMPL_(mem, n)
+BASE_INLINE void
+Base_secure_zero(void* R_ mem, size_t n)
+SECURE_ZERO_IMPL_(mem, n)
 #undef SECURE_ZERO_IMPL_
 
-BASE_API size_t
-Base_ctime_memdiff(
 /* Compare the first @size bytes of @mem0 and @mem1.
- * Return the number of bytes that differed between @mem0 and @mem1.
  * Do the comparison in constant (worst case) time. */
- R_(const void*) mem0, R_(const void*) mem1, size_t size);
+BASE_API size_t
+Base_ctime_memdiff(const void* R_ mem0, const void* R_ mem1, size_t size);
+/* -> The number of bytes that differed between @mem0 and @mem1. */
 
+/* Compare the first @size bytes of @mem with 0. */
 BASE_API bool
-Base_is_zero(
-/* Compare the first @size bytes of @mem with 0.
- * Return false immediately upon detecting a non-zero byte.
- * Return true if all bytes are zero. */
- R_(const void*) mem, size_t size);
+Base_is_zero(const void* R_ mem, size_t size);
+/* -> true : All bytes of @mem were zero.
+ * -> false: At least one byte of @mem was not zero.
+ * Return immediately on detection of nonzero. */
 
-BASE_API bool
-Base_ctime_is_zero(
 /* Compare the first @size bytes of @mem with 0.
- * This comparison is constant time. All @size bytes will be scanned,
- * before determining whether they were all zero or not.
- * Return false if one or more of the @mem bytes were non-zero.
- * Return true if all of the @mem bytes were zero. */
- R_(const void*) mem, size_t size);
+ * This comparison is constant time. All @size bytes will be scanned. */
+BASE_API bool
+Base_ctime_is_zero(const void* R_ mem, size_t size);
+/* -> true : All bytes of @mem were zero.
+ * -> false: At least one byte of @mem was nonzero.
+ * Don't return until all @size bytes of @mem are scanned. */
 
 BASE_END_C_DECLS
 #undef R_

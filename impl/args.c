@@ -5,7 +5,7 @@
 #include "args.h"
 #include "errors.h"
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 
 typedef Base_Arg_Short         Short_t;
 typedef Base_Arg_Long          Long_t;
@@ -13,32 +13,45 @@ typedef Base_Arg_Parser        Parser_t;
 typedef Base_Arg_Parser_Flag_t BAP_Flag_t;
 #define EQ_ISVALID_ BASE_ARG_PARSER_FLAG_EQUALS_ISVALID
 
-static int short_match_(const int shortc, R_(const Short_t*) shortv, char ch);
+static int
+short_match_(const int shortc, const Short_t* R_ shortv, char ch);
 
-static int long_match_flag_(const BAP_Flag_t flag, const int longc, R_(const Long_t*) longv, size_t str_n, R_(char*) str);
+static int
+long_match_flag_(
+ const BAP_Flag_t flag,
+ const int longc,
+ const Long_t* R_ longv,
+ size_t str_n,
+ char* R_ str);
 
-BASE_INLINE int long_match_(const int longc, R_(const Long_t*) longv, size_t str_n, R_(char*) str) {
+BASE_INLINE int
+long_match_(
+ const int        longc, /* Number of longs to process. */
+ const Long_t* R_ longv, /* Long vector. */
+ size_t           str_n, /* Length of the string to check. */
+ char* R_         str)   /* The string to check. */
+{
   return long_match_flag_(BASE_ARG_PARSER_FLAG_NONE, longc, longv, str_n, str);
 }
 
-static int long_match_(const int, R_(const Long_t*), size_t, R_(char*));
+static int long_match_(const int, const Long_t* R_, size_t, char* R_);
 
-static int process_shorts_(const int, R_(char**), const int, R_(const Short_t*), R_(void*));
+static int process_shorts_(const int, char** R_, const int, const Short_t* R_, void* R_);
 
 static int process_longs_flag_(
- const BAP_Flag_t  flag,
- const int         argc,
- R_(char**)        argv,
- const int         longc,
- R_(const Long_t*) longv,
- R_(void*)         state);
+ const BAP_Flag_t flag,
+ const int        argc,
+ char** R_        argv,
+ const int        longc,
+ const Long_t* R_ longv,
+ void* R_         state);
 
 BASE_INLINE int process_longs_(
- const int         argc,
- R_(char**)        argv,
- const int         longc,
- R_(const Long_t*) longv,
- R_(void*)         state)
+ const int        argc,
+ char** R_        argv,
+ const int        longc,
+ const Long_t* R_ longv,
+ void* R_         state)
 {
   return process_longs_flag_(BASE_ARG_PARSER_FLAG_NONE, argc, argv, longc, longv, state);
 }
@@ -52,7 +65,7 @@ Base_ArgType_t Base_argtype(const char* s)
     goto skip;
   if (s[1] == '-')
     ++n_hyphens;
-skip:
+  skip:
   switch (n_hyphens) {
     case 1:  return BASE_ARGTYPE_SHORT;
     case 2:  return BASE_ARGTYPE_LONG;
@@ -61,10 +74,11 @@ skip:
 }
 
 enum { NOMATCH_ = -1 };
-int short_match_
-(const int          shortc,
- R_(const Short_t*) shortv,
- char               ch)
+
+int short_match_(
+ const int         shortc,
+ const Short_t* R_ shortv,
+ char              ch)
 {
   for (int shorti = 0; shorti < shortc; ++shorti)
     if (shortv[shorti].ch == ch)
@@ -73,6 +87,7 @@ int short_match_
 }
 
 enum { EQ_NOT_FOUND_ = -1 };
+
 static int eq_strlen_(const char* s)
 {
   int i = 0;
@@ -86,14 +101,13 @@ static int eq_strlen_(const char* s)
 }
 
 /* Long matching relies upon all Base_Arg_Long structs
- * being in alphabetical order.
- */
-int long_match_flag_
-(const BAP_Flag_t  flag,
- const int         longc,
- R_(const Long_t*) longv,
- const size_t      str_n,
- R_(char*)         str)
+ * being in alphanumeric order. */
+int long_match_flag_(
+ const BAP_Flag_t flag,
+ const int        longc,
+ const Long_t* R_ longv,
+ const size_t     str_n,
+ char* R_         str)
 {
   for (int longi = 0; longi < longc; ++longi) {
     const int cmp_res = memcmp(str, longv[longi].str, longv[longi].str_n);
@@ -107,12 +121,12 @@ int long_match_flag_
   return NOMATCH_;
 }
 
-int process_shorts_
-(const int          argc,
- R_(char**)         argv,
- const int          shortc,
- R_(const Short_t*) shortv,
- R_(void*)          state)
+int process_shorts_(
+ const int         argc,
+ char** R_         argv,
+ const int         shortc,
+ const Short_t* R_ shortv,
+ void* R_          state)
 {
   if (argc == 0)
     return 0; /* Are there arguments? */
@@ -134,13 +148,13 @@ int process_shorts_
   return 0;
 }
 
-int process_longs_flag_
-(const BAP_Flag_t  flag,
- const int         argc,
- R_(char**)        argv,
- const int         longc,
- R_(const Long_t*) longv,
- R_(void*)         state)
+int process_longs_flag_(
+ const BAP_Flag_t flag,
+ const int        argc,
+ char** R_        argv,
+ const int        longc,
+ const Long_t* R_ longv,
+ void* R_         state)
 {
   if (argc == 0)
     return 0; /* Stop if there are 0 args. */
@@ -152,8 +166,7 @@ int process_longs_flag_
     Base_errx("Error: Invalid long option %s!\n", argv[0]);
   /* If '=' is invalid it signifies assignment. If we're doing assignment,
    * then we need to scan and find a '=', if any, and start reading from there
-   * instead of the end of the word, to trigger reading the next word.
-   */
+   * instead of the end of the word, to trigger reading the next word. */
   int start;
   if (!(flag & EQ_ISVALID_))
     if ((start = eq_strlen_(argv[0])) == EQ_NOT_FOUND_)
@@ -165,11 +178,11 @@ int process_longs_flag_
   return (longv[long_i].proc)(argc, argv, start, state);
 }
 
-void Base_process_args
-(const int argc,   R_(char**)         argv,
- const int shortc, R_(const Short_t*) shortv,
- const int longc,  R_(const Long_t*)  longv,
- R_(void*) state,  Base_Arg_Proc_f*   alone)
+void Base_process_args(
+ const int argc,   char** R_         argv,
+ const int shortc, const Short_t* R_ shortv,
+ const int longc,  const Long_t* R_  longv,
+ void* R_ state,   Base_Arg_Proc_f*  alone)
 {
   for (int arg_i = 0; arg_i < argc; ++arg_i) {
     const int argc_left = argc - arg_i;
@@ -197,10 +210,10 @@ void Base_process_args
 } /* ! Base_process_args */
 
 void Base_Arg_Parser_init(
- R_(Parser_t*) ctx,
- R_(char*)     start,
- const int     argc,
- R_(char**)    argv)
+ Parser_t* R_ ctx,
+ char* R_     start,
+ const int    argc,
+ char** R_    argv)
 {
   ctx->consumed = 0;
   if (*start != '\0') {

@@ -1,10 +1,9 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #include "errors.h"
 #include "files.h"
 #include "mmap.h"
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 
 #if   defined(BASE_OS_UNIXLIKE)
  #define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
@@ -15,7 +14,8 @@
  #error "Unsupported."
 #endif
 
-int Base_MMap_map(Base_MMap* map, bool readonly) 
+Base_Error_t
+Base_MMap_map(Base_MMap* map, bool readonly) 
 {
 #if    defined(BASE_OS_UNIXLIKE)
   const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
@@ -25,12 +25,10 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
     return -1;
   }
 #elif  defined(BASE_OS_WINDOWS)
-  BASE_ANY_ASSERT(CHAR_BIT == 8      , "CHAR_BIT must be 8!\n");
-  BASE_ANY_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t should be 4 bytes\n");
   Dw32_t high, low, page_rw, map_rw;
 
-  high = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
-  low  = (Dw32_t)(((uint_fast64_t)map->size & UINT64_C(0x00000000ffffffff))      );
+  high = (Dw32_t)(((uint64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
+  low  = (Dw32_t)(((uint64_t)map->size & UINT64_C(0x00000000ffffffff))      );
   if (readonly) {
     page_rw = PAGE_READONLY;
     map_rw  = FILE_MAP_READ;
@@ -54,8 +52,10 @@ int Base_MMap_map(Base_MMap* map, bool readonly)
   return 0;
 }
 
-int Base_MMap_unmap(Base_MMap* map) {
-  int ret;
+Base_Error_t
+Base_MMap_unmap(Base_MMap* map)
+{
+  Base_Error_t ret;
 #if defined(BASE_OS_UNIXLIKE)
   ret = munmap(map->ptr, map->size);
   if (!ret) {
@@ -99,11 +99,12 @@ typedef Base_MMap_Init_t Init_t;
 #define ERR_MAP_              BASE_MMAP_INIT_CODE_ERR_MAP
 typedef Base_MMap_Init_Code_t Init_Code_t;
 
-Init_Code_t Base_MMap_init
-(R_(Base_MMap*)  map,
- R_(const char*) filepath,
- size_t          size,
- Init_t          flags)
+Init_Code_t
+Base_MMap_init(
+ Base_MMap* R_  map,
+ const char* R_ filepath,
+ size_t         size,
+ Init_t         flags)
 {
   bool exists, readonly, allowshrink, setsize;
 
@@ -149,19 +150,18 @@ Init_Code_t Base_MMap_init
     if (Base_set_file_size(map->file, map->size))
       return ERR_SET_FILE_SIZE_;
   }
-  /* When we create a new file, it implicitly
-   * is readwrite, not readonly.
-   */
+  /* When we create a new file, it's implicitly readwrite, not readonly. */
   if (Base_MMap_map(map, readonly))
     return ERR_MAP_;
   return OK_;
 }
 
-void Base_MMap_init_or_die
-(R_(Base_MMap*)  map,
- R_(const char*) filepath,
- size_t          size,
- Init_t          flags)
+void
+Base_MMap_init_or_die(
+ Base_MMap* R_  map,
+ const char* R_ filepath,
+ size_t         size,
+ Init_t         flags)
 {
   Init_Code_t ic = Base_MMap_init(map, filepath, size, flags);
   const char* err_str;
@@ -205,15 +205,16 @@ void Base_MMap_init_or_die
   Base_errx(BASE_ERR_S_IN(err_str));
 }
 
-void Base_MMap_del(Base_MMap* map)
+void
+Base_MMap_del(Base_MMap* map)
 {
   if (map->ptr && Base_MMap_unmap(map))
-    Base_errx(BASE_ERR_S_FAILED_IN("Base_MMap_unmap"));
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_MMap_unmap()"));
   if ((map->file != BASE_FILE_NULL_LITERAL) && Base_close_file(map->file))
-    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file"));
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file()"));
   #ifdef BASE_MMAP_HAS_WIN_FMAPPING
   if ((map->win_fmapping != BASE_FILE_NULL_LITERAL) && Base_close_file(map->win_fmapping))
-    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file"));
+    Base_errx(BASE_ERR_S_FAILED_IN("Base_close_file()"));
   #endif
   *map = BASE_MMAP_NULL_LITERAL;
 }

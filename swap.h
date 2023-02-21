@@ -4,8 +4,7 @@
 #ifndef BASE_SWAP_H
 #define BASE_SWAP_H
 /* This header implements byte-swapping; reversing the order of bytes in
- * unsigned integers.
- */
+ * unsigned integers. */
 
 #include "errors.h"
 #include "macros.h"

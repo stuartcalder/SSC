@@ -45,47 +45,55 @@
  #error "Unsupported."
 #endif
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
-BASE_INLINE void* Base_aligned_malloc(size_t alignment, size_t size)
 /* Return an object pointer to @size heap bytes, aligned to @alignment. */
+BASE_INLINE void*
+Base_aligned_malloc(size_t alignment, size_t size)
 BASE_ALIGNED_MALLOC_IMPL(alignment, size)
+/* On failure, return BASE_NULL. */
 
-BASE_INLINE void* Base_aligned_malloc_or_die(size_t alignment, size_t sz)
 /* Return an object pointer to @size heap bytes, aligned to @alignment. */
+BASE_INLINE void*
+Base_aligned_malloc_or_die(size_t alignment, size_t size)
 {
-  void* p = Base_aligned_malloc(alignment, sz);
+  void* p = Base_aligned_malloc(alignment, size);
   Base_assert_msg(p != BASE_NULL, "Error: Base_aligned_malloc_or_die died!\n");
   return p;
 }
 
-BASE_INLINE void Base_aligned_free(void* p)
 /* Free memory allocated with Base_aligned_malloc* */
+BASE_INLINE void
+Base_aligned_free(void* p)
 BASE_ALIGNED_FREE_IMPL(p)
 
-BASE_INLINE size_t Base_get_pagesize(void)
-/* How big are the memory pages? */
+/* Get the size of the OS's virtual memory pages. */
+BASE_INLINE size_t
+Base_get_pagesize(void)
 BASE_GET_PAGESIZE_IMPL
 
-BASE_INLINE void* Base_malloc_or_die(size_t n)
 /* Allocate @n bytes on the heap successfully, or terminate the program. */
+BASE_INLINE void*
+Base_malloc_or_die(size_t n)
 {
   void* p = malloc(n);
   Base_assert_msg(p != BASE_NULL, "Error: Base_malloc_or_die died!\n");
   return p;
 }
 
-BASE_INLINE void* Base_calloc_or_die(size_t n_elem, size_t elem_sz)
 /* Allocate (@n_elem * @elem_sz) bytes on the heap successfully, or terminate the program. */
+BASE_INLINE void*
+Base_calloc_or_die(size_t n_elem, size_t elem_sz)
 {
   void* p = calloc(n_elem, elem_sz);
   Base_assert_msg(p != BASE_NULL, "Error: Base_calloc_or_die died!\n");
   return p;
 }
 
-BASE_INLINE void* Base_realloc_or_die(R_(void*) mem, size_t n)
 /* Change the size of @mem to be @n bytes successfully, or terminate the program. */
+BASE_INLINE void*
+Base_realloc_or_die(void* R_ mem, size_t n)
 {
   void* p = realloc(mem, n);
   Base_assert_msg(p != BASE_NULL, "Error: Base_realloc_or_die died!\n");
@@ -133,14 +141,14 @@ BASE_INLINE void* Base_realloc_or_die(R_(void*) mem, size_t n)
 #endif
 
 /* Little and big endian stores. */
-BASE_INLINE void Base_store_le16(R_(void*) mem, uint16_t val) STORE_LE_IMPL_(mem, val, 16)
-BASE_INLINE void Base_store_be16(R_(void*) mem, uint16_t val) STORE_BE_IMPL_(mem, val, 16)
+BASE_INLINE void Base_store_le16(void* R_ mem, uint16_t val) STORE_LE_IMPL_(mem, val, 16)
+BASE_INLINE void Base_store_be16(void* R_ mem, uint16_t val) STORE_BE_IMPL_(mem, val, 16)
 
-BASE_INLINE void Base_store_le32(R_(void*) mem, uint32_t val) STORE_LE_IMPL_(mem, val, 32)
-BASE_INLINE void Base_store_be32(R_(void*) mem, uint32_t val) STORE_BE_IMPL_(mem, val, 32)
+BASE_INLINE void Base_store_le32(void* R_ mem, uint32_t val) STORE_LE_IMPL_(mem, val, 32)
+BASE_INLINE void Base_store_be32(void* R_ mem, uint32_t val) STORE_BE_IMPL_(mem, val, 32)
 
-BASE_INLINE void Base_store_le64(R_(void*) mem, uint64_t val) STORE_LE_IMPL_(mem, val, 64)
-BASE_INLINE void Base_store_be64(R_(void*) mem, uint64_t val) STORE_BE_IMPL_(mem, val, 64)
+BASE_INLINE void Base_store_le64(void* R_ mem, uint64_t val) STORE_LE_IMPL_(mem, val, 64)
+BASE_INLINE void Base_store_be64(void* R_ mem, uint64_t val) STORE_BE_IMPL_(mem, val, 64)
 /* Little and big endian loads. */
 BASE_INLINE uint16_t Base_load_le16(const void* mem) LOAD_LE_IMPL_(mem, 16)
 BASE_INLINE uint16_t Base_load_be16(const void* mem) LOAD_BE_IMPL_(mem, 16)

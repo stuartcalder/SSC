@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #ifndef BASE_FILES_H
 #define BASE_FILES_H
 
@@ -20,6 +19,8 @@
  #define BASE_SET_FILE_SIZE_IMPL_F     ftruncate
  #define BASE_SET_FILE_SIZE_IMPL(F, N) { return BASE_SET_FILE_SIZE_IMPL_F(F, N); }
  #define BASE_SET_FILE_SIZE_INLINE
+ #define BASE_CHDIR_IMPL_F     chdir
+ #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_F(Path); }
  #include <fcntl.h>
  #include <unistd.h>
  #include <sys/stat.h>
@@ -35,7 +36,10 @@
       return -1;\
     return 0;\
  }
+ #define BASE_CHDIR_IMPL_F     _chdir
+ #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_F(Path); }
  #include <windows.h>
+ #include <direct.h>
  /* On Windows systems, files are managed through HANDLEs. */
  typedef HANDLE Base_File_t;
  #define BASE_FILE_NULL_LITERAL INVALID_HANDLE_VALUE
@@ -43,27 +47,24 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
 
-#define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointers from aliasing, if supported. */
+#define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS
 
-BASE_API int Base_get_file_size(
-/* @fhandle: The Base_File_t we want to know the size of.
- * @sizeptr: Where the size will be stored if successful.
- * ->0   : Successfully stored the size of @fhandle in @sizeptr.
- * ->(-1): Failed. */
- Base_File_t fhandle, R_(size_t*) sizeptr);
+/* Get the size of a file in bytes. */
+BASE_API Base_Error_t
+Base_get_file_size(Base_File_t fhandle, size_t* R_ sizeptr);
 
-BASE_INLINE size_t Base_get_file_size_or_die(Base_File_t fhandle)
+BASE_INLINE size_t
+Base_get_file_size_or_die(Base_File_t fhandle)
 {
   size_t s;
   Base_assert_msg(!Base_get_file_size(fhandle, &s), BASE_ERR_S_FAILED_IN("Base_get_file_size()"));
   return s;
 }
 
-/* Store the size of the file at @fpath into the memory address @sizeptr.
- * Return 0 on success, -1 on failure. */
-BASE_API int
-Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) sizeptr);
+/* Get the size of a file at a specified filepath in bytes. */
+BASE_API Base_Error_t
+Base_get_filepath_size(const char* R_ fpath, size_t* R_ sizeptr);
 
 BASE_INLINE size_t
 Base_get_filepath_size_or_die(const char* fpath)
@@ -73,46 +74,46 @@ Base_get_filepath_size_or_die(const char* fpath)
   return s;
 }
 
-/* Return true if a file exists at @fpath, false otherwise. */
+/* Is there a file at a specified filepath? */
 BASE_API bool
 Base_filepath_exists(const char* fpath);
+/* ->true : There is a file.
+ * ->false: There is not a file. */
 
-/* If @control is true, force a file to exist at @fpath; otherwise force a file
- * to NOT exist at @fpath. */
+/* If @control is true, force a file to exist at @fpath; otherwise force a file to NOT exist at @fpath. */
 BASE_API void
-Base_force_filepath_existence_or_die(R_(const char*) fpath, bool control);
+Base_force_filepath_existence_or_die(const char* R_ fpath, bool control);
 
-/* Open the file at @fpath with readwrite rights @ronly,
- * storing the handle at @fhptr.
- * Return 0 on success, -1 on failure. */
-BASE_API int
-Base_open_filepath(R_(const char*) fpath, bool ronly, R_(Base_File_t*) fhptr);
+/* Open the file at a specified filepath. */
+BASE_API Base_Error_t
+Base_open_filepath(const char* R_ fpath, bool ronly, Base_File_t* R_ fhptr);
 
 BASE_INLINE Base_File_t
-Base_open_filepath_or_die(R_(const char*) fpath, bool ronly) {
+Base_open_filepath_or_die(const char* R_ fpath, bool ronly)
+{
   Base_File_t f;
   Base_assert_msg(!Base_open_filepath(fpath, ronly, &f), BASE_ERR_S_FAILED_IN("Base_open_filepath()"));
   return f;
 }
-
-/* Create a file at @fpath, and store the handle at @fhptr.
- * Return 0 on success, -1 on failure. */
-BASE_API int
-Base_create_filepath(R_(const char*) fpath, R_(Base_File_t*) fhptr);
+/* Create a file at a specified filepath. */
+BASE_API Base_Error_t
+Base_create_filepath(const char* R_ fpath, Base_File_t* R_ fhptr);
 
 BASE_INLINE Base_File_t
-Base_create_filepath_or_die(const char* fpath) {
+Base_create_filepath_or_die(const char* fpath)
+{
   Base_File_t f;
   Base_assert_msg(!Base_create_filepath(fpath, &f), BASE_ERR_S_FAILED_IN("Base_create_filepath()"));
   return f;
 }
 
-/* Close the file associated with the @fhandle. */
-BASE_INLINE int
+/* Close the file associed with a specified file handle. */
+BASE_INLINE Base_Error_t
 Base_close_file(Base_File_t fhandle) BASE_CLOSE_FILE_IMPL(fhandle)
 
 BASE_INLINE void
-Base_close_file_or_die(Base_File_t fhandle) {
+Base_close_file_or_die(Base_File_t fhandle)
+{
   Base_assert_msg(!Base_close_file(fhandle), BASE_ERR_S_FAILED_IN("Base_close_file()"));
 }
 
@@ -123,17 +124,21 @@ Base_close_file_or_die(Base_File_t fhandle) {
  #define  API_      BASE_API
  #define IMPL_(...) ;
 #endif
-/* Set the file described by @fhandle to a size of @size bytes.
- * Return 0 on success, -1 on failure. */
-API_ int
+/* Set the size of a file in bytes. Fill the void with zeroes. */
+API_ Base_Error_t
 Base_set_file_size(Base_File_t fhandle, size_t size) IMPL_(fhandle, size)
 #undef  API_
 #undef IMPL_
 
 BASE_INLINE void
-Base_set_file_size_or_die(Base_File_t fhandle, size_t size) {
+Base_set_file_size_or_die(Base_File_t fhandle, size_t size)
+{
   Base_assert_msg(!Base_set_file_size(fhandle, size), BASE_ERR_S_FAILED_IN("Base_set_file_size()"));
 }
+
+/* Change the current working directory to @path. */
+BASE_INLINE Base_Error_t
+Base_chdir(const char* path) BASE_CHDIR_IMPL(path)
 
 BASE_END_C_DECLS
 #undef R_

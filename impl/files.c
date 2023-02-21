@@ -1,9 +1,8 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #include "files.h"
 
-#define R_(Ptr) Ptr BASE_RESTRICT /* Restrict pointer aliasing if we can. */
+#define R_ BASE_RESTRICT
 
 #if   defined(BASE_OS_UNIXLIKE)
 typedef struct stat   Stat_t;
@@ -12,7 +11,8 @@ typedef LARGE_INTEGER LargeInt_t;
 typedef DWORD         Dw32_t;
 #endif
 
-int Base_get_file_size(Base_File_t file, R_(size_t*) size_p)
+Base_Error_t
+Base_get_file_size(Base_File_t file, size_t* R_ size_p)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   Stat_t s;
@@ -30,7 +30,8 @@ int Base_get_file_size(Base_File_t file, R_(size_t*) size_p)
   return 0;
 }
 
-int Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) size_p)
+Base_Error_t
+Base_get_filepath_size(const char* R_ fpath, size_t* R_ size_p)
 {
 #ifdef BASE_OS_UNIXLIKE
   Stat_t s;
@@ -50,7 +51,8 @@ int Base_get_filepath_size(R_(const char*) fpath, R_(size_t*) size_p)
 #endif
 }
 
-bool Base_filepath_exists(const char* filepath)
+bool
+Base_filepath_exists(const char* filepath)
 {
   bool exists = false;
   FILE* test = fopen(filepath, "r");
@@ -61,7 +63,8 @@ bool Base_filepath_exists(const char* filepath)
   return exists;
 }
 
-void Base_force_filepath_existence_or_die(R_(const char*) filepath, bool force_to_exist)
+void
+Base_force_filepath_existence_or_die(const char* R_ filepath, bool force_to_exist)
 {
   if (force_to_exist)
     Base_assert_msg(Base_filepath_exists(filepath) , "Error: The filepath %s does not seem to exist.\n", filepath);
@@ -69,13 +72,12 @@ void Base_force_filepath_existence_or_die(R_(const char*) filepath, bool force_t
     Base_assert_msg(!Base_filepath_exists(filepath), "Error: The filepath %s seems to already exist.\n", filepath);
 }
 
-int Base_open_filepath(R_(const char*) filepath, bool readonly, R_(Base_File_t*) file)
+Base_Error_t
+Base_open_filepath(const char* R_ filepath, bool readonly, Base_File_t* R_ file)
 {
 #if    defined(BASE_OS_UNIXLIKE)
-  const int read_write_rights = readonly ? O_RDONLY : O_RDWR;
-  *file = open(filepath, read_write_rights, (mode_t)0600);
+  *file = open(filepath, (readonly ? O_RDONLY : O_RDWR), (mode_t)0600);
 #elif  defined(BASE_OS_WINDOWS)
-  BASE_ANY_ASSERT(sizeof(Dw32_t) == 4, "Dw32_t not 4 bytes!");
   const Dw32_t read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
   *file = CreateFileA(filepath, read_write_rights, 0, BASE_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, BASE_NULL);
 #else
@@ -84,7 +86,8 @@ int Base_open_filepath(R_(const char*) filepath, bool readonly, R_(Base_File_t*)
   return (*file != BASE_FILE_NULL_LITERAL) ? 0 : -1;
 }
 
-int Base_create_filepath(R_(const char*) filepath, R_(Base_File_t*) file)
+Base_Error_t
+Base_create_filepath(const char* R_ filepath, Base_File_t* R_ file)
 {
 #if    defined(BASE_OS_UNIXLIKE)
   *file = open(filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600);
@@ -97,7 +100,6 @@ int Base_create_filepath(R_(const char*) filepath, R_(Base_File_t*) file)
 }
 
 #ifndef BASE_SET_FILE_SIZE_INLINE
-int
-Base_set_file_size(Base_File_t file, size_t size)
-BASE_SET_FILE_SIZE_IMPL(file, size)
+Base_Error_t
+Base_set_file_size(Base_File_t file, size_t size) BASE_SET_FILE_SIZE_IMPL(file, size)
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */

@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
+/* Copyright (c) 2020-2023 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  */
 #ifndef BASE_RANDOM_H
@@ -26,11 +26,11 @@
   uint8_t* p = (uint8_t*)Ptr;\
   while (Size > BASE_RANDOM_MAX) {\
     Base_assert_msg(getrandom(p, BASE_RANDOM_MAX, 0) == BASE_RANDOM_MAX,\
-     BASE_ERR_S_FAILED_IN("getrandom"));\
+     BASE_ERR_S_FAILED_IN("getrandom()"));\
     Size -= BASE_RANDOM_MAX;\
     p    += BASE_RANDOM_MAX;\
   }\
-  Base_assert_msg(getrandom(p, Size, 0) == Size, BASE_ERR_S_FAILED_IN("getrandom"));\
+  Base_assert_msg(getrandom(p, Size, 0) == Size, BASE_ERR_S_FAILED_IN("getrandom()"));\
  }
 #elif defined(__OpenBSD__)
  #include <unistd.h>
@@ -38,11 +38,11 @@
  #define BASE_GET_OS_ENTROPY_IMPL(Ptr, Size) {\
   uint8_t* p = (uint8_t*)Ptr;\
   while (Size > BASE_RANDOM_MAX) {\
-    Base_assert_msg(!getentropy(p, BASE_RANDOM_MAX), BASE_ERR_S_FAILED_IN("getentropy"));\
+    Base_assert_msg(!getentropy(p, BASE_RANDOM_MAX), BASE_ERR_S_FAILED_IN("getentropy()"));\
     Size -= BASE_RANDOM_MAX;\
     p    += BASE_RANDOM_MAX;\
   }\
-  Base_assert_msg(!getentropy(p, Size), BASE_ERR_S_FAILED_IN("getentropy"));\
+  Base_assert_msg(!getentropy(p, Size), BASE_ERR_S_FAILED_IN("getentropy()"));\
  }
 #elif defined(BASE_OS_WINDOWS)
  #include <windows.h>
@@ -62,7 +62,10 @@
 #endif
 
 BASE_BEGIN_C_DECLS
-BASE_API void Base_get_os_entropy(void* BASE_RESTRICT ptr, size_t size);
+
+BASE_API void
+Base_get_os_entropy(void* BASE_RESTRICT ptr, size_t size);
+
 BASE_END_C_DECLS
 
 #endif

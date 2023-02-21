@@ -1,62 +1,66 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #include "operations.h"
 
 #undef  R_
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 
 #define XOR_8_(U8p, Cu8p, Start) \
-  U8p[(0 + Start)] ^= Cu8p[(0 + Start)]; \
-  U8p[(1 + Start)] ^= Cu8p[(1 + Start)]; \
-  U8p[(2 + Start)] ^= Cu8p[(2 + Start)]; \
-  U8p[(3 + Start)] ^= Cu8p[(3 + Start)]; \
-  U8p[(4 + Start)] ^= Cu8p[(4 + Start)]; \
-  U8p[(5 + Start)] ^= Cu8p[(5 + Start)]; \
-  U8p[(6 + Start)] ^= Cu8p[(6 + Start)]; \
+  U8p[(0 + Start)] ^= Cu8p[(0 + Start)];\
+  U8p[(1 + Start)] ^= Cu8p[(1 + Start)];\
+  U8p[(2 + Start)] ^= Cu8p[(2 + Start)];\
+  U8p[(3 + Start)] ^= Cu8p[(3 + Start)];\
+  U8p[(4 + Start)] ^= Cu8p[(4 + Start)];\
+  U8p[(5 + Start)] ^= Cu8p[(5 + Start)];\
+  U8p[(6 + Start)] ^= Cu8p[(6 + Start)];\
   U8p[(7 + Start)] ^= Cu8p[(7 + Start)]
 #define XOR_16_(U8p, Cu8p, Start) \
-  XOR_8_(U8p, Cu8p, (0 + Start)); \
+  XOR_8_(U8p, Cu8p, (0 + Start));\
   XOR_8_(U8p, Cu8p, (8 + Start))
 #define XOR_32_(U8p, Cu8p, Start) \
-  XOR_16_(U8p, Cu8p, (0  + Start)); \
+  XOR_16_(U8p, Cu8p, (0  + Start));\
   XOR_16_(U8p, Cu8p, (16 + Start))
 #define XOR_64_(U8p, Cu8p, Start) \
-  XOR_32_(U8p, Cu8p, (0  + Start)); \
+  XOR_32_(U8p, Cu8p, (0  + Start));\
   XOR_32_(U8p, Cu8p, (32 + Start))
 #define XOR_128_(U8p, Cu8p, Start) \
-  XOR_64_(U8p, Cu8p, (0  + Start)); \
+  XOR_64_(U8p, Cu8p, (0  + Start));\
   XOR_64_(U8p, Cu8p, (64 + Start))
 
-void Base_xor_16(R_(void*) writeto, R_(const void*) readfrom)
+void
+Base_xor_16(void* R_ writeto, const void* R_ readfrom)
 {
   uint8_t*       first  = (uint8_t*)      writeto;
   const uint8_t* second = (const uint8_t*)readfrom;
   XOR_16_(first, second, 0);
 }
 
-void Base_xor_32(R_(void*) writeto, R_(const void*) readfrom)
+void
+Base_xor_32(void* R_ writeto, const void* R_ readfrom)
 {
   uint8_t*       first  = (uint8_t*)      writeto;
   const uint8_t* second = (const uint8_t*)readfrom;
   XOR_32_(first, second, 0);
 }
 
-void Base_xor_64(R_(void*) writeto, R_(const void*) readfrom)
+void
+Base_xor_64(void* R_ writeto, const void* R_ readfrom)
 {
   uint8_t*       first  = (uint8_t*)      writeto;
   const uint8_t* second = (const uint8_t*)readfrom;
   XOR_64_(first, second, 0);
 }
 
-void Base_xor_128 (R_(void*) writeto, R_(const void*) readfrom)
+void
+Base_xor_128 (void* R_ writeto, const void* R_ readfrom)
 {
   uint8_t*       first  = (uint8_t*)      writeto;
   const uint8_t* second = (const uint8_t*)readfrom;
   XOR_128_(first, second, 0);
 }
 
-size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size)
+size_t
+Base_ctime_memdiff (const void* R_ v_0, const void* R_ v_1, size_t size)
 {
   BASE_ASSERT(v_0 && v_1);
   const uint8_t* const mem0 = (const uint8_t*)v_0;
@@ -76,14 +80,14 @@ size_t Base_ctime_memdiff (R_(const void*) v_0, R_(const void*) v_1, size_t size
     /* We do integer addition.
      * If bit-index 0 was 1, this will increment @unequal_count,
      * else the bytes were equal.
-     * This should take the same amount of time in either case.
-     */
+     * This should take the same amount of time in either case. */
     unequal_count += (u8_bits & UINT8_C(0x01));
   }
   return unequal_count;
 }
 
-bool Base_is_zero (R_(const void*) v, size_t n_bytes)
+bool
+Base_is_zero (const void* R_ v, size_t n_bytes)
 {
   BASE_ASSERT(v);
   const uint8_t* mem = (const uint8_t*)v;
@@ -93,7 +97,8 @@ bool Base_is_zero (R_(const void*) v, size_t n_bytes)
   return true;
 }
 
-bool Base_ctime_is_zero (R_(const void*) v, size_t n_bytes)
+bool
+Base_ctime_is_zero (const void* R_ v, size_t n_bytes)
 {
   BASE_ASSERT(v);
   const uint8_t* mem = (const uint8_t*)v;
@@ -103,7 +108,6 @@ bool Base_ctime_is_zero (R_(const void*) v, size_t n_bytes)
     zero_test |= mem[i];
   }
   /* If any 1 bits were absorbed, the memory range
-   * was not all zeroes.
-   */
+   * was not all zeroes. */
   return !zero_test;
 }

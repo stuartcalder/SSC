@@ -7,13 +7,13 @@
 #include "operations.h"
 
 #undef  R_
-#define R_(ptr) ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 typedef Base_String_Size_t Size_t;
 
 int
 Base_String_init(
- R_(char**)      ctxp, const Size_t size,
- R_(const char*) cstr, const Size_t cstr_len)
+ char** R_      ctxp, const Size_t size,
+ const char* R_ cstr, const Size_t cstr_len)
 {
   char* ctx;
 
@@ -40,7 +40,7 @@ Base_String_init(
 }
 
 void
-Base_String_del_flag(R_(char*) ctx, int flag)
+Base_String_del_flag(char* R_ ctx, int flag)
 {
   if (ctx == BASE_NULL)
     return;
@@ -71,7 +71,7 @@ Base_String_make_cstr_or_die(char* ctx)
   Base_assert_msg(!Base_String_make_cstr(ctx), BASE_ERR_S_IN("Base_String_make_cstr failed"));
 }
 
-int Base_shift_left_digits(R_(char*) str, const int size)
+int Base_shift_left_digits(char* R_ str, const int size)
 {
   BASE_ASSERT(str);
   int index = 0;

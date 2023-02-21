@@ -16,6 +16,10 @@
 #define BASE_ERR_S_IN(Str)         "Error: %s in function %s!\n", Str, __func__
 #define BASE_ERR_S_FAILED(Str)	   "Error: %s failed!\n", Str
 #define BASE_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
+
+/* For functions that return 0 on success and (-1) on failure,
+ * use the Base_Error_t typedef, so it is unambiguous why
+ * we are returning an integer. */
 typedef int Base_Error_t;
 
 #define BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) {\
@@ -45,26 +49,26 @@ typedef int Base_Error_t;
  #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
 #endif
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS
-BASE_API    void Base_errx_code_vargs (int, R_(const char*), ...);
+BASE_API    void Base_errx_code_vargs(int code, const char* R_ fmt, ...);
 #ifdef BASE_ERRX_CODE_LIST_INLINE
-BASE_INLINE void Base_errx_code_list (int code, R_(const char*) fmt, va_list args) BASE_ERRX_CODE_LIST_IMPL(code, fmt, args)
+BASE_INLINE void Base_errx_code_list(int code, const char* R_ fmt, va_list args) BASE_ERRX_CODE_LIST_IMPL(code, fmt, args)
 #else
-BASE_API    void Base_errx_code_list (int code, R_(const char*) fmt, va_list args);
+BASE_API    void Base_errx_code_list(int code, const char* R_ fmt, va_list args);
 #endif
-BASE_API    void Base_errx (R_(const char*) fmt, ...);
-BASE_API    void Base_assert_msg (bool, R_(const char*), ...);
-BASE_INLINE void Base_assert (bool b) { Base_assert_msg(b, BASE_ERR_S_FAILED("Base_assert")); }
+BASE_API    void Base_errx(const char* R_ fmt, ...);
+BASE_API    void Base_assert_msg(bool, const char* R_, ...);
+BASE_INLINE void Base_assert(bool b) { Base_assert_msg(b, BASE_ERR_S_FAILED("Base_assert")); }
 BASE_END_C_DECLS
 #undef R_
 
 #ifdef BASE_EXTERN_DEBUG
-#  define BASE_ASSERT(Bool)    Base_assert(Bool)
-#  define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
+ #define BASE_ASSERT(Bool)    Base_assert(Bool)
+ #define BASE_ASSERT_MSG(...) Base_assert_msg(__VA_ARGS__)
 #else
-#  define BASE_ASSERT(Boolean) /* Nil */
-#  define BASE_ASSERT_MSG(...) /* Nil */
+ #define BASE_ASSERT(Boolean) /* Nil */
+ #define BASE_ASSERT_MSG(...) /* Nil */
 #endif
 
 #endif /* ! BASE_ERRORS_H */

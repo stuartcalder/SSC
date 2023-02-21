@@ -23,7 +23,7 @@
 
 Base_MLock Base_MLock_g;
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 
 /* Static prototypes. */
 static uint64_t num_locked_bytes_(
@@ -120,7 +120,7 @@ uint64_t num_locked_bytes_(uint64_t n, uint64_t page_size)
   return locked * page_size; /* Number pages x Size of each page in bytes. */
 }
 
-Base_Error_t Base_mlock_ctx(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
+Base_Error_t Base_mlock_ctx(void* R_ p, uint64_t n, Base_MLock* R_ ctx)
 {
   const uint64_t locked = num_locked_bytes_(n, ctx->page_size); /* How many bytes would be locked? */
   LOCK_N_MTX_(ctx); /* Lock mutex. */
@@ -150,7 +150,7 @@ Base_Error_t Base_mlock_ctx(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
 #undef  ERR_
 #define ERR_ "Error: Base_mlock_ctx_handled: %s\n"
 
-void Base_mlock_ctx_handled(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f)
+void Base_mlock_ctx_handled(void* R_ p, uint64_t n, Base_MLock* R_ ctx, Base_MLock_F_t f)
 {
   const int c = Base_mlock_ctx(p, n, ctx);
   switch (c) {
@@ -175,7 +175,7 @@ void Base_mlock_ctx_handled(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_M
   Base_errx(ERR_, "Invalid Base_mlock_ctx return code.");
 }
 
-Base_Error_t Base_munlock_ctx(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
+Base_Error_t Base_munlock_ctx(void* R_ p, uint64_t n, Base_MLock* R_ ctx)
 {
   const uint64_t locked = num_locked_bytes_(n, ctx->page_size);
   LOCK_N_MTX_(ctx);
@@ -204,7 +204,7 @@ Base_Error_t Base_munlock_ctx(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
 #undef  ERR_
 #define ERR_ "Error: Base_munlock_ctx_handled: %s\n"
 
-void Base_munlock_ctx_handled(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f)
+void Base_munlock_ctx_handled(void* R_ p, uint64_t n, Base_MLock* R_ ctx, Base_MLock_F_t f)
 {
   const int c = Base_munlock_ctx(p, n, ctx);
   switch (c) {

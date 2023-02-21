@@ -13,7 +13,7 @@
 #include "macros.h"
 #include "errors.h"
 
-#define R_(p) p BASE_RESTRICT
+#define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS
 
 typedef struct {
@@ -53,104 +53,90 @@ typedef int Base_MLock_F_t;
  #define BASE_MLOCK_INIT_MAYRETURN_ERR_MTX_INIT 0
 #endif
 
-BASE_API Base_Error_t Base_MLock_init(
 /* Initialize a Base_MLock struct at @ml.
  * This must be called on a Base_MLock before using it in
  * the other procedures. */
- Base_MLock* ml);
+BASE_API Base_Error_t Base_MLock_init(Base_MLock* ml);
 
-BASE_INLINE Base_Error_t Base_MLock_g_init(void)
 /* Initialize, if not already initialized. */
+BASE_INLINE Base_Error_t Base_MLock_g_init(void)
 {
   if (!Base_MLock_g.page_size)
     return Base_MLock_init(&Base_MLock_g);
   return 0;
 }
 
-BASE_API void Base_MLock_init_handled(
 /* Initialize @ctx. Die on failure. */
- Base_MLock* ctx);
+BASE_API void Base_MLock_init_handled(Base_MLock* ctx);
 
-BASE_INLINE void Base_MLock_g_init_handled(void)
 /* Initialize the global variable Base_MLock_g, the default
  * memory locking structure when none is specified.
  * Die on failure. */
+BASE_INLINE void Base_MLock_g_init_handled(void)
 {
   if (!Base_MLock_g.page_size)
     Base_MLock_init_handled(&Base_MLock_g);
 }
 
-BASE_API Base_Error_t Base_mlock_ctx
 /* Attempt to lock the memory @p with requested number of bytes @n, with the
  * MemoryLock struct pointer @ctx. */
-(R_(void*) p, uint64_t n, R_(Base_MLock*) ctx);
+BASE_API Base_Error_t Base_mlock_ctx(void* R_ p, uint64_t n, Base_MLock* R_ ctx);
 
-BASE_INLINE Base_Error_t Base_mlock(
 /* Lock the memory @p with number bytes @n using the default global context. */
- R_(void*) p, uint64_t n)
+BASE_INLINE Base_Error_t Base_mlock(void* R_ p, uint64_t n)
 {
   return Base_mlock_ctx(p, n, &Base_MLock_g);
 }
 
-BASE_API void Base_mlock_ctx_handled(
 /* Lock the memory @p with number bytes @n using context
  * @ctx with the handle flags @f. */
- R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f);
+BASE_API void Base_mlock_ctx_handled(void* R_ p, uint64_t n, Base_MLock* R_ ctx, Base_MLock_F_t f);
 
-BASE_INLINE void Base_mlock_ctx_or_die(
 /* Lock the memory @p with number bytes @n using context @ctx. */
- R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
+BASE_INLINE void Base_mlock_ctx_or_die(void* R_ p, uint64_t n, Base_MLock* R_ ctx)
 {
   Base_mlock_ctx_handled(p, n, ctx, 0);
 }
 
-BASE_INLINE void Base_mlock_handled(
 /* Lock the memory @p with number bytes @n using the default global context, with a handle flag of @f. */
- R_(void*) p, uint64_t n, Base_MLock_F_t f)
+BASE_INLINE void Base_mlock_handled(void* R_ p, uint64_t n, Base_MLock_F_t f)
 {
   Base_mlock_ctx_handled(p, n, &Base_MLock_g, f);
 }
 
-BASE_INLINE void Base_mlock_or_die(
 /* Lock the memory @p with number bytes @n using the default global context. */
- R_(void*) p, uint64_t n)
+BASE_INLINE void Base_mlock_or_die(void* R_ p, uint64_t n)
 {
   Base_mlock_handled(p, n, 0);
 }
 
-BASE_API Base_Error_t Base_munlock_ctx(
 /* Unlock the memory @p with number bytes @n using the context @ctx. */
- R_(void*) p, uint64_t n, R_(Base_MLock*) ctx);
+BASE_API Base_Error_t Base_munlock_ctx(void* R_ p, uint64_t n, Base_MLock* R_ ctx);
 
-BASE_INLINE Base_Error_t Base_munlock(
 /* Unlock the memory @p with number bytes @n using the default global context. */
- R_(void*) p, uint64_t n)
+BASE_INLINE Base_Error_t Base_munlock(void* R_ p, uint64_t n)
 {
   return Base_munlock_ctx(p, n, &Base_MLock_g);
 }
 
-BASE_API void Base_munlock_ctx_handled(
 /* Unlock the memory @p with number bytes @n using the context @ctx, with a handle flag of @f. */
- R_(void*) p, uint64_t n, R_(Base_MLock*) ctx, Base_MLock_F_t f);
+BASE_API void Base_munlock_ctx_handled(void* R_ p, uint64_t n, Base_MLock* R_ ctx, Base_MLock_F_t f);
 
-BASE_INLINE void Base_munlock_ctx_or_die(
 /* Unlock the memory @p with number bytes @n using the context @ctx, with a handle flag of 0. */
- R_(void*) p, uint64_t n, R_(Base_MLock*) ctx)
+BASE_INLINE void Base_munlock_ctx_or_die(void* R_ p, uint64_t n, Base_MLock* R_ ctx)
 {
   Base_munlock_ctx_handled(p, n, ctx, 0);
 }
 
-BASE_INLINE void Base_munlock_handled(
 /* Unlock the memory @p with number bytes @n using the default global context, with a handle flag of @f. */
- R_(void*) p, uint64_t n, Base_MLock_F_t f)
+BASE_INLINE void Base_munlock_handled(void* R_ p, uint64_t n, Base_MLock_F_t f)
 {
   Base_munlock_ctx_handled(p, n, &Base_MLock_g, f);
 }
 
-BASE_INLINE void Base_munlock_or_die(
 /* Unlock the memory @p with number bytes @n using the
  * default global context, with a handle flag of 0. */
- R_(void*) p, uint64_t n)
+BASE_INLINE void Base_munlock_or_die(void* R_ p, uint64_t n)
 {
   Base_munlock_handled(p, n, 0);
 }

@@ -4,7 +4,7 @@
 #include "term.h"
 #include "macros.h"
 
-#define R_(Ptr) Ptr BASE_RESTRICT
+#define R_ BASE_RESTRICT
 #if defined(BASE_OS_UNIXLIKE)
  #define NEWLINE_ "\n"
  #ifdef __NetBSD__
@@ -29,7 +29,7 @@ void Base_term_end(void)  { endwin();           }
 
 #define SECRET_STR_MIN_BUFSIZE_ 2
 int Base_term_get_secret_string(
- R_(uint8_t*) buffer, R_(const char*) prompt, const int buffer_size)
+ uint8_t* R_ buffer, const char* R_ prompt, const int buffer_size)
 #if defined(BASE_OS_UNIXLIKE)
 { /* Unixlike impl */
   Base_assert_msg(
@@ -132,7 +132,7 @@ int Base_term_get_secret_string(
 #endif
 
 int Base_term_obtain_password(
- R_(uint8_t*) password_buf, R_(const char*) entry_prompt,
+ uint8_t* R_ password_buf, const char* R_ entry_prompt,
  const int min_pw_size, const int max_pw_size, const int buffer_size)
 {
   Base_assert_msg(
@@ -149,8 +149,8 @@ return size;
 }
 
 int Base_term_obtain_password_checked(
- R_(uint8_t*) password_buf, R_(uint8_t*) check_buf, R_(const char*) entry_prompt,
- R_(const char*) reentry_prompt, const int min_pw_size, const int max_pw_size, const int buffer_size)
+ uint8_t* R_ password_buf, uint8_t* R_ check_buf, const char* R_ entry_prompt,
+ const char* R_ reentry_prompt, const int min_pw_size, const int max_pw_size, const int buffer_size)
 {
   int size;
   while (1) {
