@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #ifndef BASE_ERRORS_H
 #define BASE_ERRORS_H
 
@@ -49,17 +48,42 @@ typedef int Base_Error_t;
  #define BASE_ERRX_CODE_LIST_IMPL(Code, Fmt, ArgList) BASE_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList)
 #endif
 
-#define R_ BASE_RESTRICT /* Shorthand. */
+#define R_ BASE_RESTRICT
 BASE_BEGIN_C_DECLS
-BASE_API    void Base_errx_code_vargs(int code, const char* R_ fmt, ...);
+
+/* TODO: Document. */
+BASE_API
+void Base_errx_code_vargs(int code, const char* R_ fmt, ...);
+
 #ifdef BASE_ERRX_CODE_LIST_INLINE
-BASE_INLINE void Base_errx_code_list(int code, const char* R_ fmt, va_list args) BASE_ERRX_CODE_LIST_IMPL(code, fmt, args)
+ #define  API_      BASE_INLINE
+ #define IMPL_(...) BASE_ERRX_CODE_LIST_IMPL(__VA_ARGS__)
 #else
-BASE_API    void Base_errx_code_list(int code, const char* R_ fmt, va_list args);
+ #define  API_      BASE_API
+ #define IMPL_(...) ;
 #endif
-BASE_API    void Base_errx(const char* R_ fmt, ...);
-BASE_API    void Base_assert_msg(bool, const char* R_, ...);
-BASE_INLINE void Base_assert(bool b) { Base_assert_msg(b, BASE_ERR_S_FAILED("Base_assert")); }
+/* TODO: Document. */
+API_ void
+Base_errx_code_list(int code, const char* R_ fmt, va_list args)
+IMPL_(code, fmt, args)
+#undef  API_
+#undef IMPL_
+
+/* TODO: Document. */
+BASE_API void
+Base_errx(const char* R_ fmt, ...);
+
+/* TODO: Document. */
+BASE_API void
+Base_assert_msg(bool, const char* R_, ...);
+
+/* TODO: Document. */
+BASE_INLINE void
+Base_assert(bool b)
+{
+  Base_assert_msg(b, BASE_ERR_S_FAILED("Base_assert"));
+}
+
 BASE_END_C_DECLS
 #undef R_
 

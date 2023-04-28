@@ -10,7 +10,7 @@
 typedef Base_Arg_Short         Short_t;
 typedef Base_Arg_Long          Long_t;
 typedef Base_Arg_Parser        Parser_t;
-typedef Base_Arg_Parser_Flag_t BAP_Flag_t;
+typedef Base_Arg_Parser_Flag_t Flag_t;
 #define EQ_ISVALID_ BASE_ARG_PARSER_FLAG_EQUALS_ISVALID
 
 static int
@@ -18,11 +18,11 @@ short_match_(const int shortc, const Short_t* R_ shortv, char ch);
 
 static int
 long_match_flag_(
- const BAP_Flag_t flag,
- const int longc,
+ const Flag_t     flag,
+ const int        longc,
  const Long_t* R_ longv,
- size_t str_n,
- char* R_ str);
+ size_t           str_n,
+ char* R_         str);
 
 BASE_INLINE int
 long_match_(
@@ -34,19 +34,23 @@ long_match_(
   return long_match_flag_(BASE_ARG_PARSER_FLAG_NONE, longc, longv, str_n, str);
 }
 
-static int long_match_(const int, const Long_t* R_, size_t, char* R_);
+static int
+long_match_(const int, const Long_t* R_, size_t, char* R_);
 
-static int process_shorts_(const int, char** R_, const int, const Short_t* R_, void* R_);
+static int
+process_shorts_(const int, char** R_, const int, const Short_t* R_, void* R_);
 
-static int process_longs_flag_(
- const BAP_Flag_t flag,
+static int
+process_longs_flag_(
+ const Flag_t     flag,
  const int        argc,
  char** R_        argv,
  const int        longc,
  const Long_t* R_ longv,
  void* R_         state);
 
-BASE_INLINE int process_longs_(
+BASE_INLINE int
+process_longs_(
  const int        argc,
  char** R_        argv,
  const int        longc,
@@ -56,7 +60,8 @@ BASE_INLINE int process_longs_(
   return process_longs_flag_(BASE_ARG_PARSER_FLAG_NONE, argc, argv, longc, longv, state);
 }
 
-Base_ArgType_t Base_argtype(const char* s)
+Base_ArgType_t
+Base_argtype(const char* s)
 {
   int n_hyphens = 0;
   if (s[0] == '-')
@@ -75,7 +80,8 @@ Base_ArgType_t Base_argtype(const char* s)
 
 enum { NOMATCH_ = -1 };
 
-int short_match_(
+int
+short_match_(
  const int         shortc,
  const Short_t* R_ shortv,
  char              ch)
@@ -88,22 +94,27 @@ int short_match_(
 
 enum { EQ_NOT_FOUND_ = -1 };
 
-static int eq_strlen_(const char* s)
+static int
+eq_strlen_(const char* s)
 {
   int i = 0;
   while (1) {
-    if (s[i] == '\0')
-      return EQ_NOT_FOUND_;
-    if (s[i] == '=')
-      return i;
-    ++i;
+    switch (s[i]) {
+      case '\0':
+        return EQ_NOT_FOUND_;
+      case '=':
+        return i;
+      default:
+        ++i;
+    }
   }
 }
 
 /* Long matching relies upon all Base_Arg_Long structs
  * being in alphanumeric order. */
-int long_match_flag_(
- const BAP_Flag_t flag,
+int
+long_match_flag_(
+ const Flag_t     flag,
  const int        longc,
  const Long_t* R_ longv,
  const size_t     str_n,
@@ -121,7 +132,8 @@ int long_match_flag_(
   return NOMATCH_;
 }
 
-int process_shorts_(
+int
+process_shorts_(
  const int         argc,
  char** R_         argv,
  const int         shortc,
@@ -148,8 +160,9 @@ int process_shorts_(
   return 0;
 }
 
-int process_longs_flag_(
- const BAP_Flag_t flag,
+int
+process_longs_flag_(
+ const Flag_t     flag,
  const int        argc,
  char** R_        argv,
  const int        longc,
@@ -178,11 +191,12 @@ int process_longs_flag_(
   return (longv[long_i].proc)(argc, argv, start, state);
 }
 
-void Base_process_args(
+void
+Base_process_args(
  const int argc,   char** R_         argv,
  const int shortc, const Short_t* R_ shortv,
  const int longc,  const Long_t* R_  longv,
- void* R_ state,   Base_Arg_Proc_f*  alone)
+ void* R_  state,  Base_Arg_Proc_f*  alone)
 {
   for (int arg_i = 0; arg_i < argc; ++arg_i) {
     const int argc_left = argc - arg_i;
@@ -209,7 +223,8 @@ void Base_process_args(
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
 } /* ! Base_process_args */
 
-void Base_Arg_Parser_init(
+void
+Base_Arg_Parser_init(
  Parser_t* R_ ctx,
  char* R_     start,
  const int    argc,
@@ -219,14 +234,16 @@ void Base_Arg_Parser_init(
   if (*start != '\0') {
     ctx->to_read = start;
     ctx->size = strlen(ctx->to_read);
-  } else {
+  }
+  else {
     /* *start == '\0' */
     if (argc >= 2) {
       /* There is a next word. Assume this next word has the input we want. */
       ctx->to_read = argv[1];
       ctx->size = strlen(ctx->to_read);
       ctx->consumed = 1;
-    } else
+    }
+    else
       ctx->to_read = BASE_NULL;
   }
 }

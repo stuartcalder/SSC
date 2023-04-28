@@ -101,5 +101,6 @@ Base_create_filepath(const char* R_ filepath, Base_File_t* R_ file)
 
 #ifndef BASE_SET_FILE_SIZE_INLINE
 Base_Error_t
-Base_set_file_size(Base_File_t file, size_t size) BASE_SET_FILE_SIZE_IMPL(file, size)
+Base_set_file_size(Base_File_t file, size_t size)
+BASE_SET_FILE_SIZE_IMPL(file, size)
 #endif /* ~ BASE_INLINE_SET_FILE_SIZE */

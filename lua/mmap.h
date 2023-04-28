@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #if !defined(BASE_LUA_MMAP_H) && defined(BASE_EXTERN_LUA)
 #define BASE_LUA_MMAP_H
 
@@ -16,13 +15,15 @@
 #define BASE_LUA_MMAP_TEST(L, idx)	BASE_LUA_TEST_UD(L, idx, Base_MMap, BASE_LUA_MMAP_MT)
 
 /* FIXME: We no longer really need `Base_Lua_MMap`.
- * typedef this for now until we remove every usage of `Base_Lua_MMap`.
- */
+ * typedef this for now until we remove every usage of `Base_Lua_MMap`. */
 typedef Base_MMap Base_Lua_MMap;
 #define BASE_LUA_MMAP_NULL_LITERAL BASE_MMAP_NULL_LITERAL
 
 BASE_BEGIN_C_DECLS
-BASE_API int luaopen_Base_MMap (lua_State* L);
+
+BASE_API int
+luaopen_Base_MMap(lua_State* L);
+
 BASE_END_C_DECLS
 
 #endif /* ~ !defined(BASE_LUA_MMAP_H) ... */

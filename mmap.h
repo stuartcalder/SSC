@@ -40,14 +40,15 @@ typedef struct {
 #endif
 
 /* Initialization flags. */
-#define BASE_MMAP_INIT_READONLY        UINT8_C(0x01) /* Is the memorymap readonly? */
-#define BASE_MMAP_INIT_ALLOWSHRINK     UINT8_C(0x02) /* Are we allowed to shrink the size of the file? */
-#define BASE_MMAP_INIT_FORCE_EXIST     UINT8_C(0x04) /* Indicate we will force existence or non-existence of a file. */
-/* When BASE_MMAP_INIT_FORCE_EXIST is on...
- * if BASE_MMAP_INIT_FORCE_EXIST_YES is on, enforce that the file already exists.
- * else, enforce that the file DOESN'T already exist. */
-#define BASE_MMAP_INIT_FORCE_EXIST_YES UINT8_C(0x08)
-typedef uint_fast8_t Base_MMap_Init_t;
+enum {
+  BASE_MMAP_INIT_READONLY =    0x01, /* Is the memory-map readonly? */
+  BASE_MMAP_INIT_ALLOWSHRINK = 0x02, /* Are we allowed to shrink the size of the file? */
+  BASE_MMAP_INIT_FORCE_EXIST = 0x04, /* Indicate we will either force existence or non-existence of a file. */
+  /* When BASE_MMAP_INIT_FORCE_EXIST is on...
+   * if BASE_MMAP_INIT_FORCE_EXIST_YES is on, enforce that the file already exists.
+   * else, enforce that the file DOESN'T already exist. */
+  BASE_MMAP_INIT_FORCE_EXIST_YES = 0x08,
+}; typedef uint_fast8_t Base_MMap_Init_t;
 /* Initialization error codes. */
 enum {
   BASE_MMAP_INIT_CODE_OK =                   0,
@@ -104,14 +105,14 @@ Base_MMap_unmap_or_die(Base_MMap* map)
 
 /* Synchronize mapped memory with the filesystem. */
 BASE_INLINE Base_Error_t
-Base_MMap_sync(const Base_MMap* map) BASE_MMAP_SYNC_IMPL(map)
+Base_MMap_sync(const Base_MMap* map)
+BASE_MMAP_SYNC_IMPL(map)
 
 BASE_INLINE void
 Base_MMap_sync_or_die(const Base_MMap* map)
 {
   Base_assert_msg(!Base_MMap_sync(map), BASE_ERR_S_FAILED_IN("Base_MMap_sync()"));
 }
-
 
 /* Unmap memory and close opened files. */
 BASE_API void

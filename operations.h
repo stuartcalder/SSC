@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #ifndef BASE_OPERATIONS_H
 #define BASE_OPERATIONS_H
 
@@ -43,12 +42,36 @@
 #define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS
 /* Use inline functions instead of macros directly to do bitwise rotation. */
-BASE_INLINE uint16_t Base_rotl_16(uint16_t val, int count) { return BASE_ROT_LEFT_(val, count, 16); }
-BASE_INLINE uint32_t Base_rotl_32(uint32_t val, int count) { return BASE_ROT_LEFT_(val, count, 32); }
-BASE_INLINE uint64_t Base_rotl_64(uint64_t val, int count) { return BASE_ROT_LEFT_(val, count, 64); }
-BASE_INLINE uint16_t Base_rotr_16(uint16_t val, int count) { return BASE_ROT_RIGHT_(val, count, 16); }
-BASE_INLINE uint32_t Base_rotr_32(uint32_t val, int count) { return BASE_ROT_RIGHT_(val, count, 32); }
-BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIGHT_(val, count, 64); }
+BASE_INLINE uint16_t
+Base_rotl_16(uint16_t val, int count)
+{
+  return BASE_ROT_LEFT_(val, count, 16);
+}
+BASE_INLINE uint32_t
+Base_rotl_32(uint32_t val, int count)
+{
+  return BASE_ROT_LEFT_(val, count, 32);
+}
+BASE_INLINE uint64_t
+Base_rotl_64(uint64_t val, int count)
+{
+  return BASE_ROT_LEFT_(val, count, 64);
+}
+BASE_INLINE uint16_t
+Base_rotr_16(uint16_t val, int count)
+{
+  return BASE_ROT_RIGHT_(val, count, 16);
+}
+BASE_INLINE uint32_t
+Base_rotr_32(uint32_t val, int count)
+{
+  return BASE_ROT_RIGHT_(val, count, 32);
+}
+BASE_INLINE uint64_t
+Base_rotr_64(uint64_t val, int count)
+{
+  return BASE_ROT_RIGHT_(val, count, 64);
+}
 /* Cleanup implementation macros. */
 #undef BASE_ROT_LEFT_
 #undef BASE_ROT_RIGHT_
@@ -57,11 +80,21 @@ BASE_INLINE uint64_t Base_rotr_64(uint64_t val, int count) { return BASE_ROT_RIG
 
 /* Base_xor_n(write_to, read_from)
  * XOR n bytes beginning at both addresses, and store in @write_to. */
-BASE_API void Base_xor_16(void*  R_ writeto, const void* R_ readfrom);
-BASE_API void Base_xor_32(void*  R_ writeto, const void* R_ readfrom);
-BASE_API void Base_xor_64(void*  R_ writeto, const void* R_ readfrom);
-BASE_API void Base_xor_128(void* R_ writeto, const void* R_ readfrom);
+BASE_API void
+Base_xor_16(void* R_ writeto, const void* R_ readfrom);
 
+BASE_API void
+Base_xor_32(void* R_ writeto, const void* R_ readfrom);
+
+BASE_API void
+Base_xor_64(void* R_ writeto, const void* R_ readfrom);
+
+BASE_API void
+Base_xor_128(void* R_ writeto, const void* R_ readfrom);
+
+/* When possible, use C23's memset_explicit() to securely
+ * zero over memory without optimizations; otherwise fall back
+ * to OS-specific methods of secure zeroing. */
 #include <string.h>
 #if defined(BASE_LANG_C) && (BASE_LANG_C >= BASE_C_23)
  #define SECURE_ZERO_IMPL_(Ptr, Size) { memset_explicit(Ptr, 0, Size); }
@@ -92,7 +125,6 @@ BASE_API void Base_xor_128(void* R_ writeto, const void* R_ readfrom);
 BASE_INLINE void
 Base_secure_zero(void* R_ mem, size_t n)
 SECURE_ZERO_IMPL_(mem, n)
-#undef SECURE_ZERO_IMPL_
 
 /* Compare the first @size bytes of @mem0 and @mem1.
  * Do the comparison in constant (worst case) time. */
@@ -116,6 +148,7 @@ Base_ctime_is_zero(const void* R_ mem, size_t size);
  * Don't return until all @size bytes of @mem are scanned. */
 
 BASE_END_C_DECLS
+#undef SECURE_ZERO_IMPL_
 #undef R_
 
 #endif /* ~ ifndef BASE_OPERATIONS_H */

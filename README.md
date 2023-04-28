@@ -8,7 +8,7 @@ memory-mapping, memory-locking, etc.
 -	[meson](https://mesonbuild.com) Build System
 ## Linux, MacOS, BSDs
 -	On Linux we need the ncurses development libraries and tinfo installed.
--	On MacOS and the BSDs we need the ncurses development libraries.
+-	On MacOS and the BSDs we only need the ncurses development libraries installed.
 ## Win64
 -	Minimum __Windows Vist/Server 2008__
 -	Minimum Visual Studio 2019

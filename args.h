@@ -7,7 +7,7 @@
 #include "macros.h"
 #include "strings.h"
 
-#define R_ BASE_RESTRICT /* Shorthand. */
+#define R_ BASE_RESTRICT
 BASE_BEGIN_C_DECLS
 
 /* Are we processing a short or long argument?
@@ -64,9 +64,10 @@ typedef struct {
 } Base_Arg_Parser;
 #define BASE_ARG_PARSER_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_Arg_Parser, 0)
 
-#define BASE_ARG_PARSER_FLAG_NONE           0x00 /* Passing no flags. */
-#define BASE_ARG_PARSER_FLAG_EQUALS_ISVALID 0x01 /* '=' is a valid character, not indicative of assignment. */
-typedef int Base_Arg_Parser_Flag_t;
+enum {
+  BASE_ARG_PARSER_FLAG_NONE =           0x00, /* Passing no flags. */
+  BASE_ARG_PARSER_FLAG_EQUALS_ISVALID = 0x01  /* '=' is a valid character, not indicative of assignment. */
+}; typedef int Base_Arg_Parser_Flag_t;
 
 /* Get the argument type of the string. Short? Long? Neither? */
 BASE_API Base_ArgType_t
@@ -100,6 +101,6 @@ Base_1opt(const char ch)
 }
 
 BASE_END_C_DECLS
-
 #undef R_
+
 #endif /* ! */

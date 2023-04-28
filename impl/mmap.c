@@ -32,7 +32,8 @@ Base_MMap_map(Base_MMap* map, bool readonly)
   if (readonly) {
     page_rw = PAGE_READONLY;
     map_rw  = FILE_MAP_READ;
-  } else {
+  }
+  else {
     page_rw = PAGE_READWRITE;
     map_rw  = (FILE_MAP_READ|FILE_MAP_WRITE);
   }
@@ -80,28 +81,28 @@ Base_MMap_unmap(Base_MMap* map)
   return ret;
 }
 
-#define RONLY_           BASE_MMAP_INIT_READONLY
-#define ALLOWSHRINK_     BASE_MMAP_INIT_ALLOWSHRINK
-#define FEXIST_          BASE_MMAP_INIT_FORCE_EXIST
-#define FEXIST_Y_        BASE_MMAP_INIT_FORCE_EXIST_YES
+#define RONLY_       BASE_MMAP_INIT_READONLY
+#define ALLOWSHRINK_ BASE_MMAP_INIT_ALLOWSHRINK
+#define FEXIST_      BASE_MMAP_INIT_FORCE_EXIST
+#define FEXIST_Y_    BASE_MMAP_INIT_FORCE_EXIST_YES
 typedef Base_MMap_Init_t Init_t;
 
-#define OK_                   BASE_MMAP_INIT_CODE_OK
-#define ERR_FEXIST_NO_        BASE_MMAP_INIT_CODE_ERR_FEXIST_NO
-#define ERR_FEXIST_YES_       BASE_MMAP_INIT_CODE_ERR_FEXIST_YES
-#define ERR_READONLY_         BASE_MMAP_INIT_CODE_ERR_READONLY
-#define ERR_SHRINK_           BASE_MMAP_INIT_CODE_ERR_SHRINK
-#define ERR_NOSIZE_           BASE_MMAP_INIT_CODE_ERR_NOSIZE
-#define ERR_OPEN_FILEPATH_    BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH
-#define ERR_CREATE_FILEPATH_  BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH
-#define ERR_GET_FILE_SIZE_    BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE
-#define ERR_SET_FILE_SIZE_    BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE
-#define ERR_MAP_              BASE_MMAP_INIT_CODE_ERR_MAP
+#define OK_                  BASE_MMAP_INIT_CODE_OK
+#define ERR_FEXIST_NO_       BASE_MMAP_INIT_CODE_ERR_FEXIST_NO
+#define ERR_FEXIST_YES_      BASE_MMAP_INIT_CODE_ERR_FEXIST_YES
+#define ERR_READONLY_        BASE_MMAP_INIT_CODE_ERR_READONLY
+#define ERR_SHRINK_          BASE_MMAP_INIT_CODE_ERR_SHRINK
+#define ERR_NOSIZE_          BASE_MMAP_INIT_CODE_ERR_NOSIZE
+#define ERR_OPEN_FILEPATH_   BASE_MMAP_INIT_CODE_ERR_OPEN_FILEPATH
+#define ERR_CREATE_FILEPATH_ BASE_MMAP_INIT_CODE_ERR_CREATE_FILEPATH
+#define ERR_GET_FILE_SIZE_   BASE_MMAP_INIT_CODE_ERR_GET_FILE_SIZE
+#define ERR_SET_FILE_SIZE_   BASE_MMAP_INIT_CODE_ERR_SET_FILE_SIZE
+#define ERR_MAP_             BASE_MMAP_INIT_CODE_ERR_MAP
 typedef Base_MMap_Init_Code_t Init_Code_t;
 
 Init_Code_t
 Base_MMap_init(
- Base_MMap* R_  map,
+ Base_MMap*  R_ map,
  const char* R_ filepath,
  size_t         size,
  Init_t         flags)
@@ -116,36 +117,53 @@ Base_MMap_init(
   setsize = !readonly && (!exists || (size > 0));
   if (flags & FEXIST_) {
     if (flags & FEXIST_Y_) {
-      /* We are forcing existence. */
+    /* We are forcing existence. */
       if (!exists)
         return ERR_FEXIST_YES_;
-    } else {
-      /* We are forcing non-existence. */
+    }
+    else {
+    /* We are forcing non-existence. */
       if (exists)
         return ERR_FEXIST_NO_;
     }
   }
+  /* Does the file exist? */
+
+  /* It does exist. */
   if (exists) {
+    /* It does. Open it and store the Base_File_t in @map. */
     if (Base_open_filepath(filepath, readonly, &map->file))
       return ERR_OPEN_FILEPATH_;
+    /* Store the size of the file in @map->size. */
     if (Base_get_file_size(map->file, &map->size))
       return ERR_GET_FILE_SIZE_;
-    if (!readonly) {
+    /* When not readonly and a size has been requested by the caller... */
+    if (!readonly && size > 0) {
+      /* ... and the stored size in @map exceeds the size requested by the caller... */
       if (map->size > size) {
+        /* ... only allow it when we are allowing shrinkage. */
         if (!allowshrink)
 	  return ERR_SHRINK_;
-      } else if (map->size == size)
-        setsize = false;
+      }
+      /* ... and the stored size in @map equals the size requested by the caller ... */
+      else if (map->size == size)
+        setsize = false; /* ... no size change is necessary. */
     }
-  } else {
+  }
+  /* The file didn't exist. */
+  else {
+    /* Since it didn't exist requesting readonly makes no sense. */
     if (readonly)
       return ERR_READONLY_;
-    if (!size)
+    /* Since it didn't exist a size must be provided by the caller. */
+    if (size == 0)
       return ERR_NOSIZE_;
+    /* Create the file at the @filepath and store the Base_File_t in @map. */
     if (Base_create_filepath(filepath, &map->file))
       return ERR_CREATE_FILEPATH_;
   }
   if (setsize) {
+    /* Set the size according to that specified by the caller. */
     map->size = size;
     if (Base_set_file_size(map->file, map->size))
       return ERR_SET_FILE_SIZE_;
@@ -158,7 +176,7 @@ Base_MMap_init(
 
 void
 Base_MMap_init_or_die(
- Base_MMap* R_  map,
+ Base_MMap*  R_ map,
  const char* R_ filepath,
  size_t         size,
  Init_t         flags)

@@ -31,10 +31,10 @@
 #elif defined(BASE_OS_WINDOWS)
  #define BASE_CLOSE_FILE_IMPL(F) { if (CloseHandle(F)) return 0; return -1; }
  #define BASE_SET_FILE_SIZE_IMPL(F, N) {\
-    LARGE_INTEGER i; i.QuadPart = N;\
-    if (!SetFilePointerEx(F, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(F))\
-      return -1;\
-    return 0;\
+  LARGE_INTEGER i; i.QuadPart = N;\
+  if (!SetFilePointerEx(F, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(F))\
+    return -1;\
+  return 0;\
  }
  #define BASE_CHDIR_IMPL_F     _chdir
  #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_F(Path); }
@@ -95,6 +95,7 @@ Base_open_filepath_or_die(const char* R_ fpath, bool ronly)
   Base_assert_msg(!Base_open_filepath(fpath, ronly, &f), BASE_ERR_S_FAILED_IN("Base_open_filepath()"));
   return f;
 }
+
 /* Create a file at a specified filepath. */
 BASE_API Base_Error_t
 Base_create_filepath(const char* R_ fpath, Base_File_t* R_ fhptr);
@@ -109,7 +110,8 @@ Base_create_filepath_or_die(const char* fpath)
 
 /* Close the file associed with a specified file handle. */
 BASE_INLINE Base_Error_t
-Base_close_file(Base_File_t fhandle) BASE_CLOSE_FILE_IMPL(fhandle)
+Base_close_file(Base_File_t fhandle)
+BASE_CLOSE_FILE_IMPL(fhandle)
 
 BASE_INLINE void
 Base_close_file_or_die(Base_File_t fhandle)
@@ -126,7 +128,8 @@ Base_close_file_or_die(Base_File_t fhandle)
 #endif
 /* Set the size of a file in bytes. Fill the void with zeroes. */
 API_ Base_Error_t
-Base_set_file_size(Base_File_t fhandle, size_t size) IMPL_(fhandle, size)
+Base_set_file_size(Base_File_t fhandle, size_t size)
+IMPL_(fhandle, size)
 #undef  API_
 #undef IMPL_
 
@@ -138,7 +141,8 @@ Base_set_file_size_or_die(Base_File_t fhandle, size_t size)
 
 /* Change the current working directory to @path. */
 BASE_INLINE Base_Error_t
-Base_chdir(const char* path) BASE_CHDIR_IMPL(path)
+Base_chdir(const char* path)
+BASE_CHDIR_IMPL(path)
 
 BASE_END_C_DECLS
 #undef R_

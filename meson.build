@@ -6,8 +6,8 @@ LANG = 'c'
 # Operating Systems & Compilers
 UNIXLIKE_OPERATING_SYSTEMS  = ['openbsd', 'freebsd', 'netbsd', 'darwin', 'linux']
 SUPPORTED_OPERATING_SYSTEMS = UNIXLIKE_OPERATING_SYSTEMS + ['windows']
-GCC_COMPATIBLE_COMPILERS		= ['gcc', 'clang']
-SUPPORTED_COMPILERS			= GCC_COMPATIBLE_COMPILERS + ['msvc']
+GCC_COMPATIBLE_COMPILERS = ['gcc', 'clang']
+SUPPORTED_COMPILERS = GCC_COMPATIBLE_COMPILERS + ['msvc']
 GCC_COMPATIBLE_FLAGS = [
   '-fvisibility=hidden',
   '-fstrict-aliasing',

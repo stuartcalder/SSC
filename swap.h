@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #ifndef BASE_SWAP_H
 #define BASE_SWAP_H
 /* This header implements byte-swapping; reversing the order of bytes in
@@ -26,8 +25,7 @@
 #endif
 /* On OSX we will use the provided OSByteOrder.h
  * to byteswap, if it is available and if the compiler
- * supports __has_include.
- */
+ * supports __has_include. */
 #if !defined(BASE_SWAP_IMPL) && defined(BASE_OS_MAC)
  #ifdef __has_include
   #if __has_include(<libkern/OSByteOrder.h>)
@@ -58,7 +56,7 @@
 #ifndef BASE_SWAP_IMPL
  #define BASE_SWAP_IMPL BASE_SWAP_IMPL_RAW
 #endif
-#if (BASE_SWAP_IMPL == BASE_SWAP_IMPL_RAW)
+#if BASE_SWAP_IMPL == BASE_SWAP_IMPL_RAW
  #define BASE_SWAP_DONT_INLINE
 #endif
 
@@ -98,8 +96,7 @@
   #define BASE_SWAP_64_IMPL(VarU64) { return _byteswap_uint64(VarU64); }
  #elif defined(BASE_OS_MAC)
    /* We just want to byteswap here. OSX provides functions to convert from host to alternative endians,
-    * which is the same as a byteswap when endianness differs.
-    */
+    * which is the same as a byteswap when endianness differs. */
   #if   (BASE_ENDIAN == BASE_ENDIAN_LITTLE)
    #define BASE_SWAP_IMPL_HOST_TO(Var, Bits) (uint##Bits##_t)OSSwapHostToBigInt##Bits(Var)
   #elif (BASE_ENDIAN == BASE_ENDIAN_BIG)
@@ -141,13 +138,35 @@
 #endif /* ~ Defining swap implementation. */
 
 #ifdef BASE_SWAP_DONT_INLINE
-BASE_API    uint16_t Base_swap_16 (uint16_t);
-BASE_API    uint32_t Base_swap_32 (uint32_t);
-BASE_API    uint64_t Base_swap_64 (uint64_t);
+ #define API_          BASE_API
+ #define IMPL_16_(U16) ;
+ #define IMPL_32_(U32) ;
+ #define IMPL_64_(U64) ;
 #else
-BASE_INLINE uint16_t Base_swap_16 (uint16_t u16v) BASE_SWAP_16_IMPL(u16v)
-BASE_INLINE uint32_t Base_swap_32 (uint32_t u32v) BASE_SWAP_32_IMPL(u32v)
-BASE_INLINE uint64_t Base_swap_64 (uint64_t u64v) BASE_SWAP_64_IMPL(u64v)
-#endif /* ! ifdef BASE_SWAP_DONT_INLINE */
+ #define API_          BASE_INLINE
+ #define IMPL_16_(U16) BASE_SWAP_16_IMPL(U16)
+ #define IMPL_32_(U32) BASE_SWAP_32_IMPL(U32)
+ #define IMPL_64_(U64) BASE_SWAP_64_IMPL(U64)
+#endif
+
+BASE_BEGIN_C_DECLS
+
+API_ uint16_t
+Base_swap_16(uint16_t u16)
+IMPL_16_(u16)
+
+API_ uint32_t
+Base_swap_32(uint32_t u32)
+IMPL_32_(u32)
+
+API_ uint64_t
+Base_swap_64(uint64_t u64)
+IMPL_64_(u64)
+
+BASE_END_C_DECLS
+#undef API_
+#undef IMPL_16_
+#undef IMPL_32_
+#undef IMPL_64_
 
 #endif /* ~ BASE_SWAP_H */

@@ -39,10 +39,10 @@ static int sbuffer_new (lua_State* L) {
 				break;
 			case BASE_MLOCK_ERR_LOCK_OP:
 				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "MLock Op");
-#  ifdef BASE_EXTERN_MLOCK_THREADSAFE
+ #ifdef BASE_EXTERN_MLOCK_THREADSAFE
 			case BASE_MLOCK_ERR_MTX_OP:
 				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Mutex Op");
-#  endif
+ #endif
 			default:
 				return luaL_error(L, "%s failed with error `%s'.", "Base_MLock", "Invalid Base_mlock Retcode");
 		}

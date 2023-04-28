@@ -1,10 +1,9 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
+/* Copyright (c) 2020-2023 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  *
  * In this file, we define procedures for allocating aligned memory,
  * determining the memory page size of the OS.
- * The *_or_die(...) procedures call exit() on failure.
- */
+ * The *_or_die(...) procedures call exit() on failure. */
 #ifndef BASE_MEM_H
 #define BASE_MEM_H
 

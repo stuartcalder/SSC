@@ -24,7 +24,7 @@
 #define BASE_COMPILER_UNKNOWN 0 /* Unrecognized compiler. */
 #define BASE_COMPILER_GCC     1 /* GNU C/C++ compiler. */
 #define BASE_COMPILER_CLANG   2 /* Clang C/C++ compiler. */
-#define BASE_COMPILER_MSVC    3 /* Microsoft Visual C compiler. */
+#define BASE_COMPILER_MSVC    3 /* Microsoft Visual C/C++ compiler. */
 #define BASE_COMPILER_ISVALID(Comp) ((Comp) >= BASE_COMPILER_UNKNOWN && (Comp) <= BASE_COMPILER_MSVC) /* UNKNOWN is valid. */
 /* Pointer-aliasing restrict support bits. */
 #define BASE_RESTRICT_IMPL_C    0x01 /* C99 restrict. */
@@ -307,7 +307,7 @@
   #define BASE_ALIGNOF(Of_)
   #define BASE_ALIGNOF_IS_NIL
  #endif /* !#i fdef __STDC_VERSION__ */
- #define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 syntax. */
+ #define BASE_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 literal syntax. */
  #define BASE_CONSTEXPR
  #define BASE_CONSTEXPR_IS_NIL
  #define BASE_CONSTEVAL
@@ -323,6 +323,7 @@
 #else
  #define BASE_ANY_ASSERT(Bool, Msg) BASE_STATIC_ASSERT(Bool, Msg)
 #endif
+
 /* If we can do a compile-time assertion, BASE_ANY_ASSERT_1()
  * is equivalent to BASE_STATIC_ASSERT_1(). If we cannot, the assertion
  * is runtime. Only pass compile-time boolean expressions as @Bool. */
@@ -336,8 +337,8 @@
 #ifndef BASE_RESTRICT_IMPL
  #define BASE_RESTRICT_IMPL 0
 #endif
-#if ((BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) ||\
- ((BASE_COMPILER == BASE_COMPILER_MSVC) && (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900))))
+#if (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_CPP) ||\
+     ((BASE_COMPILER == BASE_COMPILER_MSVC) && (defined(BASE_COMPILER_V) && (BASE_COMPILER_V >= 1900)))
  #define BASE_RESTRICT __restrict /* C++/MSVC compatible restrict. */
 #elif (BASE_RESTRICT_IMPL & BASE_RESTRICT_IMPL_C)
  #define BASE_RESTRICT restrict   /* C99-specified restrict. */
