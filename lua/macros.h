@@ -106,11 +106,20 @@
 #define BASE_LUA_STACK_FAIL(L, N)      luaL_stack(L, N, "Stack failed to grow.")
 #define BASE_LUA_NUM_METHODS(RegArray) ((sizeof(RegArray) / sizeof(luaL_Reg)) - 1)
 
+/* The table at the top of the stack will now index itself. */
 #define BASE_LUA_MT_SELF_INDEX(L) do {\
  lua_pushvalue(L, -1);\
  lua_setfield(L, -2, "__index");\
 } while (0)
 
+/* Load the @Module. */
+#define BASE_LUA_LOAD_MODULE(L, Module) do {\
+  lua_pushcfunction(L, luaopen_##Module);\
+  if (lua_pcall(L, 0, 1, 0) != LUA_OK)\
+    return luaL_error(L, "Failed to load main module %s.", BASE_STRINGIFY(Module));\
+} while (0)
+
+/* Load the @SubModule of @MainModule. */
 #define BASE_LUA_LOAD_SUBMODULE(L, MainModule, SubModule) do {\
   lua_pushcfunction(L, luaopen_##MainModule##_##SubModule);\
   if (lua_pcall(L, 0, 1, 0) != LUA_OK)\
@@ -118,12 +127,8 @@
   lua_setfield(L, -2, BASE_STRINGIFY(SubModule));\
 } while (0)
 
-#define BASE_LUA_LOAD_MODULE(L, Module) do {\
-  lua_pushcfunction(L, luaopen_##Module);\
-  if (lua_pcall(L, 0, 1, 0) != LUA_OK)\
-    return luaL_error(L, "Failed to load main module %s.", BASE_STRINGIFY(Module));\
-} while (0)
-
+/* Load @C_Proc into the table at the top of the stack, and associate
+ * it with the name @Lua_Func_Str. */
 #define BASE_LUA_LOAD_FREE_PROC(L, C_Proc, Lua_Func_Str) do {\
   lua_pushcfunction(L, C_Proc);\
   lua_setfield(L, -2, Lua_Func_Str);\
@@ -137,7 +142,11 @@
  #error "Unsupported Lua version!"
 #endif
 
+/* Ensure there is a Userdata of type @Type with metatable @Mt at @Idx, or raise an error.
+ * Return a pointer to the Userdata. */
 #define BASE_LUA_CHECK_UD(L, Idx, Type, Mt) (Type*)luaL_checkudata(L, Idx, Mt)
+/* Check if there is a Userdata of type @Type with metatable @Mt at @Idx, or return
+ * a NULL pointer. */
 #define BASE_LUA_TEST_UD(L, Idx, Type, Mt)  (Type*)luaL_testudata(L, Idx, Mt)
-#define BASE_LUA_UD_FAIL(L, Idx, Func)      luaL_error(L, "%s: Invalid pointer for arg %d", Func, Idx)
+#define BASE_LUA_UD_FAIL(L, Idx, FuncStr)   luaL_error(L, "%s: Invalid pointer for arg %d", FuncStr, Idx)
 #endif

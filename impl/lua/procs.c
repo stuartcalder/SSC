@@ -6,38 +6,41 @@
 #include <Base/lua/macros.h>
 #include <Base/lua/procs.h>
 
-#define MT_            BASE_LUA_FILE_MT
-#define NEW_(L)        BASE_LUA_FILE_NEW(L)
-#define CHECK_(L, idx) BASE_LUA_FILE_CHECK(L, idx)
-#define TEST_(L, idx)  BASE_LUA_FILE_TEST(L, idx)
-#define NULL_          BASE_LUA_FILE_NULL_LITERAL
+#define FILE_MT_            BASE_LUA_FILE_MT
+#define FILE_NEW_(L)        BASE_LUA_FILE_NEW(L)
+#define FILE_CHECK_(L, idx) BASE_LUA_FILE_CHECK(L, idx)
+#define FILE_TEST_(L, idx)  BASE_LUA_FILE_TEST(L, idx)
+#define FILE_NULL_          BASE_LUA_FILE_NULL_LITERAL
 
-#define MFAIL_(L)      BASE_LUA_MALLOC_FAIL(L)
+#define MFAIL_(L)           BASE_LUA_MALLOC_FAIL(L)
 
 typedef Base_Lua_File File_t;
 
+/* Lua Args: (char*)filepath (optional bool)readonly
+ * Returns: File_t*, or nil on failure. */
 static int fpath_open (lua_State* L)
 {
   size_t fpath_n;
   const char* const fpath = luaL_checklstring(L, 1, &fpath_n);
   const bool ronly = (bool)(lua_isboolean(L, 2) ? lua_toboolean(L, 2) : true);
-  File_t* f = NEW_(L);
+  File_t* f = FILE_NEW_(L);
   if (Base_open_filepath(fpath, ronly, &f->file)) {
-    *f = NULL_;
+    *f = FILE_NULL_;
     lua_pushnil(L);
-  } else {
+  }
+  else {
     if (Base_get_file_size(f->file, &f->file_n)) {
-      *f = NULL_;
+      *f = FILE_NULL_;
       return luaL_error(L, "Base_get_file_size failed.");
     }
     if (!(f->fpath = (char*)malloc(fpath_n + 1))) {
-      *f = NULL_;
+      *f = FILE_NULL_;
       return luaL_error(L, "malloc failed.");
     }
     memcpy(f->fpath, fpath, fpath_n + 1);
     f->fpath_n = fpath_n;
     f->readonly = (uint8_t)ronly;
-    luaL_getmetatable(L, MT_);
+    luaL_getmetatable(L, FILE_MT_);
     lua_setmetatable(L, -2);
   }
   return 1;
@@ -49,9 +52,9 @@ static int fpath_create (lua_State* L)
 {
   size_t fpath_n;
   const char* const fpath = luaL_checklstring(L, 1, &fpath_n);
-  File_t* const f = NEW_(L);
+  File_t* const f = FILE_NEW_(L);
   if (Base_create_filepath(fpath, &f->file)) {
-    *f = NULL_;
+    *f = FILE_NULL_;
     lua_pushnil(L);
   } else {
     f->file_n = BASE_FILES_DEFAULT_NEWFILE_SIZE;
@@ -60,7 +63,7 @@ static int fpath_create (lua_State* L)
     memcpy(f->fpath, fpath, fpath_n + 1);
     f->fpath_n = fpath_n;
     f->readonly = UINT8_C(0);
-    luaL_getmetatable(L, MT_);
+    luaL_getmetatable(L, FILE_MT_);
     lua_setmetatable(L, -2);
   }
   return 1;
@@ -83,7 +86,7 @@ static int fpath_size (lua_State* L)
  * Returns: the size of the file, or nil on failure. */
 static int get_file_size (lua_State* L)
 {
-  const File_t* const f = CHECK_(L, 1);
+  const File_t* const f = FILE_CHECK_(L, 1);
   if (f->file != BASE_FILE_NULL_LITERAL)
     lua_pushinteger(L, (lua_Integer)f->file_n);
   else
@@ -95,7 +98,7 @@ static int get_file_size (lua_State* L)
  * Returns: true if the file is successfully closed, or if it was already closed. */
 static int close_file (lua_State* L)
 {
-  File_t* const f = CHECK_(L, 1);
+  File_t* const f = FILE_CHECK_(L, 1);
   int ok = 1;
   if ((f->file != BASE_FILE_NULL_LITERAL) && Base_close_file(f->file))
     ok = 0;
@@ -108,7 +111,7 @@ static int close_file (lua_State* L)
     memset(f->fpath, 0, f->fpath_n);
     free(f->fpath);
   }
-  *f = NULL_;
+  *f = FILE_NULL_;
   lua_pushboolean(L, ok);
   return 1;
 }
@@ -126,7 +129,7 @@ static int fpath_exists (lua_State* L)
  * Return: true when file is valid and open, false otherwise. */
 static int file_is_open (lua_State* L)
 {
-  const File_t* const f = CHECK_(L, 1);
+  const File_t* const f = FILE_CHECK_(L, 1);
   lua_pushboolean(L, f->file != BASE_FILE_NULL_LITERAL);
   return 1;
 }
@@ -135,7 +138,7 @@ static int file_is_open (lua_State* L)
  * Return: true on success; false on failure. */
 static int file_set_size (lua_State* L)
 {
-  File_t* const f = CHECK_(L, 1);
+  File_t* const f = FILE_CHECK_(L, 1);
   if (f->file == BASE_FILE_NULL_LITERAL) {
     lua_pushboolean(L, 0);
     return 1;
@@ -152,7 +155,7 @@ static int file_set_size (lua_State* L)
 
 static int file_fpath (lua_State* L)
 {
-  const File_t* const f = CHECK_(L, 1);
+  const File_t* const f = FILE_CHECK_(L, 1);
   if (f->fpath)
     lua_pushlstring(L, f->fpath, f->fpath_n);
   else
@@ -162,7 +165,7 @@ static int file_fpath (lua_State* L)
 
 static int file_readonly (lua_State* L)
 {
-  const File_t* const f = CHECK_(L, 1);
+  const File_t* const f = FILE_CHECK_(L, 1);
   lua_pushboolean(L, f->readonly);
   return 1;
 }
@@ -284,7 +287,7 @@ static const luaL_Reg free_procs[] = {
 
 int luaopen_Base_Procs (lua_State* L)
 {
-  if (luaL_newmetatable(L, MT_)) {
+  if (luaL_newmetatable(L, FILE_MT_)) {
     luaL_setfuncs(L, file_methods, 0);
     BASE_LUA_MT_SELF_INDEX(L);
   }

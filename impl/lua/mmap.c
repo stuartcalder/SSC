@@ -1,6 +1,5 @@
-/* Copyright (c) 2020-2022 Stuart Steven Calder
- * See accompanying LICENSE file for licensing information.
- */
+/* Copyright (c) 2020-2023 Stuart Steven Calder
+ * See accompanying LICENSE file for licensing information. */
 #include <stdbool.h>
 
 #include <Base/lua/lua.h>
@@ -9,20 +8,20 @@
 
 #define FILE_MT_            BASE_LUA_FILE_MT
 #define FILE_NEW_(L)        BASE_LUA_FILE_NEW(L)
-#define FILE_CHECK_(L, idx) BASE_LUA_FILE_CHECK(L, idx)
-#define FILE_TEST_(L, idx)  BASE_LUA_FILE_TEST(L, idx)
+#define FILE_CHECK_(L, Idx) BASE_LUA_FILE_CHECK(L, Idx)
+#define FILE_TEST_(L, Idx)  BASE_LUA_FILE_TEST(L, Idx)
 #define FILE_NULL_          BASE_LUA_FILE_NULL_LITERAL
 
 #define MMAP_MT_            BASE_LUA_MMAP_MT
 #define MMAP_NEW_(L)        BASE_LUA_MMAP_NEW(L)
-#define MMAP_CHECK_(L, idx) BASE_LUA_MMAP_CHECK(L, idx)
-#define MMAP_TEST_(L, idx)  BASE_LUA_MMAP_TEST(L, idx)
+#define MMAP_CHECK_(L, Idx) BASE_LUA_MMAP_CHECK(L, Idx)
+#define MMAP_TEST_(L, Idx)  BASE_LUA_MMAP_TEST(L, Idx)
 #define MMAP_NULL_          BASE_LUA_MMAP_NULL_LITERAL
 
 typedef Base_Lua_File File_t; /* Base Lua File Userdata. */
 typedef Base_Lua_MMap MMap_t; /* Base Lua MMap Userdata. */
 
-static int new_mmap (lua_State* L)
+static int new_mmap(lua_State* L)
 {
   File_t* f = FILE_TEST_(L, 1); /* Initial file is optional. */
   if (f && (f->file == BASE_FILE_NULL_LITERAL))
@@ -44,35 +43,35 @@ static int new_mmap (lua_State* L)
   return 1;
 }
   
-static int ptr_mmap (lua_State* L)
+static int mmap_ptr(lua_State* L)
 {
   MMap_t* map = MMAP_CHECK_(L, 1);
   lua_pushlightuserdata(L, map->ptr);
   return 1;
 }
 
-static int size_mmap (lua_State* L)
+static int mmap_size(lua_State* L)
 {
   MMap_t* map = MMAP_CHECK_(L, 1);
   lua_pushinteger(L, (lua_Integer)map->size);
   return 1;
 }
 
-static int is_mapped (lua_State* L)
+static int mmap_is_mapped(lua_State* L)
 {
   MMap_t* map = MMAP_CHECK_(L, 1);
   lua_pushboolean(L, map->ptr != BASE_NULL);
   return 1;
 }
 
-static int mmap_readonly (lua_State* L)
+static int mmap_readonly(lua_State* L)
 {
   MMap_t* map = MMAP_CHECK_(L, 1);
   lua_pushboolean(L, map->readonly);
   return 1;
 }
 
-static int del_mmap (lua_State* L)
+static int mmap_del(lua_State* L)
 {
   MMap_t* map = MMAP_CHECK_(L, 1);
   if (map->ptr) {
@@ -86,24 +85,24 @@ static int del_mmap (lua_State* L)
 }
 
 static const luaL_Reg mmap_methods[] = {
-  {"ptr"      , ptr_mmap},
-  {"size"     , size_mmap},
-  {"is_mapped", is_mapped},
+  {"ptr"      , mmap_ptr},
+  {"size"     , mmap_size},
+  {"is_mapped", mmap_is_mapped},
   {"readonly" , mmap_readonly},
-  {"del"      , del_mmap},
-  {"__gc"     , del_mmap},
+  {"del"      , mmap_del},
+  {"__gc"     , mmap_del},
 #if BASE_LUA >= BASE_LUA_5_4
-  {"__close"  , del_mmap},
+  {"__close"  , mmap_del},
 #endif
   {BASE_NULL  , BASE_NULL}
 };
 
 static const luaL_Reg free_procs[] = {
-  {"new", new_mmap},
+  {"new"     , new_mmap},
   {BASE_NULL , BASE_NULL}
 };
 
-int luaopen_Base_MMap (lua_State* L)
+int luaopen_Base_MMap(lua_State* L)
 {
   if (luaL_newmetatable(L, MMAP_MT_)) {
     luaL_setfuncs(L, mmap_methods, 0);

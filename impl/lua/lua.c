@@ -9,7 +9,7 @@
 #define NUM_SUBMODULES_         3
 
 /* We load in the other modules of the table we created on the stack. */
-#define LOAD_SUBMODULE_(L, submodule) BASE_LUA_LOAD_SUBMODULE(L, Base, submodule)
+#define LOAD_SUBMODULE_(L, SubModule) BASE_LUA_LOAD_SUBMODULE(L, Base, SubModule)
 
 int luaopen_Base (lua_State* L) {
   lua_createtable(L, 0, NUM_SUBMODULES_);

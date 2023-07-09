@@ -8,8 +8,8 @@
 #include "files.h"
 #include "macros.h"
 #if defined(BASE_OS_UNIXLIKE)
- #define BASE_MMAP_SYNC_IMPL_F  msync
- #define BASE_MMAP_SYNC_IMPL(M) { return BASE_MMAP_SYNC_IMPL_F(M->ptr, M->size, MS_SYNC); }
+ #define BASE_MMAP_SYNC_IMPL_FUNCTION  msync
+ #define BASE_MMAP_SYNC_IMPL(M) { return BASE_MMAP_SYNC_IMPL_FUNCTION(M->ptr, M->size, MS_SYNC); }
  #include <sys/mman.h>
 #elif defined(BASE_OS_WINDOWS)
  #define BASE_MMAP_HAS_WIN_FMAPPING

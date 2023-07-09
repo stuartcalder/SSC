@@ -21,7 +21,7 @@ typedef struct {
   size_t      fpath_n;
   uint8_t     readonly;
 } Base_Lua_File;
-#define BASE_LUA_FILE_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_Lua_File, BASE_FILE_NULL_LITERAL, 0, NULL, 0, 0)
+#define BASE_LUA_FILE_NULL_LITERAL BASE_COMPOUND_LITERAL(Base_Lua_File, BASE_FILE_NULL_LITERAL, 0, BASE_NULL, 0, 0)
 
 BASE_BEGIN_C_DECLS
 

@@ -14,13 +14,10 @@
 #define BASE_FILES_DEFAULT_NEWFILE_SIZE 0
 
 #if defined(BASE_OS_UNIXLIKE)
- #define BASE_CLOSE_FILE_IMPL_F  close
- #define BASE_CLOSE_FILE_IMPL(F) { return BASE_CLOSE_FILE_IMPL_F(F); }
- #define BASE_SET_FILE_SIZE_IMPL_F     ftruncate
- #define BASE_SET_FILE_SIZE_IMPL(F, N) { return BASE_SET_FILE_SIZE_IMPL_F(F, N); }
+ #define BASE_CLOSE_FILE_IMPL_FUNCTION    close
+ #define BASE_SET_FILE_SIZE_IMPL_FUNCTION ftruncate
+ #define BASE_CHDIR_IMPL_FUNCTION         chdir
  #define BASE_SET_FILE_SIZE_INLINE
- #define BASE_CHDIR_IMPL_F     chdir
- #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_F(Path); }
  #include <fcntl.h>
  #include <unistd.h>
  #include <sys/stat.h>
@@ -29,15 +26,19 @@
  typedef int Base_File_t;
  #define BASE_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor, often representing failure. */
 #elif defined(BASE_OS_WINDOWS)
- #define BASE_CLOSE_FILE_IMPL(F) { if (CloseHandle(F)) return 0; return -1; }
- #define BASE_SET_FILE_SIZE_IMPL(F, N) {\
-  LARGE_INTEGER i; i.QuadPart = N;\
-  if (!SetFilePointerEx(F, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(F))\
+ #define BASE_CHDIR_IMPL_FUNCTION _chdir
+ #define BASE_CLOSE_FILE_IMPL(File) {\
+  if (CloseHandle(File))\
+    return 0;\
+  return -1;\
+ }
+ #define BASE_SET_FILE_SIZE_IMPL(File, Size) {\
+  LARGE_INTEGER i;\
+  i.QuadPart = Size;\
+  if (!SetFilePointerEx(File, i, BASE_NULL, FILE_BEGIN) || !SetEndOfFile(File))\
     return -1;\
   return 0;\
  }
- #define BASE_CHDIR_IMPL_F     _chdir
- #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_F(Path); }
  #include <windows.h>
  #include <direct.h>
  /* On Windows systems, files are managed through HANDLEs. */
@@ -46,6 +47,24 @@
 #else
  #error "Unsupported operating system."
 #endif /* ~ if defined (BASE_OS_UNIXLIKE) or defined (BASE_OS_WINDOWS) */
+
+#if defined(BASE_CLOSE_FILE_IMPL_FUNCTION)
+ #define BASE_CLOSE_FILE_IMPL(File) { return BASE_CLOSE_FILE_IMPL_FUNCTION(File); }
+#elif !defined(BASE_CLOSE_FILE_IMPL)
+ #error "BASE_CLOSE_FILE_IMPL undefined!"
+#endif
+
+#if defined(BASE_SET_FILE_SIZE_IMPL_FUNCTION)
+ #define BASE_SET_FILE_SIZE_IMPL(File, Size) { return BASE_SET_FILE_SIZE_IMPL_FUNCTION(File, Size); }
+#elif !defined(BASE_SET_FILE_SIZE_IMPL)
+ #error "BASE_SET_FILE_SIZE_IMPL undefined!"
+#endif
+
+#if defined(BASE_CHDIR_IMPL_FUNCTION)
+ #define BASE_CHDIR_IMPL(Path) { return BASE_CHDIR_IMPL_FUNCTION(Path); }
+#elif !defined(BASE_CHDIR_IMPL)
+ #error "BASE_CHDIR_IMPL undefined!"
+#endif
 
 #define R_ BASE_RESTRICT /* Shorthand. */
 BASE_BEGIN_C_DECLS

@@ -13,12 +13,14 @@ BASE_BEGIN_C_DECLS
 /* Are we processing a short or long argument?
  * Or neither? */
 enum {
-  BASE_ARGTYPE_NONE  = 0,  /* Neither a short argtype nor a long argtype. */
-  BASE_ARGTYPE_SHORT = 1, /* Short argtype i.e. -e -f -g, etc. */
-  BASE_ARGTYPE_LONG  = 2 /*  Long argtype i.e. --encrypt --force --guard, etc. */
-}; typedef int_fast8_t Base_ArgType_t;
+  BASE_ARGTYPE_NONE  = 0,/* Neither a short argtype nor a long argtype. */
+  BASE_ARGTYPE_SHORT = 1,/* Short argtype i.e. -e -f -g, etc. */
+  BASE_ARGTYPE_LONG  = 2 /* Long argtype i.e. --encrypt --force --guard, etc. */
+};
+typedef int_fast8_t Base_ArgType_t;
 
-/* Return BASE_ARG_PROC_ONECHAR when processing
+/**
+ * Return BASE_ARG_PROC_ONECHAR when processing
  * short options, and we consume only 1 char
  * during processing. */
 enum { BASE_ARG_PROC_ONECHAR = -1 };
