@@ -1,13 +1,13 @@
 # Whether to compile with '-march=native' where possible.
 option('native_optimize', type: 'boolean', value: false)
-# Whether to compile Base as a static library. (Default is false)
+# Whether to compile SSC as a static library. (Default is false)
 option('static', type: 'boolean', value: false)
 # Is this a debug build? (Default is false)
 option('debug_build', type: 'boolean', value: false)
-# Whether the MLock module should be built. (Default is yes on most platforms.)
-option('mlock', type: 'boolean', value: true)
-# Whether the Base_MLock module should be threadsafe. (Default is false)
-option('mlock_threadsafe', type: 'boolean', value: false)
+# Whether the MemLock module should be built. (Default is yes on most platforms.)
+option('memlock', type: 'boolean', value: true)
+# Whether the SSC_MemLock module should be threadsafe. (Default is false)
+option('memlock_threadsafe', type: 'boolean', value: false)
 # Whether to compile Lua bindings. (Default is false)
 option('lua', type: 'boolean', value: false)
 # Little Endian? Big Endian?
