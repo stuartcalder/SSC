@@ -8,8 +8,13 @@
 
 SSC_BEGIN_C_DECLS
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Obtain @size bytes of pseudorandom data from the
+ * operating system, and store them at @ptr. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API void
 SSC_getEntropy(void* SSC_RESTRICT ptr, size_t size);
+/*===================================================*/
 
 SSC_END_C_DECLS
 

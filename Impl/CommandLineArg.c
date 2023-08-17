@@ -255,8 +255,7 @@ SSC_processCommandLineArgs(
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
 } /* ! SSC_process_args */
 
-void
-SSC_ArgParser_init(
+void SSC_ArgParser_init(
  Parser_t* R_ ctx,
  char* R_     start,
  const int    argc,

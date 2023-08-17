@@ -6,10 +6,18 @@
 
 #if defined(SSC_OS_UNIXLIKE)
  #define NEWLINE_ "\n"
- #ifdef __NetBSD__
-  #include <ncurses/ncurses.h>
+ #ifdef __has_include
+  #if __has_include(<ncurses.h>)
+   #include <ncurses.h>
+  #elif __has_include(<ncurses/ncurses.h>)
+   #include <ncurses/ncurses.h>
+  #endif
  #else
-  #include <ncurses.h>
+  #ifdef __NetBSD__
+   #include <ncurses/ncurses.h>
+  #else
+   #include <ncurses.h>
+  #endif
  #endif
 #elif defined(SSC_OS_WINDOWS)
  #define NEWLINE_ "\n\r"
