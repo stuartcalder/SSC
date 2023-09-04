@@ -95,6 +95,9 @@ enum {
 typedef int SSC_ArgParserFlag_t;
 /*==============================================================================*/
 
+/* TODO: DOCUMENT */
+typedef SSC_Error_t SSC_ArgProc_Processor_f(SSC_ArgParser* R_ parser, void* R_ data);
+
 /*##############################################################################*/
 /* Get the argument type of the string. Short? Long? Neither? */
 /*##############################################################################*/
@@ -121,13 +124,22 @@ SSC_processCommandLineArgs(
 /* Initialize the SSC_ArgParser context @ctx.
  * Begin reading at @start. */
 /*##############################################################################*/
-SSC_API void
-SSC_ArgParser_init(
+SSC_API void SSC_ArgParser_init(
  SSC_ArgParser* R_ ctx,
  char* R_          start,
  const int         argc,
  char** R_         argv);
 /*==============================================================================*/
+
+/* TODO: DOCUMENT. */
+SSC_API int SSC_ArgParser_process(
+ SSC_ArgParser* R_        ctx,
+ const int                argc,
+ char** R_                argv,
+ const int                offset,
+ void* R_                 data,
+ SSC_Error_t* R_          processor_status,
+ SSC_ArgProc_Processor_f* processor);
 
 /*##############################################################################*/
 /* When @ch is NOT zero, return SSC_ARG_PROC_ONECHAR else return zero. */

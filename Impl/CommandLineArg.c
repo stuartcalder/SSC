@@ -255,7 +255,8 @@ SSC_processCommandLineArgs(
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
 } /* ! SSC_process_args */
 
-void SSC_ArgParser_init(
+void
+SSC_ArgParser_init(
  Parser_t* R_ ctx,
  char* R_     start,
  const int    argc,
@@ -277,4 +278,25 @@ void SSC_ArgParser_init(
     else
       ctx->to_read = SSC_NULL;
   }
+}
+
+int
+SSC_ArgParser_process(
+ SSC_ArgParser* R_        ctx,
+ const int                argc,
+ char** R_                argv,
+ const int                offset,
+ void* R_                 data,
+ SSC_Error_t* R_          processor_status,
+ SSC_ArgProc_Processor_f* processor)
+{
+  *ctx = SSC_ARGPARSER_NULL_LITERAL;
+  SSC_ArgParser_init(ctx, argv[0] + offset, argc, argv);
+  if (ctx->to_read) {
+    if (processor_status)
+      *processor_status = processor(ctx, data);
+    else
+      processor(ctx, data);
+  }
+  return ctx->consumed;
 }
