@@ -76,7 +76,12 @@ typedef struct {
 /*==============================================================================*/
 
 /*##############################################################################*/
-/* TODO: Document SSC_ArgParser. */
+/* SSC_ArgParser {}
+ *     This struct is intended to help parse through command line argument strings.
+ *     When initialized @to_read either points to a C-string to read input from or
+ *     assumes a value of NULL when invalid. @size refers to the number of non-null
+ *     bytes of @to_read. When more than one C-string gets processed at once, @consumed
+ *     equals the number of additional C-strings consumed beyond the first. */
 /*##############################################################################*/
 typedef struct {
   char*  to_read;
@@ -86,17 +91,20 @@ typedef struct {
 #define SSC_ARGPARSER_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_ArgParser, 0)
 /*==============================================================================*/
 
-/*##############################################################################*/
-/* TODO: Document SSC_ArgParserFlag_t . */
-/*##############################################################################*/
 enum {
   SSC_ARGPARSER_FLAG_EQUALS_ISVALID = 0x01  /* '=' is a valid character, not indicative of assignment. */
 };
 typedef int SSC_ArgParserFlag_t;
-/*==============================================================================*/
 
-/* TODO: DOCUMENT */
+/*##############################################################################*/
+/* SSC_ArgProc_Processor_f ()*
+ *     Pointers to functions of this signature are intended to be passed to
+ *     SSC_ArgParser_process(), where they implement the logic of processing
+ *     command line strings that supply parameters should valid parameters to
+ *     be found in SSC_ArgParser.to_read */
+/*##############################################################################*/
 typedef SSC_Error_t SSC_ArgProc_Processor_f(SSC_ArgParser* R_ parser, void* R_ data);
+/*==============================================================================*/
 
 /*##############################################################################*/
 /* Get the argument type of the string. Short? Long? Neither? */
@@ -106,7 +114,12 @@ SSC_getArgType(const char* arg);
 /*==============================================================================*/
 
 /*##############################################################################*/
-/* TODO: Document. */
+/* SSC_processCommandLineArgs ()
+ *     This procedure is typically called from main().
+ *     Pass the traditional main @argc and @argv, as well as the
+ *     short and long option vectors, @state pointer, as well as an SSC_ArgProc_f
+ *     for handling long arguments, i.e. arguments not preceded by dashed words like
+ *     -i or --input. */
 /*##############################################################################*/
 SSC_API void
 SSC_processCommandLineArgs(
@@ -131,7 +144,14 @@ SSC_API void SSC_ArgParser_init(
  char** R_         argv);
 /*==============================================================================*/
 
-/* TODO: DOCUMENT. */
+/*##############################################################################*/
+/* SSC_ArgParser_process ()
+ *     Process the @argc C-strings pointed to by @argv.
+ *     Begin processing at @argv[@offset].
+ *     Pass @ctx and @data to the supplied SSC_ArgProc_Processor_f
+ *     function pointer and store the result in @processor_status, if that
+ *     pointer is not NULL. */
+/*##############################################################################*/
 SSC_API int SSC_ArgParser_process(
  SSC_ArgParser* R_        ctx,
  const int                argc,
@@ -140,6 +160,7 @@ SSC_API int SSC_ArgParser_process(
  void* R_                 data,
  SSC_Error_t* R_          processor_status,
  SSC_ArgProc_Processor_f* processor);
+/*==============================================================================*/
 
 /*##############################################################################*/
 /* When @ch is NOT zero, return SSC_ARG_PROC_ONECHAR else return zero. */
