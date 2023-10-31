@@ -136,7 +136,7 @@ SSC_CodeError_t SSC_MemMap_init(
       if (map->size > size) {
         /* ... only allow it when we are allowing shrinkage. */
         if (!allowshrink)
-	  return ERR_SHRINK_;
+	        return ERR_SHRINK_;
       }
       /* ... and the stored size in @map equals the size requested by the caller ... */
       else if (map->size == size)

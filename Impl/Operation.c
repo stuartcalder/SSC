@@ -67,11 +67,11 @@ size_t SSC_constTimeMemDiff(const void* R_ v_0, const void* R_ v_1, size_t size)
     /* Bit-index 0 absorbs 1 bits from bit-indices 1 through 7. */
     u8_bits |= ((u8_bits >> 7)|
                 (u8_bits >> 6)|
-	        (u8_bits >> 5)|
-	        (u8_bits >> 4)|
-	        (u8_bits >> 3)|
-	        (u8_bits >> 2)|
-	        (u8_bits >> 1));
+                (u8_bits >> 5)|
+                (u8_bits >> 4)|
+                (u8_bits >> 3)|
+                (u8_bits >> 2)|
+                (u8_bits >> 1));
     /* We do integer addition.
      * If bit-index 0 was 1, this will increment @unequal_count,
      * else the bytes were equal.
