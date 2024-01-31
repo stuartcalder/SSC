@@ -381,8 +381,14 @@
  #error "Unaccounted for compiler."
 #endif
 
-/* Currenly in SSC all inline functions are static inline. */
-#define SSC_INLINE		 static inline
+#if   SSC_COMPILER_IS_GCC_COMPATIBLE
+ #define SSC_INLINE __attribute__((always_inline)) inline
+#elif SSC_COMPILER == SSC_COMPILER_MSVC
+ #define SSC_INLINE __forceinline inline
+#else
+ #define SSC_INLINE static inline
+#endif
+
 #define SSC_STRINGIFY_IMPL(Text) #Text
 #define SSC_STRINGIFY(Text)      SSC_STRINGIFY_IMPL(Text)
 

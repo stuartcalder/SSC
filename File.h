@@ -15,18 +15,22 @@
 #define SSC_FILE_DEFAULT_NEWFILE_SIZE 0
 
 #if defined(SSC_OS_UNIXLIKE)
- #define SSC_FILE_CLOSE_IMPL_FUNCTION   close
- #define SSC_FILE_SETSIZE_IMPL_FUNCTION ftruncate
- #define SSC_CHDIR_IMPL_FUNCTION        chdir
- #define SSC_FILE_SETSIZE_INLINE
  #include <fcntl.h>
  #include <unistd.h>
  #include <sys/stat.h>
  #include <sys/types.h>
  /* On Unix-like systems, files are managed through integer handles, "file descriptors". */
  typedef int SSC_File_t;
+ #define SSC_FILE_CLOSE_IMPL_FUNCTION   close
+ #define SSC_FILE_SETSIZE_IMPL_FUNCTION ftruncate
+ #define SSC_CHDIR_IMPL_FUNCTION        chdir
+ #define SSC_FILE_SETSIZE_INLINE
  #define SSC_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor representing failure. */
 #elif defined(SSC_OS_WINDOWS)
+ #include <windows.h>
+ #include <direct.h>
+ /* On Windows systems, files are managed through HANDLEs. */
+ typedef HANDLE SSC_File_t;
  #define SSC_CHDIR_IMPL_FUNCTION _chdir
  #define SSC_FILE_CLOSE_IMPL(File) {\
   if (CloseHandle(File))\
@@ -40,10 +44,6 @@
     return -1;\
   return 0;\
  }
- #include <windows.h>
- #include <direct.h>
- /* On Windows systems, files are managed through HANDLEs. */
- typedef HANDLE SSC_File_t;
  #define SSC_FILE_NULL_LITERAL INVALID_HANDLE_VALUE
 #else
  #error "Unsupported operating system."

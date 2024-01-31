@@ -34,7 +34,7 @@ longMatchFlag_(
  size_t           str_n,
  char* R_         str);
 
-SSC_INLINE int
+static int
 longMatch_(
  const int        longc, /* Number of longs to process. */
  const Long_t* R_ longv, /* Long vector. */
@@ -71,7 +71,7 @@ processLongsFlag_(
  const Long_t* R_ longv,
  void* R_         state);
 
-SSC_INLINE int
+static int
 processLongs_(
  const int        argc,
  char** R_        argv,
