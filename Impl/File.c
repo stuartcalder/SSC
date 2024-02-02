@@ -102,5 +102,5 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 #ifndef SSC_FILE_SETSIZE_INLINE
 SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)
-SSC_SET_FILE_SIZE_IMPL(file, size)
+SSC_FILE_SETSIZE_IMPL(file, size)
 #endif /* ~ SSC_FILE_SETSIZE_INLINE */
