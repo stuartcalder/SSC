@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_FILE_H
 #define SSC_FILE_H
@@ -21,6 +21,7 @@
  #include <sys/types.h>
  /* On Unix-like systems, files are managed through integer handles, "file descriptors". */
  typedef int SSC_File_t;
+ #define SSC_FILE_IS_INT
  #define SSC_FILE_CLOSE_IMPL_FUNCTION   close
  #define SSC_FILE_SETSIZE_IMPL_FUNCTION ftruncate
  #define SSC_CHDIR_IMPL_FUNCTION        chdir
@@ -80,7 +81,11 @@ SSC_INLINE size_t
 SSC_File_getSizeOrDie(SSC_File_t file)
 {
   size_t s;
-  SSC_assertMsg(!SSC_File_getSize(file, &s), SSC_ERR_S_FAILED_IN("SSC_File_getSize()"));
+  #ifdef SSC_FILE_IS_INT
+  SSC_assertMsg(!SSC_File_getSize(file, &s), "Error: SSC_File_getSize() failed to store the size of file %d at %p!", file, (void*)&s);
+  #else
+  SSC_assertMsg(!SSC_File_getSize(file, &s), "Error: SSC_File_getSize() failed to store the size of a file at %p!", (void*)&s);
+  #endif
   return s;
 }
 /*==========================================================================================*/
@@ -95,7 +100,7 @@ SSC_INLINE size_t
 SSC_FilePath_getSizeOrDie(const char* fpath)
 {
   size_t s;
-  SSC_assertMsg(!SSC_FilePath_getSize(fpath, &s), SSC_ERR_S_FAILED_IN("SSC_FilePath_getSize()"));
+  SSC_assertMsg(!SSC_FilePath_getSize(fpath, &s), "Error: SSC_FilePath_getSize() failed to obtain the size of %s!\n", fpath);
   return s;
 }
 /*==========================================================================================*/
@@ -126,7 +131,11 @@ SSC_INLINE SSC_File_t
 SSC_FilePath_openOrDie(const char* R_ fpath, bool ronly)
 {
   SSC_File_t f;
-  SSC_assertMsg(!SSC_FilePath_open(fpath, ronly, &f), SSC_ERR_S_FAILED_IN("SSC_FilePath_open()"));
+  SSC_assertMsg(
+   !SSC_FilePath_open(fpath, ronly, &f),
+   "Error: SSC_FilePath_open() failed to open %s as %s!\n",
+   fpath,
+   ronly ? "ReadOnly" : "ReadWrite");
   return f;
 }
 /*==========================================================================================*/
@@ -141,7 +150,7 @@ SSC_INLINE SSC_File_t
 SSC_FilePath_createOrDie(const char* fpath)
 {
   SSC_File_t f;
-  SSC_assertMsg(!SSC_FilePath_create(fpath, &f), SSC_ERR_S_FAILED_IN("SSC_FilePath_create()"));
+  SSC_assertMsg(!SSC_FilePath_create(fpath, &f), "Error: SSC_FilePath_create() failed to create %s!\n", fpath);
   return f;
 }
 /*==========================================================================================*/
@@ -156,7 +165,11 @@ SSC_FILE_CLOSE_IMPL(file)
 SSC_INLINE void
 SSC_File_closeOrDie(SSC_File_t file)
 {
+  #ifdef SSC_FILE_IS_INT
+  SSC_assertMsg(!SSC_File_close(file), "Error: SSC_File_close() failed to close file %d!\n", file);
+  #else
   SSC_assertMsg(!SSC_File_close(file), SSC_ERR_S_FAILED_IN("SSC_File_close()"));
+  #endif
 }
 /*==========================================================================================*/
 
@@ -179,7 +192,11 @@ IMPL_(file, size)
 SSC_INLINE void
 SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
 {
-  SSC_assertMsg(!SSC_File_setSize(file, size), SSC_ERR_S_FAILED_IN("SSC_File_setSize()"));
+  #ifdef SSC_FILE_IS_INT
+  SSC_assertMsg(!SSC_File_setSize(file, size), "Error: SSC_File_setSize() failed to set file %d to size %zu!\n", file, size);
+  #else
+  SSC_assertMsg(!SSC_File_setSize(file, size), "Error: SSC_File_setSize() failed to set a file to size %zu!\n", size);
+  #endif
 }
 /*==========================================================================================*/
 

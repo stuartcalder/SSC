@@ -3,7 +3,6 @@
 #if !defined(SSC_LUA_SECUREBUFFER_H) && defined(SSC_EXTERN_LUA)
 #define SSC_LUA_SECUREBUFFER_H
 
-#include "../Macro.h"
 #include "../Error.h"
 #include "../MemLock.h"
 #include "../Operation.h"

@@ -1,11 +1,11 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
-#include <SSC/Macro.h>
-#include <SSC/Lua/Lua.h>
-#include <SSC/Lua/Macro.h>
-#include <SSC/Lua/Proc.h>     /* Submodule 1 */
-#include <SSC/Lua/SecureBuffer.h>   /* Submodule 2 */
-#include <SSC/Lua/MemMap.h>      /* Submodule 3 */
+#include "../../Macro.h"
+#include "../../Lua/Lua.h"
+#include "../../Lua/Macro.h"
+#include "../../Lua/Proc.h"     /* Submodule 1 */
+#include "../../Lua/SecureBuffer.h"   /* Submodule 2 */
+#include "../../Lua/MemMap.h"      /* Submodule 3 */
 #define NUM_SUBMODULES_         3
 
 /* We load in the other modules of the table we created on the stack. */

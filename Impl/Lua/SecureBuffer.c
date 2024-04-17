@@ -1,7 +1,7 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
-#include <SSC/Lua/Lua.h>
-#include <SSC/Lua/SecureBuffer.h>
+#include "../../Lua/Lua.h"
+#include "../../Lua/SecureBuffer.h"
 
 #define MT_             SSC_LUA_SECUREBUFFER_MT
 #define NEW_(L)         SSC_LUA_SECUREBUFFER_NEW(L)

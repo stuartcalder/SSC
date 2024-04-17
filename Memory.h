@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information.
  *
  * In this file, we define procedures for allocating aligned memory,

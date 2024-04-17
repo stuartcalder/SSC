@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_COMMANDLINEARG_H
 #define SSC_COMMANDLINEARG_H
@@ -14,12 +14,11 @@ SSC_BEGIN_C_DECLS
 /* Are we processing a short or long argument?
  * Or neither? */
 /*##############################################################################*/
-enum {
+typedef enum {
   SSC_ARGTYPE_NONE  = 0,/* Neither a short argtype nor a long argtype. */
   SSC_ARGTYPE_SHORT = 1,/* Short argtype i.e. -e -f -g, etc. */
   SSC_ARGTYPE_LONG  = 2 /* Long argtype i.e. --encrypt --force --guard, etc. */
-};
-typedef int SSC_ArgType_t;
+} SSC_ArgType_t;
 /*==============================================================================*/
 
 /*##############################################################################*/

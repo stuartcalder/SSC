@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_MACRO_H
 #define SSC_MACRO_H
@@ -411,13 +411,13 @@
  #endif /* ! #ifdef SSC_EXTERN_BUILD_DYNAMIC_LIB */
 #endif /* ! #ifdef SSC_EXTERN_STATIC_LIB */
 
-/* We conditionally include `errors.h' below, but `errors.h' depends upon some macros defined here in `macros.h'.
- * The following macros must remain at the end of `macros.h' to avoid circular dependence problems.*/
+/* We conditionally include `Error.h' below, but `Error.h' depends upon some macros defined here in `Macro.h'.
+ * The following macros must remain at the end of `Macro.h' to avoid circular dependence problems.*/
 
 /* OpenBSD-specific mitigations */
 #ifdef	__OpenBSD__
  #include <unistd.h>
- #include "errors.h"
+ #include "Error.h"
  #define SSC_OPENBSD_PLEDGE(Promises, Execpromises) SSC_assertMsg(!pledge(Promises, Execpromises), "Failed to pledge()!\n")
  #define SSC_OPENBSD_UNVEIL(Path    , Permissions)  SSC_assertMsg(!unveil(Path    , Permissions ), "Failed to unveil()!\n")
 #else

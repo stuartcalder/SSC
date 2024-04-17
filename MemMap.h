@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_MEMMAP_H
 #define SSC_MEMMAP_H
@@ -101,6 +101,32 @@ SSC_MemMap_initOrDie(
  SSC_BitFlag_t  flags);
 /*=========================================================================================*/
 
+#if defined(SSC_FILE_IS_INT)
+ #define MEMMAP_DUMP_ \
+  "Error: %s. Dump:\n"\
+  "map->ptr      = %p.\n"\
+  "map->size     = %zu.\n"\
+  "map->file     = %d.\n"\
+  "map->readonly = %s.\n"
+ #define MEMMAP_DUMP_ARGS_(Map, Err) \
+  Err,\
+  (void*)Map->ptr,\
+  Map->size,\
+  Map->file,\
+  Map->readonly ? "ReadOnly" : "ReadWrite"
+#else
+ #define MEMMAP_DUMP_ \
+  "Error: %s. Dump:\n"\
+  "map->ptr      = %p.\n"\
+  "map->size     = %zu.\n"\
+  "map->readonly = %s.\n"
+ #define MEMMAP_DUMP_ARGS_(Map, Err) \
+  Err,\
+  (void*)Map->ptr,\
+  Map->size,\
+  Map->readonly ? "ReadOnly" : "ReadWrite"
+#endif
+
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Assuming @map->file, @map->size, and @map->windows_filemap
  * (if applicable) fields of @map are initialized, attempt to map the
@@ -112,7 +138,10 @@ SSC_MemMap_map(SSC_MemMap* map, bool readonly);
 SSC_INLINE void
 SSC_MemMap_mapOrDie(SSC_MemMap* map, bool readonly)
 {
-  SSC_assertMsg(!SSC_MemMap_map(map, readonly), SSC_ERR_S_FAILED_IN("SSC_MemMap_map()"));
+  SSC_assertMsg(
+   !SSC_MemMap_map(map, readonly),
+   MEMMAP_DUMP_,
+   MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_map() failed to map a file into memory"));
 }
 /*=========================================================================================*/
 
@@ -125,7 +154,10 @@ SSC_MemMap_unmap(SSC_MemMap* map);
 SSC_INLINE void
 SSC_MemMap_unmapOrDie(SSC_MemMap* map)
 {
-  SSC_assertMsg(!SSC_MemMap_unmap(map), SSC_ERR_S_FAILED_IN("SSC_MemMap_unmap()"));
+  SSC_assertMsg(
+   !SSC_MemMap_unmap(map),
+   MEMMAP_DUMP_,
+   MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_unmap() failed to unmap a file from memory"));
 }
 /*=========================================================================================*/
 
@@ -139,7 +171,10 @@ SSC_MEMMAP_SYNC_IMPL(map)
 SSC_INLINE void
 SSC_MemMap_syncOrDie(const SSC_MemMap* map)
 {
-  SSC_assertMsg(!SSC_MemMap_sync(map), SSC_ERR_S_FAILED_IN("SSC_MemMap_sync()"));
+  SSC_assertMsg(
+   !SSC_MemMap_sync(map),
+   MEMMAP_DUMP_,
+   MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_sync() failed to synchronize a memory-mapped file"));
 }
 /*=========================================================================================*/
 
@@ -151,5 +186,8 @@ SSC_MemMap_del(SSC_MemMap* map);
 /*=========================================================================================*/
 
 SSC_END_C_DECLS
+#undef MEMMAP_DUMP_
+#undef MEMMAP_DUMP_ARGS_
+#undef R_
 
 #endif

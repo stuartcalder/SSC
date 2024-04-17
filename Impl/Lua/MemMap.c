@@ -1,10 +1,10 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (c) 2020-2024 Stuart Steven Calder
  * See accompanying LICENSE file for licensing information. */
 #include <stdbool.h>
 
-#include <SSC/Lua/Lua.h>
-#include <SSC/Lua/MemMap.h>
-#include <SSC/Lua/Proc.h>
+#include "../../Lua/Lua.h"
+#include "../../Lua/MemMap.h"
+#include "../../Lua/Proc.h"
 
 #define FILE_MT_              SSC_LUA_FILE_MT
 #define FILE_NEW_(L)          SSC_LUA_FILE_NEW(L)

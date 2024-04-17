@@ -247,9 +247,9 @@ SSC_processCommandLineArgs(
       case SSC_ARGTYPE_NONE: {
         /* The string did not appear to be an option. */
         if (alone)
-	  arg_i += alone(argc_left, argv_left, 0, state);
-	else
-	  SSC_errx("Error: Invalid argument: %s!\n", *argv_left);
+	        arg_i += alone(argc_left, argv_left, 0, state);
+	      else
+	        SSC_errx("Error: Invalid argument: %s!\n", *argv_left);
       } break;
     } /* ! switch (typ) */
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
@@ -293,10 +293,9 @@ SSC_ArgParser_process(
   *ctx = SSC_ARGPARSER_NULL_LITERAL;
   SSC_ArgParser_init(ctx, argv[0] + offset, argc, argv);
   if (ctx->to_read) {
+    SSC_Error_t status = processor(ctx, data);
     if (processor_status)
-      *processor_status = processor(ctx, data);
-    else
-      processor(ctx, data);
+      *processor_status = status;
   }
   return ctx->consumed;
 }
