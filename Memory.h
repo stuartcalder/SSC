@@ -28,6 +28,15 @@
  #define SSC_ALIGNED_FREE_IS_POSIX_FREE
  /* SSC_getPageSize */
  #define SSC_GET_PAGE_SIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
+ /* SSC_getTotalSystemMemory */
+ #if defined(_SC_PHYS_PAGES)
+  #define SSC_HAS_GETTOTALSYSTEMMEMORY
+  #define SSC_GETTOTALSYSTEMMEMORY_IMPL {\
+   long pages = sysconf(_SC_PHYS_PAGES);\
+   long page_size = sysconf(_SC_PAGE_SIZE);\
+   return (size_t)pages * (size_t)page_size;\
+  }
+ #endif
 #elif defined(SSC_OS_WINDOWS)
  #include <malloc.h>
  #include <sysinfoapi.h>
@@ -40,6 +49,14 @@
   SYSTEM_INFO si;\
   GetSystemInfo(&si);\
   return (size_t)si.dwPageSize;\
+ }
+ /* SSC_getTotalSystemMemory */
+ #define SSC_HAS_GETTOTALSYSTEMMEMORY
+ #define SSC_GETTOTALSYSTEMMEMORY_IMPL {\
+  MEMORYSTATUSEX status;\
+  status.dwLength = sizeof(status);\
+  GlobalMemoryStatusEx(&status);\
+  return (size_t)status.ullTotalPhys;\
  }
 #else
  #error "Unsupported."
@@ -72,6 +89,13 @@ SSC_ALIGNED_FREE_IMPL(p)
 SSC_INLINE size_t
 SSC_getPageSize(void)
 SSC_GET_PAGE_SIZE_IMPL
+
+#ifdef SSC_HAS_GETTOTALSYSTEMMEMORY
+/* Get the total amount of OS physical memory. */
+SSC_INLINE size_t
+SSC_getTotalSystemMemory(void)
+SSC_GETTOTALSYSTEMMEMORY_IMPL
+#endif
 
 /* Allocate @n bytes on the heap successfully, or terminate the program. */
 SSC_INLINE void*
