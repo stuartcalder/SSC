@@ -27,6 +27,12 @@
  #define SSC_CHDIR_IMPL_FUNCTION        chdir
  #define SSC_FILE_SETSIZE_INLINE
  #define SSC_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor representing failure. */
+ #ifdef __gnu_linux__
+  /* Assume that memfd_secret() is supported if no Linux kernel version is specified. */
+  #if !SSC_LINUX_VERSION_VALUE_ISDEFINED || (SSC_LINUX_VERSION_VALUE >= SSC_LINUX_VERSION(5, 14, 0))
+   #define SSC_HAS_FILE_CREATESECRET
+  #endif
+ #endif
 #elif defined(SSC_OS_WINDOWS)
  #include <windows.h>
  #include <direct.h>
@@ -154,6 +160,16 @@ SSC_FilePath_createOrDie(const char* fpath)
   return f;
 }
 /*==========================================================================================*/
+
+#ifdef SSC_HAS_FILE_CREATESECRET
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Create a "secret" file, with more protections than usually afforded by RAM-backed
+ * filesytems. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_File_createSecret(SSC_File_t* file);
+/*==========================================================================================*/
+#endif /* ! SSC_HAS_FILE_CREATESECRET */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Close the file associed with a specified file handle. */

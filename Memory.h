@@ -37,6 +37,14 @@
    return (size_t)pages * (size_t)page_size;\
   }
  #endif
+ #if defined(_SC_AVPHYS_PAGES)
+  #define SSC_HAS_GETAVAILABLESYSTEMMEMORY
+  #define SSC_GETAVAILABLESYSTEMMEMORY_IMPL {\
+   long pages = sysconf(_SC_AVPHYS_PAGES);\
+   long page_size = sysconf(_SC_PAGE_SIZE);\
+   return (size_t)pages * (size_t)page_size;\
+  }
+ #endif
 #elif defined(SSC_OS_WINDOWS)
  #include <malloc.h>
  #include <sysinfoapi.h>
@@ -57,6 +65,13 @@
   status.dwLength = sizeof(status);\
   GlobalMemoryStatusEx(&status);\
   return (size_t)status.ullTotalPhys;\
+ }
+ #define SSC_HAS_GETAVAILABLESYSTEMMEMORY
+ #define SSC_GETAVAILABLESYSTEMMEMORY_IMPL {\
+  MEMORYSTATUSEX status;\
+  status.dwLength = sizeof(status);\
+  GlobalMemoryStatusEx(&status);\
+  return (size_t)ullAvailPhys;\
  }
 #else
  #error "Unsupported."
@@ -95,6 +110,13 @@ SSC_GET_PAGE_SIZE_IMPL
 SSC_INLINE size_t
 SSC_getTotalSystemMemory(void)
 SSC_GETTOTALSYSTEMMEMORY_IMPL
+#endif
+
+#ifdef SSC_HAS_GETAVAILABLESYSTEMMEMORY
+/* Get the total amount of available physical memory. */
+SSC_INLINE size_t
+SSC_getAvailableSystemMemory(void)
+SSC_GETAVAILABLESYSTEMMEMORY_IMPL
 #endif
 
 /* Allocate @n bytes on the heap successfully, or terminate the program. */

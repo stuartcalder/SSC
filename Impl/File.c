@@ -2,6 +2,11 @@
  * See accompanying LICENSE file for licensing information. */
 #include "File.h"
 
+#if defined(__gnu_linux__) && defined(SSC_HAS_FILE_CREATESECRET)
+ #include <sys/syscall.h>
+ #include <unistd.h>
+#endif
+
 #define R_ SSC_RESTRICT
 
 #if   defined(SSC_OS_UNIXLIKE)
@@ -99,8 +104,26 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
   return (*storefile != SSC_FILE_NULL_LITERAL) ? 0 : -1;
 }
 
+#ifdef SSC_HAS_FILE_CREATESECRET
+SSC_Error_t
+SSC_File_createSecret(SSC_File_t* storefile)
+{
+ #ifdef __gnu_linux__
+ int ret = syscall(SYS_memfd_secret, 0U);
+ *storefile = ret;
+ if (ret == -1)
+   return -1;
+ return 0;
+ #else
+  #error "Unsupported OS!"
+ #endif
+}
+#endif /* ! SSC_HAS_FILE_CREATESECRET */
+
 #ifndef SSC_FILE_SETSIZE_INLINE
 SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)
 SSC_FILE_SETSIZE_IMPL(file, size)
 #endif /* ~ SSC_FILE_SETSIZE_INLINE */
+
+
