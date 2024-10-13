@@ -120,10 +120,44 @@ SSC_File_createSecret(SSC_File_t* storefile)
 }
 #endif /* ! SSC_HAS_FILE_CREATESECRET */
 
-#ifndef SSC_FILE_SETSIZE_INLINE
+SSC_Error_t
+SSC_File_close(SSC_File_t file)
+{
+  #if   defined(SSC_OS_UNIXLIKE)
+  return close(file);
+  #elif defined(SSC_OS_WINDOWS)
+  if (CloseHandle(File))
+    return 0;
+  return -1;
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
+
 SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)
-SSC_FILE_SETSIZE_IMPL(file, size)
-#endif /* ~ SSC_FILE_SETSIZE_INLINE */
+{
+  #if   defined(SSC_OS_UNIXLIKE)
+  return ftruncate(file, size);
+  #elif defined(SSC_OS_WINDOWS)
+  LARGE_INTEGER i;
+  i.QuadPart = size;
+  if (!SetFilePointerEx(file, i, SSC_NULL, FILE_BEGIN) || !SetEndOfFile(file))
+    return -1;
+  return 0;
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
 
-
+SSC_Error_t
+SSC_chdir(const char* path)
+{
+  #if   defined(SSC_OS_UNIXLIKE)
+  return chdir(path);
+  #elif defined(SSC_OS_WINDOWS)
+  return _chdir(path);
+  #else
+   #error "Unsupported OS!"
+  #endif
+}

@@ -122,7 +122,7 @@
 #define SSC_C_99 199901L
 #define SSC_C_11 201112L
 #define SSC_C_17 201710L
-#define SSC_C_23 202312L /* Not finalized. */
+#define SSC_C_23 202311L
 /* C++ language standards. */
 #define SSC_CPP_11 201103L
 #define SSC_CPP_14 201402L
@@ -303,7 +303,6 @@
  #define SSC_CONSTEXPR constexpr
 #else /* Not C++. We are using C. */
  #define SSC_LANG SSC_LANG_C
- #define SSC_NULL NULL
  #define SSC_BEGIN_C_DECLS
  #define SSC_BEGIN_C_DECLS_IS_NIL
  #define SSC_END_C_DECLS
@@ -332,9 +331,11 @@
   #endif
   #if SSC_LANG_C >= SSC_C_23
    #define SSC_STATIC_ASSERT_1(Boolean) _Static_assert(Boolean)
+   #define SSC_NULL nullptr
   #else
    #define SSC_STATIC_ASSERT_1(Boolean_)
    #define SSC_STATIC_ASSERT_1_IS_NIL
+   #define SSC_NULL NULL
   #endif
  #else  /* __STDC_VERSION__ not defined. */
   /* We use C99 features, so if we can't detect a C version just pray

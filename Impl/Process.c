@@ -42,3 +42,18 @@ char* SSC_getExecutablePath(
  #endif
 }
 #endif /* ! ifdef SSC_HAS_GETEXECUTABLEPATH */
+
+#ifdef SSC_HAS_GETNUMBERPROCESSORS
+int SSC_getNumberProcessors(void)
+{
+ #if   defined(__gnu_linux__) && defined(_SC_NPROCESSORS_ONLN)
+  return (int)sysconf(_SC_NPROCESSORS_ONLN);
+ #elif defined(SSC_OS_WINDOWS)
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  return (int)si.dwNumberOfProcessors;
+ #else
+  #error "Invalid implementation!"
+ #endif
+}
+#endif

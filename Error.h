@@ -15,7 +15,7 @@
 #define SSC_ERR_S(Str)            "Error: %s!\n", Str
 #define SSC_ERR_S_GENERIC(Str)	   SSC_ERR_S(Str) /* TODO: Remove me. */
 #define SSC_ERR_S_IN(Str)         "Error: %s in function %s!\n", Str, __func__
-#define SSC_ERR_S_FAILED(Str)	  "Error: %s failed!\n", Str
+#define SSC_ERR_S_FAILED(Str)	    "Error: %s failed!\n", Str
 #define SSC_ERR_S_FAILED_IN(Str)  "Error: %s failed in function %s!\n", Str, __func__
 
 #define SSC_ERRX_CODE_LIST_IMPL_GENERIC(Code, Fmt, ArgList) {\

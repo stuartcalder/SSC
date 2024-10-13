@@ -22,10 +22,6 @@
  /* On Unix-like systems, files are managed through integer handles, "file descriptors". */
  typedef int SSC_File_t;
  #define SSC_FILE_IS_INT
- #define SSC_FILE_CLOSE_IMPL_FUNCTION   close
- #define SSC_FILE_SETSIZE_IMPL_FUNCTION ftruncate
- #define SSC_CHDIR_IMPL_FUNCTION        chdir
- #define SSC_FILE_SETSIZE_INLINE
  #define SSC_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor representing failure. */
  #ifdef __gnu_linux__
   /* Assume that memfd_secret() is supported if no Linux kernel version is specified. */
@@ -38,41 +34,10 @@
  #include <direct.h>
  /* On Windows systems, files are managed through HANDLEs. */
  typedef HANDLE SSC_File_t;
- #define SSC_CHDIR_IMPL_FUNCTION _chdir
- #define SSC_FILE_CLOSE_IMPL(File) {\
-  if (CloseHandle(File))\
-    return 0;\
-  return -1;\
- }
- #define SSC_FILE_SETSIZE_IMPL(File, Size) {\
-  LARGE_INTEGER i;\
-  i.QuadPart = Size;\
-  if (!SetFilePointerEx(File, i, SSC_NULL, FILE_BEGIN) || !SetEndOfFile(File))\
-    return -1;\
-  return 0;\
- }
  #define SSC_FILE_NULL_LITERAL INVALID_HANDLE_VALUE
 #else
  #error "Unsupported operating system."
 #endif /* ~ if defined (SSC_OS_UNIXLIKE) or defined (SSC_OS_WINDOWS) */
-
-#if defined(SSC_FILE_CLOSE_IMPL_FUNCTION)
- #define SSC_FILE_CLOSE_IMPL(File) { return SSC_FILE_CLOSE_IMPL_FUNCTION(File); }
-#elif !defined(SSC_FILE_CLOSE_IMPL)
- #error "SSC_FILE_CLOSE_IMPL undefined!"
-#endif
-
-#if defined(SSC_FILE_SETSIZE_IMPL_FUNCTION)
- #define SSC_FILE_SETSIZE_IMPL(File, Size) { return SSC_FILE_SETSIZE_IMPL_FUNCTION(File, Size); }
-#elif !defined(SSC_FILE_SETSIZE_IMPL)
- #error "SSC_FILE_SETSIZE_IMPL undefined!"
-#endif
-
-#if defined(SSC_CHDIR_IMPL_FUNCTION)
- #define SSC_CHDIR_IMPL(Path) { return SSC_CHDIR_IMPL_FUNCTION(Path); }
-#elif !defined(SSC_CHDIR_IMPL)
- #error "SSC_CHDIR_IMPL undefined!"
-#endif
 
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
@@ -174,9 +139,8 @@ SSC_File_createSecret(SSC_File_t* file);
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Close the file associed with a specified file handle. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-SSC_INLINE SSC_Error_t
-SSC_File_close(SSC_File_t file)
-SSC_FILE_CLOSE_IMPL(file)
+SSC_API SSC_Error_t
+SSC_File_close(SSC_File_t file); //TODO
 
 SSC_INLINE void
 SSC_File_closeOrDie(SSC_File_t file)
@@ -192,18 +156,8 @@ SSC_File_closeOrDie(SSC_File_t file)
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Set the size of a file in bytes. Fill the void with zeroes. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-#ifdef SSC_FILE_SETSIZE_INLINE
- #define  API_      SSC_INLINE
- #define IMPL_(...) SSC_FILE_SETSIZE_IMPL(__VA_ARGS__)
-#else
- #define  API_      SSC_API
- #define IMPL_(...) ;
-#endif
-API_ SSC_Error_t
-SSC_File_setSize(SSC_File_t file, size_t size)
-IMPL_(file, size)
-#undef  API_
-#undef IMPL_
+SSC_API SSC_Error_t
+SSC_File_setSize(SSC_File_t file, size_t size);
 
 SSC_INLINE void
 SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
@@ -219,9 +173,8 @@ SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Change the current working directory to @path. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-SSC_INLINE SSC_Error_t
-SSC_chdir(const char* path)
-SSC_CHDIR_IMPL(path)
+SSC_API SSC_Error_t
+SSC_chdir(const char* path); //TODO
 /*==========================================================================================*/
 
 SSC_END_C_DECLS

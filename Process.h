@@ -2,8 +2,15 @@
 #define SSC_PROCESS_H
 #include "Macro.h"
 
-#if defined(__gnu_linux__) || defined(SSC_OS_WINDOWS)
+#if   defined(__gnu_linux__)
  #define SSC_HAS_GETEXECUTABLEPATH
+ #include <unistd.h>
+ #ifdef _SC_NPROCESSORS_ONLN
+  #define SSC_HAS_GETNUMBERPROCESSORS
+ #endif
+#elif defined(SSC_OS_WINDOWS)
+ #define SSC_HAS_GETEXECUTABLEPATH
+ #define SSC_HAS_GETNUMBERPROCESSORS
 #endif
 
 SSC_BEGIN_C_DECLS
@@ -14,6 +21,15 @@ SSC_BEGIN_C_DECLS
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API char*
 SSC_getExecutablePath(size_t* exec_path_size);
+/*==========================================================================================*/
+#endif
+
+#ifdef SSC_HAS_GETNUMBERPROCESSORS
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* TODO: Document. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API int
+SSC_getNumberProcessors(void);
 /*==========================================================================================*/
 #endif
 

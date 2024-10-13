@@ -27,26 +27,32 @@ typedef struct {
 
 SSC_API extern SSC_MemLock SSC_MemLock_Global; /* Global SSC_MemLock structure. */
 
-#define SSC_MEMLOCK_ERR_LOCK_OP       (-1) /* Failure in a lock operation. */
-#define SSC_MEMLOCK_ERR_MTX_OP        (-2) /* Failure in a mutex operation. */
-#define SSC_MEMLOCK_ERR_MTX_INIT      (-3) /* Failure in initializing a mutex. */
-#define SSC_MEMLOCK_ERR_OVER_MEMLIMIT (-4) /* Going over the allowed memory limit. */
-#define SSC_MEMLOCK_ERR_UNDER_MEMMIN  (-5) /* Under the memory minimum. */
-#define SSC_MEMLOCK_ERR_GET_LIMIT     (-6) /* Failure in getting the memory limit. */
-#define SSC_MEMLOCK_ERR_SET_LIMIT     (-7) /* Failure in setting the memory limit. */
-#define SSC_MEMLOCK_ERR_UNINITIALIZED (-8)
+enum {
+  SSC_MEMLOCK_ERR_LOCK_OP       = -1,
+  SSC_MEMLOCK_ERR_MTX_OP        = -2,
+  SSC_MEMLOCK_ERR_MTX_INIT      = -3,
+  SSC_MEMLOCK_ERR_OVER_MEMLIMIT = -4,
+  SSC_MEMLOCK_ERR_UNDER_MEMMIN  = -5,
+  SSC_MEMLOCK_ERR_GET_LIMIT     = -6,
+  SSC_MEMLOCK_ERR_SET_LIMIT     = -7,
+  SSC_MEMLOCK_ERR_UNINITIALIZED = -8
+};
 
-#define SSC_MEMLOCKFLAG_GRACEFUL_OVERMEMLIMIT_FAIL (0x01)
-#define SSC_MEMLOCKFLAG_GRACEFUL_LOCK_FAIL         (0x02)
-#define SSC_MEMLOCKFLAG_GRACEFUL_UNLOCK_FAIL       (0x02)
-typedef int SSC_MemLockFlag_t;
+typedef enum {
+  SSC_MEMLOCKFLAG_GRACEFUL_OVERMEMLIMIT_FAIL = 0x01,
+  SSC_MEMLOCKFLAG_GRACEFUL_LOCK_FAIL         = 0x02,
+  SSC_MEMLOCKFLAG_GRACEFUL_UNLOCK_FAIL       = 0x02
+} SSC_MemLockFlag_t;
 
 #ifdef SSC_OS_UNIXLIKE
+  /* SSC_MEMLOCK_ERR_SET_LIMIT is only returned on Unixlike systems. */
  #define SSC_MEMLOCK_INIT_MAYRETURN_ERR_SET_LIMIT 1
 #else
  #define SSC_MEMLOCK_INIT_MAYRETURN_ERR_SET_LIMIT 0
 #endif
+
 #ifdef SSC_EXTERN_MEMLOCK_THREADSAFE
+ /* SSC_MEMLOCK_ERR_MTX_INIT is only returned when thread safety is enabled. */
  #define SSC_MEMLOCK_INIT_MAYRETURN_ERR_MTX_INIT 1
 #else
  #define SSC_MEMLOCK_INIT_MAYRETURN_ERR_MTX_INIT 0
