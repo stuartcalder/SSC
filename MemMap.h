@@ -164,9 +164,8 @@ SSC_MemMap_unmapOrDie(SSC_MemMap* map)
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Synchronize mapped memory with the filesystem. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-SSC_INLINE SSC_Error_t
-SSC_MemMap_sync(const SSC_MemMap* map)
-SSC_MEMMAP_SYNC_IMPL(map)
+SSC_API SSC_Error_t
+SSC_MemMap_sync(const SSC_MemMap* map);
 
 SSC_INLINE void
 SSC_MemMap_syncOrDie(const SSC_MemMap* map)

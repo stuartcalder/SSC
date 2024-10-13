@@ -227,3 +227,6 @@ void SSC_MemMap_del(SSC_MemMap* map)
   #endif
   *map = SSC_MEMMAP_NULL_LITERAL;
 }
+
+SSC_Error_t SSC_MemMap_sync(const SSC_MemMap* map)
+SSC_MEMMAP_SYNC_IMPL(map)
