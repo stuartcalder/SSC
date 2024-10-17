@@ -104,3 +104,7 @@ bool SSC_constTimeIsZero(const void* R_ v, size_t n_bytes)
    * was not all zeroes. */
   return !zero_test;
 }
+
+void
+SSC_secureZero(void* R_ mem, size_t n)
+SSC_SECUREZERO_IMPL(mem, n)

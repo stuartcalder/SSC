@@ -104,22 +104,22 @@ SSC_xor128(void* R_ writeto, const void* R_ readfrom);
  * to OS-specific methods of secure zeroing. */
 #include <string.h>
 #if defined(SSC_LANG_C) && (SSC_LANG_C >= SSC_C_23)
- #define SECUREZERO_IMPL_(Ptr, Size) { memset_explicit(Ptr, 0, Size); }
+ #define SSC_SECUREZERO_IMPL(Ptr, Size) { memset_explicit(Ptr, 0, Size); }
 #elif defined(SSC_OS_MAC)
  #if !defined(__STDC_WANT_LIB_EXT1__)
   #error "__STDC_WANT_LIB_EXT1__ not defined!"
  #elif __STDC_WANT_LIB_EXT1__ != 1
   #error "__STDC_WANT_LIB_EXT1__ != 1!"
  #endif
- #define SECUREZERO_IMPL_(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
+ #define SSC_SECUREZERO_IMPL(Ptr, Size) { memset_s(Ptr, Size, 0, Size); }
 #elif defined(__NetBSD__)
- #define SECUREZERO_IMPL_(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
+ #define SSC_SECUREZERO_IMPL(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
 #elif defined(SSC_OS_UNIXLIKE)
  #include <strings.h>
- #define SECUREZERO_IMPL_(Ptr, Size) { explicit_bzero(Ptr, Size); }
+ #define SSC_SECUREZERO_IMPL(Ptr, Size) { explicit_bzero(Ptr, Size); }
 #elif defined(SSC_OS_WINDOWS)
  #include <windows.h>
- #define SECUREZERO_IMPL_(Ptr, Size) { SecureZeroMemory(Ptr, Size); }
+ #define SSC_SECUREZERO_IMPL(Ptr, Size) { SecureZeroMemory(Ptr, Size); }
 #else
  #error "Unsupported!"
 #endif
@@ -129,9 +129,8 @@ SSC_xor128(void* R_ writeto, const void* R_ readfrom);
 
 /* Zero over the memory @mem with @n zero bytes.
  * Do not optimize away the zeroing. */
-SSC_INLINE void
-SSC_secureZero(void* R_ mem, size_t n)
-SECUREZERO_IMPL_(mem, n)
+SSC_API void
+SSC_secureZero(void* R_ mem, size_t n);
 
 /* Compare the first @size bytes of @mem0 and @mem1.
  * Do the comparison in constant (worst case) time. */

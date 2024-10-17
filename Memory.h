@@ -107,16 +107,14 @@ SSC_GET_PAGE_SIZE_IMPL
 
 #ifdef SSC_HAS_GETTOTALSYSTEMMEMORY
 /* Get the total amount of OS physical memory. */
-SSC_INLINE size_t
-SSC_getTotalSystemMemory(void)
-SSC_GETTOTALSYSTEMMEMORY_IMPL
+SSC_API size_t
+SSC_getTotalSystemMemory(void);
 #endif
 
 #ifdef SSC_HAS_GETAVAILABLESYSTEMMEMORY
 /* Get the total amount of available physical memory. */
-SSC_INLINE size_t
-SSC_getAvailableSystemMemory(void)
-SSC_GETAVAILABLESYSTEMMEMORY_IMPL
+SSC_API size_t
+SSC_getAvailableSystemMemory(void);
 #endif
 
 /* Allocate @n bytes on the heap successfully, or terminate the program. */
