@@ -116,6 +116,7 @@ SSC_xor128(void* R_ writeto, const void* R_ readfrom);
  #define SSC_SECUREZERO_IMPL(Ptr, Size) { explicit_memset(Ptr, 0, Size); }
 #elif defined(SSC_OS_UNIXLIKE)
  #include <strings.h>
+ void explicit_bzero(void *, size_t);
  #define SSC_SECUREZERO_IMPL(Ptr, Size) { explicit_bzero(Ptr, Size); }
 #elif defined(SSC_OS_WINDOWS)
  #include <windows.h>

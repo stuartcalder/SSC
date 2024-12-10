@@ -11,8 +11,7 @@
 #endif
 
 #ifdef SSC_HAS_GETEXECUTABLEPATH
-char* SSC_getExecutablePath(
- size_t* exec_path_size)
+char* SSC_getExecutablePath(size_t* exec_path_size)
 {
  #if   defined(__gnu_linux__)
   char* exec_path = realpath("/proc/self/exe", SSC_NULL);
@@ -22,21 +21,25 @@ char* SSC_getExecutablePath(
     *exec_path_size = strlen(exec_path);
   return exec_path;
  #elif defined(SSC_OS_WINDOWS)
-  const size_t BUF_SIZE = MAX_PATH + 1;
-  wchar_t wide_path [BUF_SIZE] = {0};
-  char*   exec_path = (char*)malloc(BUF_SIZE);
+  #define BUF_SIZE_ (MAX_PATH + 1)
+  wchar_t wide_path [BUF_SIZE_] = {0};
+  char*   exec_path = (char*)malloc(BUF_SIZE_);
   if (exec_path == SSC_NULL)
-    return SSC_NULL;
-  memset(exec_path, 0, BUF_SIZE);
+    return SSC_NULL; /* Return a null pointer if malloc fails. */
+  memset(exec_path, 0, BUF_SIZE_);
+
   DWORD len = GetModuleFileNameW(SSC_NULL, wide_path, MAX_PATH);
   if (len == 0) {
     free(exec_path);
     return SSC_NULL;
   }
+
   if (exec_path_size != SSC_NULL)
     *exec_path_size = (size_t)len;
-  snprintf(exec_path, BUF_SIZE, "%ls", wide_path);
+
+  snprintf(exec_path, BUF_SIZE_, "%ls", wide_path);
   return exec_path;
+  #undef BUF_SIZE_
  #else
   #error "Invalid implementation!"
  #endif

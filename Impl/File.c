@@ -105,6 +105,9 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 }
 
 #ifdef SSC_HAS_FILE_CREATESECRET
+
+long syscall();
+
 SSC_Error_t
 SSC_File_createSecret(SSC_File_t* storefile)
 {
@@ -133,6 +136,10 @@ SSC_File_close(SSC_File_t file)
    #error "Unsupported OS!"
   #endif
 }
+
+#ifdef SSC_OS_UNIXLIKE
+int ftruncate(int, off_t);
+#endif
 
 SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)

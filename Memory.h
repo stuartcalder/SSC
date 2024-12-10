@@ -16,6 +16,7 @@
 #if defined(SSC_OS_UNIXLIKE)
  #include <unistd.h>
  #include <stdlib.h>
+ int posix_memalign(void **, size_t, size_t);
 /* SSC_alignedMalloc */
  #define SSC_ALIGNED_MALLOC_IMPL(Alignment, Size) {\
   void* p;\

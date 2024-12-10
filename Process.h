@@ -26,7 +26,7 @@ SSC_getExecutablePath(size_t* exec_path_size);
 
 #ifdef SSC_HAS_GETNUMBERPROCESSORS
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* TODO: Document. */
+/* Return the number of logical processors on the system. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API int
 SSC_getNumberProcessors(void);
