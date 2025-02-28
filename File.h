@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2024 Stuart Steven Calder
+/* Copyright (C) 2020-2025 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_FILE_H
 #define SSC_FILE_H

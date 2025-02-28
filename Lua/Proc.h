@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2023 Stuart Steven Calder
+/* Copyright (C) 2020-2025 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
 #if !defined(SSC_LUA_PROC_H) && defined(SSC_EXTERN_LUA)
 #define SSC_LUA_PROC_H
