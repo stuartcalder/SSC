@@ -61,9 +61,9 @@ SSC_String_makeCstr(char* ctx)
   if (bufsize >= strsize + (SSC_STRING_PREFIXBYTES * 2) + 1) {
     char* p = SSC_String_getData(ctx) + strsize;
     *p = '\0';
-    return 0;
+    return SSC_OK;
   }
-  return -1;
+  return SSC_ERR;
 }
 
 void

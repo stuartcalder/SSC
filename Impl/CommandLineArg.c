@@ -294,7 +294,7 @@ SSC_ArgParser_process(
   SSC_ArgParser_init(ctx, argv[0] + offset, argc, argv);
   if (ctx->to_read) {
     SSC_Error_t status = processor(ctx, data);
-    if (processor_status)
+    if (processor_status != SSC_OK)
       *processor_status = status;
   }
   return ctx->consumed;

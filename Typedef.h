@@ -3,10 +3,14 @@
 
 #include <stdint.h>
 
-/* For functions that return 0 on success and (-1) on failure,
+/* For functions that return SSC_OK on success and SSC_ERR on failure,
  * use the SSC_Error_t typedef, so it is unambiguous why
  * we are returning an integer. */
-typedef int SSC_Error_t;
+typedef enum
+{
+  SSC_OK =   0,
+  SSC_ERR = -1
+} SSC_Error_t;
 
 /* For functions that return a field of bits to indicate
  * discrete errors use the SSC_BitError_t typedef. */

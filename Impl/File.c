@@ -22,17 +22,17 @@ SSC_File_getSize(SSC_File_t file, size_t* R_ storesize)
 #if    defined(SSC_OS_UNIXLIKE)
   Stat_t s;
   if (fstat(file, &s))
-    return -1;
+    return SSC_ERR;
   *storesize = (size_t)s.st_size;
 #elif  defined(SSC_OS_WINDOWS)
   LargeInt_t li;
   if (!GetFileSizeEx(file, &li))
-    return -1;
+    return SSC_ERR;
   *storesize = (size_t)li.QuadPart;
 #else
  #error "Unsupported operating system."
 #endif
-  return 0;
+  return SSC_OK;
 }
 
 SSC_Error_t
@@ -41,16 +41,16 @@ SSC_FilePath_getSize(const char* R_ fpath, size_t* R_ storesize)
 #ifdef SSC_OS_UNIXLIKE
   Stat_t s;
   if (stat(fpath, &s))
-    return -1;
+    return SSC_ERR;
   *storesize = (size_t)s.st_size;
-  return 0;
+  return SSC_OK;
 #else /* Any other OS. */
   SSC_File_t f;
   if (SSC_FilePath_open(fpath, true, &f))
-    return -1;
+    return SSC_ERR;
   if (SSC_File_getSize(f, storesize)) {
     SSC_File_close(f);
-    return -1;
+    return SSC_ERR;
   }
   return SSC_File_close(f);
 #endif
@@ -88,7 +88,7 @@ SSC_FilePath_open(const char* R_ filepath, bool readonly, SSC_File_t* R_ storefi
 #else
  #error "Unsupported operating system."
 #endif
-  return (*storefile != SSC_FILE_NULL_LITERAL) ? 0 : -1;
+  return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
 }
 
 SSC_Error_t
@@ -101,7 +101,7 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 #else
  #error "Unsupported operating system."
 #endif
-  return (*storefile != SSC_FILE_NULL_LITERAL) ? 0 : -1;
+  return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
 }
 
 #ifdef SSC_HAS_FILE_CREATESECRET
@@ -114,9 +114,9 @@ SSC_File_createSecret(SSC_File_t* storefile)
  #ifdef __gnu_linux__
  int ret = syscall(SYS_memfd_secret, 0U);
  *storefile = ret;
- if (ret == -1)
-   return -1;
- return 0;
+ if (ret == SSC_ERR)
+   return SSC_ERR;
+ return SSC_OK;
  #else
   #error "Unsupported OS!"
  #endif
@@ -130,8 +130,8 @@ SSC_File_close(SSC_File_t file)
   return close(file);
   #elif defined(SSC_OS_WINDOWS)
   if (CloseHandle(File))
-    return 0;
-  return -1;
+    return SSC_OK;
+  return SSC_ERR;
   #else
    #error "Unsupported OS!"
   #endif
@@ -150,8 +150,8 @@ SSC_File_setSize(SSC_File_t file, size_t size)
   LARGE_INTEGER i;
   i.QuadPart = size;
   if (!SetFilePointerEx(file, i, SSC_NULL, FILE_BEGIN) || !SetEndOfFile(file))
-    return -1;
-  return 0;
+    return SSC_ERR;
+  return SSC_OK;
   #else
    #error "Unsupported OS!"
   #endif
