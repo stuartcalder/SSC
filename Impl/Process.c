@@ -1,7 +1,7 @@
 #include "Process.h"
 #include "Error.h"
 
-#if   defined(__gnu_linux__)
+#if   defined(SSC_OS_UNIXLIKE)
  #include <limits.h>
  #include <stdlib.h>
  #include <string.h>
@@ -13,7 +13,7 @@
 #ifdef SSC_HAS_GETEXECUTABLEPATH
 char* SSC_getExecutablePath(size_t* exec_path_size)
 {
- #if   defined(__gnu_linux__)
+ #if   defined(__linux__)
   char* exec_path = realpath("/proc/self/exe", SSC_NULL);
   if (exec_path == SSC_NULL)
     return SSC_NULL;
@@ -49,7 +49,7 @@ char* SSC_getExecutablePath(size_t* exec_path_size)
 #ifdef SSC_HAS_GETNUMBERPROCESSORS
 int SSC_getNumberProcessors(void)
 {
- #if   defined(__gnu_linux__) && defined(_SC_NPROCESSORS_ONLN)
+ #if   defined(SSC_OS_UNIXLIKE) && defined(_SC_NPROCESSORS_ONLN)
   return (int)sysconf(_SC_NPROCESSORS_ONLN);
  #elif defined(SSC_OS_WINDOWS)
   SYSTEM_INFO si;
@@ -59,4 +59,4 @@ int SSC_getNumberProcessors(void)
   #error "Invalid implementation!"
  #endif
 }
-#endif
+#endif /* ! ifdef SSC_HAS_GETNUMBERPROCESSORS */

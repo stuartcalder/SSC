@@ -2,7 +2,14 @@
 #define SSC_PROCESS_H
 #include "Macro.h"
 
-#if   defined(__gnu_linux__)
+#ifdef SSC_OS_UNIXLIKE
+ #include <unistd.h>
+ #ifdef _SC_NPROCESSORS_ONLN
+  #define SSC_HAS_GETNUMBERPROCESSORS
+ #endif
+#endif
+
+#if   defined(__linux__)
  #define SSC_HAS_GETEXECUTABLEPATH
  #include <unistd.h>
  #ifdef _SC_NPROCESSORS_ONLN

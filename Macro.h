@@ -53,6 +53,7 @@
 
 /* More unixlikes could go here without too much code change, probably. */
 #if (defined(SSC_OS_MAC)    ||\
+     defined(__ANDROID__)   ||\
      defined(__Dragonfly__) ||\
      defined(__FreeBSD__)   ||\
      defined(__gnu_linux__) ||\
@@ -403,6 +404,10 @@
 #elif !SSC_COMPILER_ISVALID(SSC_COMPILER)
  #error "SSC_COMPILER is invalid!"
 #elif SSC_COMPILER == SSC_COMPILER_UNKNOWN
+ /* When the compiler is unknown, NIL all the import and export
+  * macros. If we don't know how the compiler decides what to
+  * export/what to import prefer to simply do nothing.
+  */
  #warning "Compiler unknown: NIL-ing import/export attributes!"
  #define SSC_EXPORT
  #define SSC_EXPORT_IS_NIL
@@ -410,11 +415,15 @@
  #define SSC_IMPORT_IS_NIL
 #elif SSC_COMPILER_IS_GCC_COMPATIBLE
  #if defined(SSC_OS_UNIXLIKE)
-  #define SSC_EXPORT __attribute__ ((visibility ("default")))
+  /* UNIX exports all symbols by default. Make the visibility of exported
+   * and imported symbols as default.
+   */
+  #define SSC_EXPORT __attribute__((visibility ("default")))
   #define SSC_IMPORT SSC_EXPORT
  #elif defined(SSC_OS_WINDOWS)
-  #define SSC_EXPORT __attribute__ ((dllexport))
-  #define SSC_IMPORT __attribute__ ((dllimport))
+ /* MinGW supports dllexport and dllimport attributes similar to MSVC's __declspec. */
+  #define SSC_EXPORT __attribute__((dllexport))
+  #define SSC_IMPORT __attribute__((dllimport))
  #else
   #error "GCC/Clang support Unixlikes and Windows."
  #endif
@@ -439,7 +448,11 @@
 #define SSC_STRINGIFY_IMPL(Text) #Text
 #define SSC_STRINGIFY(Text)      SSC_STRINGIFY_IMPL(Text)
 
-#ifdef SSC_EXTERN_STATIC_LIB /* SSC is being built, or imported as a static library. */
+/* If you want to build or import SSC as a static library you must externally define
+ * the macro SSC_EXTERN_STATIC_LIB, otherwise it is assumed SSC is a shared
+ * object/dynamically linked library.
+ */
+#ifdef SSC_EXTERN_STATIC_LIB
  #define SSC_API /* Nil */
  #define SSC_API_IS_NIL
 #else
@@ -449,7 +462,7 @@
   #ifdef SSC_EXPORT_IS_NIL
    #define SSC_API_IS_NIL
   #endif
- #else /* Assume that SSC is being imported as a dynamic library. */
+ #else /* Assume that SSC is being imported as a dynamically linked library. */
   #define SSC_API SSC_IMPORT
   #define SSC_API_IS_IMPORT
   #ifdef SSC_IMPORT_IS_NIL

@@ -1,9 +1,9 @@
 /* Copyright (C) 2020-2025 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
-#ifndef SSC_TERMINAL_H
+#include "Macro.h"
+#if !defined(SSC_TERMINAL_H) && !defined(__ANDROID__)
 #define SSC_TERMINAL_H
 
-#include "Macro.h"
 #include "Operation.h"
 
 #if defined(SSC_OS_UNIXLIKE)

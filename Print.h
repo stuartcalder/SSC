@@ -12,7 +12,7 @@ SSC_BEGIN_C_DECLS
 
 /* Print bytes in hexadecimal format. */
 SSC_API void
-SSC_printBytes(const void* SSC_RESTRICT bytes,size_t nbytes);
+SSC_printBytes(const void* SSC_RESTRICT bytes, size_t nbytes);
 
 SSC_END_C_DECLS
 

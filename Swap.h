@@ -41,11 +41,11 @@
 
 /* Next, prefer functions natively available on some operating system. */
 #if (!defined(SSC_SWAP_IMPL) &&\
-     (defined(__OpenBSD__) ||\
-      defined(__FreeBSD__) ||\
+     (defined(__OpenBSD__)   ||\
+      defined(__FreeBSD__)   ||\
       defined(__Dragonfly__) ||\
-      defined(__NetBSD__) ||\
-      defined(__gnu_linux__) ||\
+      defined(__NetBSD__)    ||\
+      defined(__linux__)     ||\
       defined(SSC_OS_WINDOWS)))
  #define SSC_SWAP_IMPL SSC_SWAP_IMPL_OS_PROVIDED
 #endif
@@ -83,7 +83,7 @@
   #define SSC_SWAP16_IMPL(VarU16) { return bswap16(VarU16); }
   #define SSC_SWAP32_IMPL(VarU32) { return bswap32(VarU32); }
   #define SSC_SWAP64_IMPL(VarU64) { return bswap64(VarU64); }
- #elif defined(__gnu_linux__)
+ #elif defined(__linux__)
   #include <byteswap.h>
   #define SSC_SWAP16_IMPL(VarU16) { return bswap_16(VarU16); }
   #define SSC_SWAP32_IMPL(VarU32) { return bswap_32(VarU32); }
