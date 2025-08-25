@@ -10,6 +10,17 @@ void SSC_assertMsg(bool b, const char* R_ fmt, ...)
     va_list vl;
     va_start(vl, fmt);
     SSC_errxCodeList(EXIT_FAILURE, fmt, vl);
+    va_end(vl);
+  }
+}
+
+void SSC_warnMsg(bool b, const char* R_ fmt, ...)
+{
+  if (!b) {
+    va_list vl;
+    va_start(vl, fmt);
+    vfprintf(stderr, fmt, vl);
+    va_end(vl);
   }
 }
 
@@ -18,6 +29,7 @@ void SSC_errxCodeVargs(int code, const char* R_ fmt, ...)
   va_list vl;
   va_start(vl, fmt);
   SSC_errxCodeList(code, fmt, vl);
+  va_end(vl);
 }
 
 #ifndef SSC_ERRX_CODE_LIST_INLINE
@@ -31,4 +43,5 @@ void SSC_errx(const char* R_ fmt, ...)
   va_list vl;
   va_start(vl, fmt);
   SSC_errxCodeList(EXIT_FAILURE, fmt, vl);
+  va_end(vl);
 }

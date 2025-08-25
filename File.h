@@ -174,7 +174,7 @@ SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
 /* Change the current working directory to @path. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
-SSC_chdir(const char* path); //TODO
+SSC_chdir(const char* path);
 /*==========================================================================================*/
 
 SSC_END_C_DECLS

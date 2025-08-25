@@ -106,8 +106,6 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 
 #ifdef SSC_HAS_FILE_CREATESECRET
 
-long syscall();
-
 SSC_Error_t
 SSC_File_createSecret(SSC_File_t* storefile)
 {

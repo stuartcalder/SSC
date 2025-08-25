@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 #include "Macro.h"
-#include "String.h"
+#include "Error.h"
 
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
@@ -52,8 +52,8 @@ typedef struct {
   SSC_ArgProc_f* proc;
   char           ch;
 } SSC_ArgShort;
-#define SSC_ARGSHORT_NULL_LITERAL      SSC_COMPOUND_LITERAL(SSC_ArgShort, 0)
-#define SSC_ARGSHORT_LITERAL(Proc, Ch) SSC_COMPOUND_LITERAL(SSC_ArgShort, Proc, Ch)
+#define SSC_ARGSHORT_NULL_LITERAL      SSC_STRUCT_LITERAL(SSC_ArgShort, 0)
+#define SSC_ARGSHORT_LITERAL(Proc, Ch) SSC_STRUCT_LITERAL(SSC_ArgShort, Proc, Ch)
 /*==============================================================================*/
 
 /*##############################################################################*/
@@ -70,8 +70,8 @@ typedef struct {
 /* Don't use SSC_ARGLONG_LITERAL with any string
  * other than a string literal "like this", or the
  * use of sizeof is going to be a problem. */
-#define SSC_ARGLONG_NULL_LITERAL               SSC_COMPOUND_LITERAL(SSC_ArgLong, 0)
-#define SSC_ARGLONG_LITERAL(Proc, Str_Literal) SSC_COMPOUND_LITERAL(SSC_ArgLong, Proc, Str_Literal, (sizeof(Str_Literal) - 1))
+#define SSC_ARGLONG_NULL_LITERAL               SSC_STRUCT_LITERAL(SSC_ArgLong, 0)
+#define SSC_ARGLONG_LITERAL(Proc, Str_Literal) SSC_STRUCT_LITERAL(SSC_ArgLong, Proc, Str_Literal, (sizeof(Str_Literal) - 1))
 /*==============================================================================*/
 
 /*##############################################################################*/
@@ -87,7 +87,7 @@ typedef struct {
   size_t size;
   int    consumed;
 } SSC_ArgParser;
-#define SSC_ARGPARSER_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_ArgParser, 0)
+#define SSC_ARGPARSER_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_ArgParser, 0)
 /*==============================================================================*/
 
 enum {

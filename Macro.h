@@ -300,7 +300,8 @@
   #define SSC_CONSTEVAL constexpr
   #define SSC_CONSTEVAL_IS_CONSTEXPR /* We have constexpr but not consteval. Assume constexpr is a `downgrade` from consteval.*/
  #endif
- #define SSC_COMPOUND_LITERAL(Type, ...) Type{__VA_ARGS__} /* C++ literal syntax. */
+ #define SSC_STRUCT_LITERAL(Type, ...)   Type{__VA_ARGS__} /* C++ literal syntax. */
+ #define SSC_COMPOUND_LITERAL(...)       SSC_STRUCT_LITERAL(__VA_ARGS__) /* TODO: DELETEME. */
  #define SSC_CONSTEXPR constexpr
 #else /* Not C++. We are using C. */
  #define SSC_LANG SSC_LANG_C
@@ -354,7 +355,8 @@
   #define SSC_ALIGNOF(Of_)
   #define SSC_ALIGNOF_IS_NIL
  #endif /* !#ifdef __STDC_VERSION__ */
- #define SSC_COMPOUND_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 literal syntax. */
+ #define SSC_STRUCT_LITERAL(Type, ...) (Type){__VA_ARGS__} /* C99 literal syntax. */
+ #define SSC_COMPOUND_LITERAL(...)     SSC_STRUCT_LITERAL(__VA_ARGS__) /* TODO: DELETEME */
  #define SSC_CONSTEXPR
  #define SSC_CONSTEXPR_IS_NIL
  #define SSC_CONSTEVAL

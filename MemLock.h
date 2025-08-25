@@ -23,7 +23,7 @@ typedef struct {
   pthread_mutex_t n_mtx; /* Mutex limiting access to @n. */
   #endif
 } SSC_MemLock;
-#define SSC_MEMLOCK_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_MemLock, 0)
+#define SSC_MEMLOCK_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemLock, 0)
 
 SSC_API extern SSC_MemLock SSC_MemLock_Global; /* Global SSC_MemLock structure. */
 

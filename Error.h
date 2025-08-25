@@ -73,6 +73,10 @@ SSC_API void
 SSC_assertMsg(bool, const char* R_, ...);
 
 /* TODO: Document. */
+SSC_API void
+SSC_warnMsg(bool, const char* R_, ...);
+
+/* TODO: Document. */
 SSC_INLINE void
 SSC_assert(bool b)
 {

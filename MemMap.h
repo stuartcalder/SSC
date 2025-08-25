@@ -42,9 +42,9 @@ typedef struct {
   bool       readonly;
 } SSC_MemMap;
 #ifdef SSC_MEMMAP_HAS_WINDOWS_FILEMAP
- #define SSC_MEMMAP_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, SSC_FILE_NULL_LITERAL, false)
+ #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, SSC_FILE_NULL_LITERAL, false)
 #else
- #define SSC_MEMMAP_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, false)
+ #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, false)
 #endif
 /*=========================================================================================*/
 

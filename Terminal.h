@@ -7,30 +7,40 @@
 #include "Operation.h"
 
 #if defined(SSC_OS_UNIXLIKE)
- #ifdef __NetBSD__
-  #include <ncurses/ncurses.h>
- #else
-  #include <ncurses.h>
- #endif
+  #ifdef __has_include
+    #if __has_include(<ncurses.h>)
+      #include <ncurses.h>
+    #elif __has_include(<ncurses/ncurses.h>)
+      #include <ncurses/ncurses.h>
+    #else
+      #error "Unable to find an ncurses.h file to include!"
+    #endif
+  #else
+    #ifdef __NetBSD__
+      #include <ncurses/ncurses.h>
+    #else
+      #include <ncurses.h>
+    #endif
+  #endif
 #elif defined(SSC_OS_WINDOWS)
- #include <conio.h>
- #include <windows.h>
- #include "Error.h"
+  #include <conio.h>
+  #include <windows.h>
+  #include "Error.h"
 #else
- #error "Unsupported OS."
+  #error "Unsupported OS."
 #endif
 
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
 
 #if defined(SSC_OS_UNIXLIKE)
- /* On a Unixlike, do not inline term_init or term_end, since
+ /* On a Unixlike, do not inline SSC_Terminal_init or SSC_Terminal_end, since
   * doing so will mean needing to link directly with ncurses,
   * which is not necessary. */
  #define TERM_API_  SSC_API
  #define TERM_IMPL_ ;
 #elif defined(SSC_OS_WINDOWS)
- /* On Windows, inline term_init and term_end, since they're
+ /* On Windows, inline SSC_Terminal_init and SSC_Terminal_end, since they're
   * just there to clear the screen. */
  #define TERM_API_  SSC_INLINE
  #define TERM_IMPL_ { system("cls"); }

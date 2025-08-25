@@ -19,7 +19,7 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
   map->ptr = (uint8_t*)mmap(SSC_NULL, map->size, rw, MAP_SHARED, map->file, 0);
   if (map->ptr == MAP_FAIL_) {
     map->ptr = SSC_NULL;
-    return -1;
+    return SSC_ERR;
   }
 #elif  defined(SSC_OS_WINDOWS)
   Dw32_t high, low, page_rw, map_rw;
@@ -36,12 +36,12 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
   }
   map->windows_filemap = CreateFileMappingA(map->file, SSC_NULL, page_rw, high, low, SSC_NULL);
   if (map->windows_filemap == SSC_FILE_NULL_LITERAL)
-    return -1;
+    return SSC_ERR;
   map->ptr = (uint8_t*)MapViewOfFile(map->windows_filemap, map_rw, 0, 0, map->size);
   if (map->ptr == MAP_FAIL_) {
     if (!SSC_File_close(map->windows_filemap))
       map->windows_filemap = SSC_FILE_NULL_LITERAL;
-    return -1;
+    return SSC_ERR;
   }
 #else
  #error "Unsupported operating system."
@@ -60,16 +60,16 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
     map->readonly = false;
   }
 #elif defined(SSC_OS_WINDOWS)
-  ret = 0;
+  ret = SSC_OK;
   if (!UnmapViewOfFile((LPCVOID)map->ptr))
-    ret = -1;
+    ret = SSC_ERR;
   else
     map->ptr = SSC_NULL;
   if (SSC_File_close(map->windows_filemap))
-    ret = -1;
+    ret = SSC_ERR;
   else
     map->windows_filemap = SSC_FILE_NULL_LITERAL;
-  if (!ret)
+  if (ret == SSC_ERR)
     map->readonly = false;
 #else
  #error "Unsupported operating system."
@@ -124,7 +124,7 @@ SSC_CodeError_t SSC_MemMap_init(
 
   /* It does exist. */
   if (exists) {
-    /* It does. Open it and store the SSC_File_t in @map. */
+    /* Open it and store the SSC_File_t in @map. */
     if (SSC_FilePath_open(filepath, readonly, &map->file))
       return ERR_OPEN_FILEPATH_;
     /* Store the size of the file in @map->size. */
@@ -168,10 +168,10 @@ SSC_CodeError_t SSC_MemMap_init(
 }
 
 void SSC_MemMap_initOrDie(
- SSC_MemMap*  R_ map,
- const char* R_  filepath,
- size_t          size,
- SSC_BitFlag_t   flags)
+ SSC_MemMap* R_ map,
+ const char* R_ filepath,
+ size_t         size,
+ SSC_BitFlag_t  flags)
 {
   SSC_CodeError_t ce = SSC_MemMap_init(map, filepath, size, flags);
   const char* err_str;

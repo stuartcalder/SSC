@@ -26,7 +26,7 @@ typedef struct {
   uint8_t  f; /* Flags. */
   #endif
 } SSC_Lua_SecureBuffer;
-#define SSC_LUA_SECUREBUFFER_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_Lua_SecureBuffer, 0)
+#define SSC_LUA_SECUREBUFFER_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_Lua_SecureBuffer, 0)
 
 SSC_BEGIN_C_DECLS
 

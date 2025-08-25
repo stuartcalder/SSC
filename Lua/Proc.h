@@ -21,7 +21,7 @@ typedef struct {
   size_t     fpath_n;
   uint8_t    readonly;
 } SSC_Lua_File;
-#define SSC_LUA_FILE_NULL_LITERAL SSC_COMPOUND_LITERAL(SSC_Lua_File, SSC_FILE_NULL_LITERAL, 0, SSC_NULL, 0, 0)
+#define SSC_LUA_FILE_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_Lua_File, SSC_FILE_NULL_LITERAL, 0, SSC_NULL, 0, 0)
 
 SSC_BEGIN_C_DECLS
 
