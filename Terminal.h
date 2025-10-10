@@ -37,9 +37,13 @@ SSC_BEGIN_C_DECLS
  /* On a Unixlike, do not inline SSC_Terminal_init or SSC_Terminal_end, since
   * doing so will mean needing to link directly with ncurses,
   * which is not necessary. */
+ #define SSC_TERMINAL_INIT_IMPL { initscr(); clear(); }
+ #define SSC_TERMINAL_END_IMPL  { endwin(); }
  #define TERM_API_  SSC_API
  #define TERM_IMPL_ ;
 #elif defined(SSC_OS_WINDOWS)
+ #define SSC_TERMINAL_INIT_INLINE
+ #define SSC_TERMINAL_END_INLINE
  /* On Windows, inline SSC_Terminal_init and SSC_Terminal_end, since they're
   * just there to clear the screen. */
  #define TERM_API_  SSC_INLINE
@@ -48,13 +52,9 @@ SSC_BEGIN_C_DECLS
  #error "Unsupported."
 #endif
 
-TERM_API_ void
-SSC_Terminal_init(void)
-TERM_IMPL_
+TERM_API_ void SSC_Terminal_init(void) TERM_IMPL_
 
-TERM_API_ void
-SSC_Terminal_end(void)
-TERM_IMPL_
+TERM_API_ void SSC_Terminal_end(void)  TERM_IMPL_
 
 #undef TERM_API_
 #undef TERM_IMPL_
@@ -62,15 +62,13 @@ TERM_IMPL_
 /* From the command-line, prompt the user for "secret" input
  * characters of size @buffer_size, storing the characters
  * at @buffer. */
-SSC_API int
-SSC_Terminal_getSecretString(uint8_t* R_ buffer, const char* R_ prompt, const int buffer_size);
+SSC_API int SSC_Terminal_getSecretString(uint8_t* R_ buffer, const char* R_ prompt, const int buffer_size);
 /* -> Size of the secret string. */
 
 /* From the command-line, prompt the user to input a password with @prompt,
  * of size at least @min_pw_size and at most @max_pw_size in a buffer of size @buffer_size,
  * at the memory location @buffer.*/
-SSC_API int
-SSC_Terminal_getPassword(
+SSC_API int SSC_Terminal_getPassword(
  uint8_t*    R_ buffer,
  const char* R_ prompt,
  const int      min_pw_size,
@@ -83,8 +81,7 @@ SSC_Terminal_getPassword(
  * @entry_prompt: String to prompt the user for input.
  * @reentry_prompt: String to prompt the user to re-enter the input.
  * @min_pw_size: The minimum size the password is allowed to be.*/
-SSC_API int
-SSC_Terminal_getPasswordChecked(
+SSC_API int SSC_Terminal_getPasswordChecked(
  uint8_t*    R_ password_buffer,
  uint8_t*    R_ check_buffer,
  const char* R_ entry_prompt,
@@ -95,8 +92,7 @@ SSC_Terminal_getPasswordChecked(
 /* -> Size of the password. */
 
 /* Notify the user with the string @notify_prompt. */
-SSC_API void
-SSC_Terminal_notify(const char* notify_prompt);
+SSC_API void SSC_Terminal_notify(const char* notify_prompt);
 
 SSC_END_C_DECLS
 #undef R_

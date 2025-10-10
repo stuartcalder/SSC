@@ -127,7 +127,7 @@ SSC_File_close(SSC_File_t file)
   #if   defined(SSC_OS_UNIXLIKE)
   return close(file);
   #elif defined(SSC_OS_WINDOWS)
-  if (CloseHandle(File))
+  if (CloseHandle(file))
     return SSC_OK;
   return SSC_ERR;
   #else

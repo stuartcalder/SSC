@@ -72,7 +72,7 @@
   MEMORYSTATUSEX status;\
   status.dwLength = sizeof(status);\
   GlobalMemoryStatusEx(&status);\
-  return (size_t)ullAvailPhys;\
+  return (size_t)status.ullAvailPhys;\
  }
 #else
  #error "Unsupported."

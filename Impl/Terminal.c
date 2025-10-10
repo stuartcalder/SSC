@@ -28,11 +28,13 @@
 
 #define OS_PROMPT_ "> " NEWLINE_
 
-#ifdef SSC_OS_UNIXLIKE
-/* On Windows these functions are inlined. */
-void SSC_Terminal_init(void) { initscr(); clear(); }
-void SSC_Terminal_end(void)  { endwin(); }
-#endif /* ~ SSC_OS_UNIXLIKE */
+#ifndef SSC_TERMINAL_INIT_INLINE
+void SSC_Terminal_init(void) SSC_TERMINAL_INIT_IMPL
+#endif
+
+#ifndef SSC_TERMINAL_END_INLINE
+void SSC_Terminal_end(void) SSC_TERMINAL_END_IMPL
+#endif
 
 #define SECRET_STR_MIN_BUFSIZE_ 2
 int
@@ -134,7 +136,6 @@ SSC_Terminal_getSecretString(
     repeat_ui = false;
   } /* ~ while(repeat_ui) */
   const int pw_size = strlen((char *)buffer);
-  system("cls");
   return pw_size;
 } /* ~ Windows impl */
 #else
