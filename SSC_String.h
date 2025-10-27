@@ -6,6 +6,7 @@
 #include "Macro.h"
 #include "Memory.h"
 #include "Error.h"
+#include <string.h>
 
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS

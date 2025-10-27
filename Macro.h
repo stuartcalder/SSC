@@ -26,6 +26,8 @@
 #define SSC_COMPILER_CLANG   2 /* Clang C/C++ compiler. */
 #define SSC_COMPILER_MSVC    3 /* Microsoft Visual C/C++ compiler. */
 #define SSC_COMPILER_ISVALID(Comp) ((Comp) >= SSC_COMPILER_UNKNOWN && (Comp) <= SSC_COMPILER_MSVC) /* UNKNOWN is valid. */
+#define SSC_COMPILER_IS_GCC_COMPATIBLE ((SSC_COMPILER == SSC_COMPILER_GCC) || (SSC_COMPILER == SSC_COMPILER_CLANG))
+
 /* Pointer-aliasing restrict support bits. */
 #define SSC_RESTRICT_IMPL_C    0x01 /* C99 restrict. */
 #define SSC_RESTRICT_IMPL_CPP  0x02 /* C++/MSVC restrict. */
@@ -43,8 +45,6 @@
  #warning "SSC_COMPILER unknown!"
 #endif
 
-/* Is our compiler a gcc-compatible compiler? */
-#define SSC_COMPILER_IS_GCC_COMPATIBLE ((SSC_COMPILER == SSC_COMPILER_GCC) || (SSC_COMPILER == SSC_COMPILER_CLANG))
 
 /* Operating system macros */
 #if defined(__APPLE__) && defined(__MACH__)
@@ -130,6 +130,7 @@
 #define SSC_CPP_17 201703L
 #define SSC_CPP_20 202002L
 #define SSC_CPP_23 202302L
+#define SSC_CPP_26 202600L
 
 /* SSC_ENDIAN
  * int

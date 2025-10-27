@@ -2,7 +2,7 @@
  * See accompanying LICENSE file for licensing information. */
 #include <ctype.h>
 #include "Error.h"
-#include "String.h"
+#include "SSC_String.h"
 #include "Operation.h"
 
 #undef  R_

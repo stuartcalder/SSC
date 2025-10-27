@@ -62,7 +62,7 @@ set(SRC
     Impl/Process.c
     Impl/Print.c
     Impl/Random.c
-    Impl/String.c
+    Impl/SSC_String.c
     Impl/Swap.c
     Impl/Terminal.c
 )
