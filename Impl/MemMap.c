@@ -215,6 +215,28 @@ void SSC_MemMap_initOrDie(
   SSC_errx(SSC_ERR_S_IN(err_str));
 }
 
+#ifdef SSC_MEMMAP_HAS_INITSECRET
+SSC_CodeError_t
+SSC_MemMap_initSecret(
+ SSC_MemMap* R_ map,
+ size_t         size)
+{
+  *map = SSC_MEMMAP_NULL_LITERAL;
+  #ifdef __gnu_linux__
+  if (SSC_File_createSecret(&map->file) == SSC_ERR)
+   return SSC_MEMMAP_INIT_CODE_ERR_SECRET;
+  map->size = size;
+  if (SSC_File_setSize(map->file, map->size) == SSC_ERR)
+    return SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE;
+  if (SSC_MemMap_map(map, false) == SSC_ERR)
+    return SSC_MEMMAP_INIT_CODE_ERR_MAP;
+  return SSC_MEMMAP_INIT_CODE_OK;
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
+#endif
+
 void SSC_MemMap_del(SSC_MemMap* map)
 {
   if (map->ptr && SSC_MemMap_unmap(map))

@@ -2,7 +2,7 @@
  * See accompanying LICENSE file for licensing information. */
 #include "File.h"
 
-#if defined(__gnu_linux__) && defined(SSC_HAS_FILE_CREATESECRET)
+#if defined(__gnu_linux__) && defined(SSC_FILE_HAS_CREATESECRET)
  #include <sys/syscall.h>
  #include <unistd.h>
 #endif
@@ -10,10 +10,10 @@
 #define R_ SSC_RESTRICT
 
 #if   defined(SSC_OS_UNIXLIKE)
-typedef struct stat   Stat_t;
+ typedef struct stat   Stat_t;
 #elif defined(SSC_OS_WINDOWS)
-typedef LARGE_INTEGER LargeInt_t;
-typedef DWORD         Dw32_t;
+ typedef LARGE_INTEGER LargeInt_t;
+ typedef DWORD         Dw32_t;
 #endif
 
 SSC_Error_t
@@ -61,7 +61,7 @@ SSC_FilePath_exists(const char* filepath)
 {
   bool exists = false;
   FILE* test = fopen(filepath, "r");
-  if (test) {
+  if (test != SSC_NULL) {
     fclose(test);
     exists = true;
   }
@@ -77,14 +77,21 @@ SSC_FilePath_forceExistOrDie(const char* R_ filepath, bool force_to_exist)
     SSC_assertMsg(!SSC_FilePath_exists(filepath), "Error: The filepath %s seems to already exist.\n", filepath);
 }
 
+#ifdef SSC_OS_WINDOWS
+ /* When creating files on Windows we provide all the FILE_SHARE_* bits
+  * to CreateFileA() so behavior is the same between Win32 and POSIX.
+  */
+ #define SHARE_MODE_ (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+#endif
+
 SSC_Error_t
 SSC_FilePath_open(const char* R_ filepath, bool readonly, SSC_File_t* R_ storefile)
 {
 #if    defined(SSC_OS_UNIXLIKE)
   *storefile = open(filepath, (readonly ? O_RDONLY : O_RDWR), (mode_t)0600);
 #elif  defined(SSC_OS_WINDOWS)
-  const Dw32_t read_write_rights = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
-  *storefile = CreateFileA(filepath, read_write_rights, 0, SSC_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
+  const Dw32_t rw = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
+  *storefile = CreateFileA(filepath, rw, SHARE_MODE_, SSC_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
 #else
  #error "Unsupported operating system."
 #endif
@@ -97,29 +104,45 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 #if    defined(SSC_OS_UNIXLIKE)
   *storefile = open(filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600);
 #elif  defined(SSC_OS_WINDOWS)
-  *storefile = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), 0, SSC_NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
+  *storefile = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), SHARE_MODE_, SSC_NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
 #else
  #error "Unsupported operating system."
 #endif
   return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
 }
 
-#ifdef SSC_HAS_FILE_CREATESECRET
-
+#ifdef SSC_FILE_HAS_CREATESECRET
 SSC_Error_t
 SSC_File_createSecret(SSC_File_t* storefile)
 {
  #ifdef __gnu_linux__
- int ret = syscall(SYS_memfd_secret, 0U);
- *storefile = ret;
- if (ret == SSC_ERR)
-   return SSC_ERR;
+ int f = syscall(SYS_memfd_secret, 0U);
+ if (f == -1)
+  return SSC_ERR;
+ *storefile = f;
  return SSC_OK;
  #else
   #error "Unsupported OS!"
  #endif
 }
-#endif /* ! SSC_HAS_FILE_CREATESECRET */
+#endif /* ! SSC_FILE_HAS_CREATESECRET */
+
+bool
+SSC_File_createSecretIsAvailable(void)
+{
+ #ifdef SSC_FILE_HAS_CREATESECRET
+  SSC_File_t  f;
+  SSC_Error_t result = SSC_File_createSecret(&f);
+  if (result == SSC_OK) {
+    SSC_File_close(f);
+    return true;
+  } else {
+    return false;
+  }
+ #else
+  return false;
+ #endif
+}
 
 SSC_Error_t
 SSC_File_close(SSC_File_t file)
@@ -145,7 +168,7 @@ SSC_File_setSize(SSC_File_t file, size_t size)
   #if   defined(SSC_OS_UNIXLIKE)
   return ftruncate(file, size);
   #elif defined(SSC_OS_WINDOWS)
-  LARGE_INTEGER i;
+  LargeInt_t i;
   i.QuadPart = size;
   if (!SetFilePointerEx(file, i, SSC_NULL, FILE_BEGIN) || !SetEndOfFile(file))
     return SSC_ERR;

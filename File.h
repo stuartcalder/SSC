@@ -26,7 +26,7 @@
  #ifdef __gnu_linux__
   /* Assume that memfd_secret() is supported if no Linux kernel version is specified. */
   #if !SSC_LINUX_VERSION_VALUE_ISDEFINED || (SSC_LINUX_VERSION_VALUE >= SSC_LINUX_VERSION(5, 14, 0))
-   #define SSC_HAS_FILE_CREATESECRET
+   #define SSC_FILE_HAS_CREATESECRET
   #endif
  #endif
 #elif defined(SSC_OS_WINDOWS)
@@ -103,7 +103,7 @@ SSC_FilePath_openOrDie(const char* R_ fpath, bool ronly)
 {
   SSC_File_t f;
   SSC_assertMsg(
-   !SSC_FilePath_open(fpath, ronly, &f),
+   SSC_FilePath_open(fpath, ronly, &f) == SSC_OK,
    "Error: SSC_FilePath_open() failed to open %s as %s!\n",
    fpath,
    ronly ? "ReadOnly" : "ReadWrite");
@@ -126,7 +126,7 @@ SSC_FilePath_createOrDie(const char* fpath)
 }
 /*==========================================================================================*/
 
-#ifdef SSC_HAS_FILE_CREATESECRET
+#ifdef SSC_FILE_HAS_CREATESECRET
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Create a "secret" file, with more protections than usually afforded by RAM-backed
  * filesytems. */
@@ -134,13 +134,16 @@ SSC_FilePath_createOrDie(const char* fpath)
 SSC_API SSC_Error_t
 SSC_File_createSecret(SSC_File_t* file);
 /*==========================================================================================*/
-#endif /* ! SSC_HAS_FILE_CREATESECRET */
+#endif /* ! SSC_FILE_HAS_CREATESECRET */
+
+SSC_API bool
+SSC_File_createSecretIsAvailable(void);
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Close the file associed with a specified file handle. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
-SSC_File_close(SSC_File_t file); //TODO
+SSC_File_close(SSC_File_t file);
 
 SSC_INLINE void
 SSC_File_closeOrDie(SSC_File_t file)

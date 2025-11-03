@@ -26,6 +26,10 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined(SSC_OS_UNIXLIKE) or defined(SSC_OS_WINDOWS) */
 
+#if (defined(__gnu_linux__) && defined(SSC_FILE_HAS_CREATESECRET))
+ #define SSC_MEMMAP_HAS_INITSECRET
+#endif
+
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
 
@@ -78,6 +82,7 @@ enum {
   SSC_MEMMAP_INIT_CODE_ERR_GET_FILE_SIZE =   -8, /* Failed to get a file size. */
   SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE =   -9, /* Failed to set a file size. */
   SSC_MEMMAP_INIT_CODE_ERR_MAP =            -10, /* Failed to map a file into memory. */
+  SSC_MEMMAP_INIT_CODE_ERR_SECRET =         -11, /* Failed to initialize a secret map. */
 };
 /*=========================================================================================*/
 
@@ -100,6 +105,13 @@ SSC_MemMap_initOrDie(
  size_t         size,
  SSC_BitFlag_t  flags);
 /*=========================================================================================*/
+
+#ifdef SSC_MEMMAP_HAS_INITSECRET
+SSC_API SSC_CodeError_t
+SSC_MemMap_initSecret(
+ SSC_MemMap* R_ map,
+ size_t         size);
+#endif
 
 #if defined(SSC_FILE_IS_INT)
  #define MEMMAP_DUMP_ \
