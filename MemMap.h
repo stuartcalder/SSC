@@ -26,7 +26,7 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined(SSC_OS_UNIXLIKE) or defined(SSC_OS_WINDOWS) */
 
-#if (defined(__gnu_linux__) && defined(SSC_FILE_HAS_CREATESECRET))
+#ifdef __gnu_linux__
  #define SSC_MEMMAP_HAS_INITSECRET
 #endif
 
@@ -37,24 +37,40 @@ SSC_BEGIN_C_DECLS
 /* Memory Map */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 typedef struct {
-  uint8_t*   ptr;
-  size_t     size;
-  SSC_File_t file;
+  uint8_t*       ptr;
+  size_t         size;
+  SSC_File_t     file;
   #ifdef SSC_MEMMAP_HAS_WINDOWS_FILEMAP
-  SSC_File_t windows_filemap;
+  SSC_File_t     windows_filemap;
   #endif
-  bool       readonly;
+  SSC_BitFlag8_t flags;
 } SSC_MemMap;
 #ifdef SSC_MEMMAP_HAS_WINDOWS_FILEMAP
- #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, SSC_FILE_NULL_LITERAL, false)
+ #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0U, SSC_FILE_NULL_LITERAL, SSC_FILE_NULL_LITERAL, 0U)
 #else
- #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0, SSC_FILE_NULL_LITERAL, false)
+ #define SSC_MEMMAP_NULL_LITERAL SSC_STRUCT_LITERAL(SSC_MemMap, SSC_NULL, 0U, SSC_FILE_NULL_LITERAL, 0U)
 #endif
 /*=========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* State Flags
+ *    SSC_BitFlag8_t
+ *      These flags are stored in the @flags variable of SSC_MemMap structs, and are used in map() and unmap() operations.
+ *      Users will typically not need to use these directly.
+ */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+enum {
+  /* Is the memory-map readonly? */
+  SSC_MEMMAP_FLAG_READONLY = 0x01,
+  /* Is the memory-map secret? i.e. created with SSC_MemMap_initSecret() */
+  SSC_MEMMAP_FLAG_SECRET   = 0x02,
+};
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Initialization Flags
- *     SSC_BitFlag_t */
+ *     SSC_BitFlag_t
+ *        These flags are not stored inside SSC_MemMap structs, but are merely passed in at runtime for init() operations.
+ */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 enum {
   SSC_MEMMAP_INIT_READONLY =    0x01, /* Is the memory-map readonly? */
@@ -65,10 +81,12 @@ enum {
    * else, enforce that the file DOESN'T already exist. */
   SSC_MEMMAP_INIT_FORCE_EXIST_YES = 0x08,
 };
-/*=========================================================================================*/
+
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Initialization Error Codes
- *     SSC_CodeError_t */
+ *     SSC_CodeError_t
+ *        These codes specify what errors might happen during an init() operation.
+ */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 enum {
   SSC_MEMMAP_INIT_CODE_OK =                   0,
@@ -84,10 +102,9 @@ enum {
   SSC_MEMMAP_INIT_CODE_ERR_MAP =            -10, /* Failed to map a file into memory. */
   SSC_MEMMAP_INIT_CODE_ERR_SECRET =         -11, /* Failed to initialize a secret map. */
 };
-/*=========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Open a file at @filepath with constraints passed as init flags in @flags,
+/* Open a file at @filepath with constraints passed as init flags in @init_flags,
  * then map the file into memory.
  * If a file does not exist at @filepath, an attempt will be made to create one there. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -96,21 +113,25 @@ SSC_MemMap_init(
  SSC_MemMap* R_ map,
  const char* R_ filepath,
  size_t         size,
- SSC_BitFlag_t  flags);
+ SSC_BitFlag_t  init_flags);
 
 SSC_API void
 SSC_MemMap_initOrDie(
  SSC_MemMap* R_ map,
  const char* R_ filepath,
  size_t         size,
- SSC_BitFlag_t  flags);
+ SSC_BitFlag_t  init_flags);
 /*=========================================================================================*/
 
 #ifdef SSC_MEMMAP_HAS_INITSECRET
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Create a RAM-backed MemoryMap to serve as a more secure memory buffer. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_MemMap_initSecret(
- SSC_MemMap* R_ map,
- size_t         size);
+ SSC_MemMap* map,
+ size_t      size);
+/*=========================================================================================*/
 #endif
 
 #if defined(SSC_FILE_IS_INT)
@@ -119,24 +140,24 @@ SSC_MemMap_initSecret(
   "map->ptr      = %p.\n"\
   "map->size     = %zu.\n"\
   "map->file     = %d.\n"\
-  "map->readonly = %s.\n"
+  "map->flags    = %u.\n"
  #define MEMMAP_DUMP_ARGS_(Map, Err) \
   Err,\
   (void*)Map->ptr,\
   Map->size,\
   Map->file,\
-  Map->readonly ? "ReadOnly" : "ReadWrite"
+  (unsigned)Map->flags
 #else
  #define MEMMAP_DUMP_ \
   "Error: %s. Dump:\n"\
   "map->ptr      = %p.\n"\
   "map->size     = %zu.\n"\
-  "map->readonly = %s.\n"
+  "map->flags    = %u.\n"
  #define MEMMAP_DUMP_ARGS_(Map, Err) \
   Err,\
   (void*)Map->ptr,\
   Map->size,\
-  Map->readonly ? "ReadOnly" : "ReadWrite"
+  (unsigned)Map->flags
 #endif
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -194,6 +215,13 @@ SSC_MemMap_syncOrDie(const SSC_MemMap* map)
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API void
 SSC_MemMap_del(SSC_MemMap* map);
+/*=========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Resize the underlying file. Unmap the file if it's currently mapped, and remap it. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_MemMap_resize(SSC_MemMap* map, size_t new_size);
 /*=========================================================================================*/
 
 SSC_END_C_DECLS

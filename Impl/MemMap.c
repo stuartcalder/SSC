@@ -46,7 +46,10 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
 #else
  #error "Unsupported operating system."
 #endif
-  map->readonly = readonly;
+  if (readonly)
+    map->flags |= SSC_MEMMAP_FLAG_READONLY;
+  else
+    map->flags &= ~SSC_MEMMAP_FLAG_READONLY;
   return 0;
 }
 
@@ -56,8 +59,8 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
 #if defined(SSC_OS_UNIXLIKE)
   ret = munmap(map->ptr, map->size);
   if (!ret) {
-    map->ptr = SSC_NULL;
-    map->readonly = false;
+    map->ptr   = SSC_NULL;
+    map->flags = 0U;
   }
 #elif defined(SSC_OS_WINDOWS)
   ret = SSC_OK;
@@ -70,7 +73,7 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
   else
     map->windows_filemap = SSC_FILE_NULL_LITERAL;
   if (ret == SSC_ERR)
-    map->readonly = false;
+    map->flags = 0U;
 #else
  #error "Unsupported operating system."
 #endif
@@ -218,18 +221,24 @@ void SSC_MemMap_initOrDie(
 #ifdef SSC_MEMMAP_HAS_INITSECRET
 SSC_CodeError_t
 SSC_MemMap_initSecret(
- SSC_MemMap* R_ map,
- size_t         size)
+ SSC_MemMap* map,
+ size_t      size)
 {
   *map = SSC_MEMMAP_NULL_LITERAL;
   #ifdef __gnu_linux__
-  if (SSC_File_createSecret(&map->file) == SSC_ERR)
-   return SSC_MEMMAP_INIT_CODE_ERR_SECRET;
+  /* Try to create a secret file. */
+  if (SSC_File_createSecret(&map->file) != SSC_OK)
+    return SSC_MEMMAP_INIT_CODE_ERR_SECRET;
+  /* Store the requested size in the MemMap struct. */
   map->size = size;
-  if (SSC_File_setSize(map->file, map->size) == SSC_ERR)
+  /* Set the size of the secret file. */
+  if (SSC_File_setSize(map->file, map->size) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE;
-  if (SSC_MemMap_map(map, false) == SSC_ERR)
+  /* Map the secret file. */
+  if (SSC_MemMap_map(map, false) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_MAP;
+  /* Denote that this is a secret Memory Map. */
+  map->flags |= SSC_MEMMAP_FLAG_SECRET;
   return SSC_MEMMAP_INIT_CODE_OK;
   #else
    #error "Unsupported OS!"
@@ -252,3 +261,28 @@ void SSC_MemMap_del(SSC_MemMap* map)
 
 SSC_Error_t SSC_MemMap_sync(const SSC_MemMap* map)
 SSC_MEMMAP_SYNC_IMPL(map)
+
+SSC_Error_t
+SSC_MemMap_resize(SSC_MemMap* map, size_t new_size)
+{
+  if (map == SSC_NULL || map->file == SSC_FILE_NULL_LITERAL)
+    return SSC_ERR;
+  /* If readonly resizing makes no sense. */
+  if (map->flags & SSC_MEMMAP_FLAG_READONLY)
+    return SSC_ERR;
+
+  /* First, unmap. */
+  if (map->ptr != SSC_NULL && SSC_MemMap_unmap(map) != SSC_OK)
+    return SSC_ERR;
+
+  /* Adjust the underlying file size. */
+  if (SSC_File_setSize(map->file, new_size) != SSC_OK)
+    return SSC_ERR;
+  map->size = new_size;
+
+  /* Remap with the new size. */
+  if (SSC_MemMap_map(map, false) != SSC_OK)
+    return SSC_ERR;
+
+  return SSC_OK;
+}
