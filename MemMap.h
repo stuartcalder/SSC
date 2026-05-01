@@ -16,9 +16,11 @@
 #elif defined(SSC_OS_WINDOWS)
  #define SSC_MEMMAP_HAS_WINDOWS_FILEMAP
  #define SSC_MEMMAP_SYNC_IMPL(M) {\
-  if (FlushViewOfFile((LPCVOID)M->ptr, M->size))\
-    return 0;\
-  return -1;\
+  if (!FlushViewOfFile((LPCVOID)M->ptr, M->size))\
+    return -1;\
+  if (!FlushFileBuffers(M->file))\
+    return -1;\
+  return 0;\
  }
  #include <memoryapi.h>
  #include <windows.h>
@@ -172,7 +174,7 @@ SSC_INLINE void
 SSC_MemMap_mapOrDie(SSC_MemMap* map, bool readonly)
 {
   SSC_assertMsg(
-   !SSC_MemMap_map(map, readonly),
+   SSC_MemMap_map(map, readonly) == SSC_OK,
    MEMMAP_DUMP_,
    MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_map() failed to map a file into memory"));
 }
@@ -188,7 +190,7 @@ SSC_INLINE void
 SSC_MemMap_unmapOrDie(SSC_MemMap* map)
 {
   SSC_assertMsg(
-   !SSC_MemMap_unmap(map),
+   SSC_MemMap_unmap(map) == SSC_OK,
    MEMMAP_DUMP_,
    MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_unmap() failed to unmap a file from memory"));
 }
@@ -204,7 +206,7 @@ SSC_INLINE void
 SSC_MemMap_syncOrDie(const SSC_MemMap* map)
 {
   SSC_assertMsg(
-   !SSC_MemMap_sync(map),
+   SSC_MemMap_sync(map) == SSC_OK,
    MEMMAP_DUMP_,
    MEMMAP_DUMP_ARGS_(map, "SSC_MemMap_sync() failed to synchronize a memory-mapped file"));
 }

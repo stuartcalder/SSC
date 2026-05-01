@@ -148,6 +148,27 @@
  #define IMPL64_(U64) SSC_SWAP64_IMPL(U64)
 #endif
 
+#if   SSC_ENDIAN == SSC_ENDIAN_LITTLE
+ #define SSC_U16_TO_LE(Value) (Value)
+ #define SSC_U32_TO_LE(Value) (Value)
+ #define SSC_U64_TO_LE(Value) (Value)
+ /* -- */
+ #define SSC_U16_TO_BE(Value) SSC_swap16(Value)
+ #define SSC_U32_TO_BE(Value) SSC_swap32(Value)
+ #define SSC_U64_TO_BE(Value) SSC_swap64(Value)
+#elif SSC_ENDIAN == SSC_ENDIAN_BIG
+ #define SSC_U16_TO_BE(Value) (Value)
+ #define SSC_U32_TO_BE(Value) (Value)
+ #define SSC_U64_TO_BE(Value) (Value)
+ /* -- */
+ #define SSC_U16_TO_LE(Value) SSC_swap16(Value)
+ #define SSC_U32_TO_LE(Value) SSC_swap32(Value)
+ #define SSC_U64_TO_LE(Value) SSC_swap64(Value)
+#else
+ #error "Invalid endianness!"
+#endif
+
+
 SSC_BEGIN_C_DECLS
 
 API_ uint16_t

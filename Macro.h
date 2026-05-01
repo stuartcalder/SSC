@@ -37,7 +37,7 @@
  #define SSC_COMPILER   SSC_COMPILER_CLANG
 #elif defined(_MSC_VER)
  #define SSC_COMPILER   SSC_COMPILER_MSVC
- #define SSC_COMPILER_V _MSC_VER
+ #define SSC_COMPILER_VERSION _MSC_VER
 #elif defined(__GNUC__)
  #define SSC_COMPILER   SSC_COMPILER_GCC
 #else
@@ -166,9 +166,9 @@
  *   SSC_ISA will default to SSC_ISA_UNKNOWN. */
 #define SSC_ISA_UNKNOWN 0
 #define SSC_ISA_AMD64   1
-#define SSC_ISA_RISCV   2
-#define SSC_ISA_ARM64   3
-#define SSC_ISA_X86     4
+#define SSC_ISA_X86     2
+#define SSC_ISA_RISCV   3
+#define SSC_ISA_ARM64   4
 #define SSC_ISA_ARMV7   5
 #define SSC_ISA_ISVALID(Isa) ((Isa) >= SSC_ISA_UNKNOWN && (Isa) <= SSC_ISA_ARMV7) /* UNKNOWN arch is valid. */
 
@@ -370,8 +370,10 @@
  * compile-time strings as @Msg. */
 #ifdef SSC_STATIC_ASSERT_IS_NIL
  #define SSC_ANY_ASSERT(Bool, Msg) SSC_assertMsg(Bool, Msg)
+ #define SSC_ANY_ASSERT_IS_RUNTIME
 #else
  #define SSC_ANY_ASSERT(Bool, Msg) SSC_STATIC_ASSERT(Bool, Msg)
+ #define SSC_ANY_ASSERT_IS_STATIC
 #endif
 
 /* If we can do a compile-time assertion, SSC_ANY_ASSERT_1()
@@ -379,21 +381,30 @@
  * is runtime. Only pass compile-time boolean expressions as @Bool. */
 #ifdef SSC_STATIC_ASSERT_1_IS_NIL
  #define SSC_ANY_ASSERT_1(Bool) SSC_assert(Bool)
+ #define SSC_ANY_ASSERT_1_IS_RUNTIME
 #else
  #define SSC_ANY_ASSERT_1(Bool) SSC_STATIC_ASSERT_1(Bool)
+ #define SSC_ANY_ASSERT_1_IS_STATIC
 #endif
 
 /* Can we restrict pointers? C++ or C99 style? */
 #ifndef SSC_RESTRICT_IMPL
  #define SSC_RESTRICT_IMPL 0
 #endif
-#if (SSC_RESTRICT_IMPL & SSC_RESTRICT_IMPL_CPP) ||\
-     ((SSC_COMPILER == SSC_COMPILER_MSVC) && (defined(SSC_COMPILER_V) && (SSC_COMPILER_V >= 1900)))
- #define SSC_RESTRICT __restrict /* C++/MSVC compatible restrict. */
+#if ((SSC_RESTRICT_IMPL & SSC_RESTRICT_IMPL_CPP) &&\
+     (SSC_COMPILER != SSC_COMPILER_UNKNOWN)) ||\
+    ((SSC_COMPILER == SSC_COMPILER_MSVC) && defined(SSC_COMPILER_VERSION) &&\
+     (SSC_COMPILER_VERSION >= 1900))
+ /* The ``__restrict`` syntax is only permitted in C++ mode for known compilers, or
+  * for MSVC (in which case ``__restrict`` is chosen over ``restrict`` even in C mode).
+  */
+ #define SSC_RESTRICT __restrict
 #elif SSC_RESTRICT_IMPL & SSC_RESTRICT_IMPL_C
- #define SSC_RESTRICT restrict   /* C99-specified restrict. */
+ /* In C mode C99 support is assumed, so we use ``restrict``. */
+ #define SSC_RESTRICT restrict
 #else
- #define SSC_RESTRICT /* We don't have restrict. */
+ /* Turn off restrict optimizations. */
+ #define SSC_RESTRICT
  #define SSC_RESTRICT_IS_NIL
 #endif
 /* Cleanup restrict implementation. */

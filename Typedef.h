@@ -8,7 +8,7 @@
  * we are returning an integer. */
 typedef enum
 {
-  SSC_OK =   0,
+  SSC_OK  =  0,
   SSC_ERR = -1
 } SSC_Error_t;
 

@@ -100,9 +100,9 @@ if (MEMLOCK AND NOT OS_LOWER STREQUAL "openbsd")
 endif()
 
 # ---------- Include directories ----------
-set(_INCLUDE_DIRS_bsd /usr/local/include)
-set(_INCLUDE_DIRS_netbsd /usr/pkg/include)
-set(_INCLUDE_DIRS_linux /usr/include)
+set(_INCLUDE_DIRS_bsd     /usr/local/include)
+set(_INCLUDE_DIRS_netbsd  /usr/pkg/include)
+set(_INCLUDE_DIRS_linux   /usr/include)
 set(_INCLUDE_DIRS_windows "C:/include")
 
 if (OS_LOWER STREQUAL "openbsd" OR OS_LOWER STREQUAL "freebsd" OR OS_LOWER STREQUAL "darwin")
