@@ -20,12 +20,14 @@
  #define SSC_GETENTROPY_IMPL_(Ptr, Size) {\
   uint8_t* p = (uint8_t*)Ptr;\
   while (Size > SSC_RANDOM_MAX_) {\
-    SSC_assertMsg(getrandom(p, SSC_RANDOM_MAX_, 0) == SSC_RANDOM_MAX_,\
-     SSC_ERR_S_FAILED_IN("getrandom()"));\
+    SSC_assertMsg(\
+     getrandom(p, SSC_RANDOM_MAX_, 0) == SSC_RANDOM_MAX_,\
+     SSC_ERR_S_FAILED_IN("getrandom()")\
+    );\
     Size -= SSC_RANDOM_MAX_;\
     p    += SSC_RANDOM_MAX_;\
   }\
-  SSC_assertMsg(getrandom(p, Size, 0) == Size, SSC_ERR_S_FAILED_IN("getrandom()"));\
+  SSC_assertMsg(getrandom(p, Size, 0) == (ssize_t)Size, SSC_ERR_S_FAILED_IN("getrandom()"));\
  }
 #elif defined(__OpenBSD__)
  #include <unistd.h>

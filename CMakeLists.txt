@@ -10,7 +10,16 @@ set(UNIXLIKE_OPERATING_SYSTEMS openbsd freebsd netbsd darwin linux)
 set(SUPPORTED_OPERATING_SYSTEMS ${UNIXLIKE_OPERATING_SYSTEMS} windows)
 set(GCC_COMPATIBLE_COMPILERS GNU Clang)
 set(SUPPORTED_COMPILERS ${GCC_COMPATIBLE_COMPILERS} MSVC)
-set(GCC_COMPATIBLE_FLAGS -fvisibility=hidden -fstrict-aliasing -Wall -funroll-loops)
+set(GCC_COMPATIBLE_FLAGS
+  -fvisibility=hidden # Symbol visibility.
+  -fstrict-aliasing   # Strict pointer aliasing.
+  -funroll-loops      # Loop unrolling for optimization.
+  # Warning/Error flags.
+  -Wall               # Turn on all standard warnings.
+  -Wextra             # Enable extra warnings.
+  -Wpedantic          # Warn about non-standard C.
+  -Wundef             # Warn if a macro is expanded to nothing in an #if condition.
+)
 
 if (WIN32 AND MSVC)
     set(_D "/D")

@@ -148,11 +148,9 @@ SSC_Error_t
 SSC_File_close(SSC_File_t file)
 {
   #if   defined(SSC_OS_UNIXLIKE)
-  return close(file);
+  return close(file) == 0 ? SSC_OK : SSC_ERR;
   #elif defined(SSC_OS_WINDOWS)
-  if (CloseHandle(file))
-    return SSC_OK;
-  return SSC_ERR;
+  return CloseHandle(file) != 0 ? SSC_OK : SSC_ERR;
   #else
    #error "Unsupported OS!"
   #endif
@@ -166,7 +164,7 @@ SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)
 {
   #if   defined(SSC_OS_UNIXLIKE)
-  return ftruncate(file, size);
+  return ftruncate(file, size) == 0 ? SSC_OK : SSC_ERR;
   #elif defined(SSC_OS_WINDOWS)
   LargeInt_t i;
   i.QuadPart = size;
@@ -182,9 +180,9 @@ SSC_Error_t
 SSC_chdir(const char* path)
 {
   #if   defined(SSC_OS_UNIXLIKE)
-  return chdir(path);
+  return chdir(path) == 0 ? SSC_OK : SSC_ERR;
   #elif defined(SSC_OS_WINDOWS)
-  return _chdir(path);
+  return _chdir(path) == 0 ? SSC_OK : SSC_ERR;
   #else
    #error "Unsupported OS!"
   #endif

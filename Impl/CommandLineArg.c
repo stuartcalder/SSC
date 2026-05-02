@@ -206,7 +206,7 @@ processLongsFlag_(
   if (len < 3)
     return 0;
   int long_i;
-  if ((long_i = longMatchFlag_(flag, longc, longv, len - 1, argv[0] + 2)) == NOMATCH_)
+  if ((long_i = longMatch_(longc, longv, len - 1, argv[0] + 2)) == NOMATCH_)
     SSC_errx("Error: Invalid long option %s!\n", argv[0]);
   /* If '=' is invalid it signifies assignment. If we're doing assignment,
    * then we need to scan and find a '=', if any, and start reading from there
