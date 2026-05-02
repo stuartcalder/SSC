@@ -31,12 +31,20 @@
  #if (CHAR_BIT != 8)
   #error "We need 8-bit chars!"
  #endif
- #define SSC_ROT_IMPL_UNSIGNED_MASK_(Bits)       ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT) - 1)
- #define SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count) (SSC_ROT_IMPL_UNSIGNED_MASK_(Bits) & Count)
+ #define SSC_ROT_IMPL_UNSIGNED_MASK_(Bits) \
+  ((uint##Bits##_t)(sizeof(uint##Bits##_t) * CHAR_BIT - 1))
+ #define SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count) \
+  (SSC_ROT_IMPL_UNSIGNED_MASK_(Bits) & (Count))
  #define SSC_ROT_LEFT_(Value, Count, Bits) \
-  ( (Value << SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value >> ((-SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & SSC_ROT_IMPL_UNSIGNED_MASK_(Bits))) )
+  ((uint##Bits##_t)( \
+    ((uint##Bits##_t)(Value) << SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | \
+    ((uint##Bits##_t)(Value) >> ((-SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & SSC_ROT_IMPL_UNSIGNED_MASK_(Bits))) \
+  ))
  #define SSC_ROT_RIGHT_(Value, Count, Bits) \
-  ( (Value >> SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | (Value << ((-SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & SSC_ROT_IMPL_UNSIGNED_MASK_(Bits))) )
+  ((uint##Bits##_t)( \
+    ((uint##Bits##_t)(Value) >> SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) | \
+    ((uint##Bits##_t)(Value) << ((-SSC_ROT_IMPL_MASKED_COUNT_(Bits, Count)) & SSC_ROT_IMPL_UNSIGNED_MASK_(Bits))) \
+  ))
 #endif
 
 #define R_ SSC_RESTRICT

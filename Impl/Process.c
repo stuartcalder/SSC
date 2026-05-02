@@ -29,7 +29,7 @@ char* SSC_getExecutablePath(size_t* exec_path_size)
   memset(exec_path, 0, BUF_SIZE_);
 
   DWORD len = GetModuleFileNameW(SSC_NULL, wide_path, MAX_PATH);
-  if (len == 0) {
+  if (len == 0 || len > MAX_PATH) {
     free(exec_path);
     return SSC_NULL;
   }

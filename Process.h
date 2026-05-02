@@ -24,7 +24,8 @@ SSC_BEGIN_C_DECLS
 
 #ifdef SSC_HAS_GETEXECUTABLEPATH
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Determine the filepath of the currently running executable. */
+/* Determine the filepath of the currently running executable.
+ * Returns a heap-allocated null-terminated string the caller is responsible for freeing with free(). */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API char*
 SSC_getExecutablePath(size_t* exec_path_size);
