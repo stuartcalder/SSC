@@ -10,18 +10,9 @@
 #include "Macro.h"
 
 #if defined(SSC_OS_UNIXLIKE)
- #define SSC_MEMMAP_SYNC_IMPL_FUNCTION  msync
- #define SSC_MEMMAP_SYNC_IMPL(M) { return SSC_MEMMAP_SYNC_IMPL_FUNCTION(M->ptr, M->size, MS_SYNC); }
  #include <sys/mman.h>
 #elif defined(SSC_OS_WINDOWS)
  #define SSC_MEMMAP_HAS_WINDOWS_FILEMAP
- #define SSC_MEMMAP_SYNC_IMPL(M) {\
-  if (!FlushViewOfFile((LPCVOID)M->ptr, M->size))\
-    return -1;\
-  if (!FlushFileBuffers(M->file))\
-    return -1;\
-  return 0;\
- }
  #include <memoryapi.h>
  #include <windows.h>
 #else

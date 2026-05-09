@@ -237,12 +237,12 @@ SSC_MemMap_initSecret(
   /* Map the secret file. */
   if (SSC_MemMap_map(map, false) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_MAP;
-  /* Denote that this is a secret Memory Map. */
-  map->flags |= SSC_MEMMAP_FLAG_SECRET;
-  return SSC_MEMMAP_INIT_CODE_OK;
   #else
    #error "Unsupported OS!"
   #endif
+  /* Denote that this is a secret Memory Map. */
+  map->flags |= SSC_MEMMAP_FLAG_SECRET;
+  return SSC_MEMMAP_INIT_CODE_OK;
 }
 #endif
 
@@ -260,7 +260,20 @@ void SSC_MemMap_del(SSC_MemMap* map)
 }
 
 SSC_Error_t SSC_MemMap_sync(const SSC_MemMap* map)
-SSC_MEMMAP_SYNC_IMPL(map)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  if (msync(M->ptr, M->size, MS_SYNC))
+    return SSC_ERR;
+#elif defined(SSC_OS_WINDOWS)
+  if (!FlushViewOfFile((LPCVOID)M->ptr, M->size))
+    return SSC_ERR;
+  if (!FlushFileBuffers(M->file))
+    return SSC_ERR;
+#else
+ #error "Unsupported OS!"
+#endif
+  return SSC_OK;
+}
 
 SSC_Error_t
 SSC_MemMap_resize(SSC_MemMap* map, size_t new_size)

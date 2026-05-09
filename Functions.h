@@ -6,7 +6,7 @@
 /* In C, you should not cast between void* and function pointers.
  * Use SSC_Fptr_t as a generic function pointer, that can be
  * cast to specific function pointer types. */
-typedef void SSC_Func_f();
+typedef void (*SSC_Func_f)(void);
 typedef SSC_Func_f* SSC_Fptr_t;
 
 typedef union {
