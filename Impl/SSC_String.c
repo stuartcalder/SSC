@@ -30,7 +30,13 @@ SSC_String_init(
   if (sz < SSC_STRING_MIN_BUFLEN)
     return SSC_NULL;
 
-  ctx = (String_t)malloc(sz);
+  #ifdef SSC_ALIGNOF_IS_NIL
+   #define ALIGN_ sizeof(Size_t)
+  #else
+   #define ALIGN_ SSC_ALIGNOF(Size_t)
+  #endif
+
+  ctx = (String_t)SSC_alignedMalloc(ALIGN_, sz);
   if (ctx == SSC_NULL)
     return SSC_NULL;
 

@@ -28,12 +28,8 @@ enum {
   SSC_STRING_FLAG_SECURE = 0x01, /* Securely zero over string memory when we're done with it. */
   SSC_STRING_FLAG_CSTR   = 0x02, /* Ensure the string is always null-terminated. */
 };
-/* Memory: [total memory allocated][current string length ][bit flags             ][...payload...]
- *         [SSC_STRING_FIELD_BYTES][SSC_STRING_FIELD_BYTES][SSC_STRING_FIELD_BYTES][.............] */
-
-
-/* Memory: [total memory allocated ][current string length  ][string bytes         ]
- * Size:   [SSC_STRING_PREFIX_BYTES][SSC_STRING_PREFIX_BYTES][current string length] */
+/* Memory Fields: [total memory allocated][current string length ][bit flags             ][...payload...]
+ * Field Sizes:   [SSC_STRING_FIELD_BYTES][SSC_STRING_FIELD_BYTES][SSC_STRING_FIELD_BYTES][.............] */
 
 /* @len     : The SSC_String_t will occupy @len bytes in total.
  * @cstr    : If not NULL, copy the characters of this C-string as initialization data.

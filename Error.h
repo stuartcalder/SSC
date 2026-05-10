@@ -46,9 +46,15 @@
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
 
-/* TODO: Document. */
+/* Internal utility function used by the library to report errors and exit with a specific return code.
+ * Parameters:
+ *   @code: The integer exit status code to be returned upon termination.
+ *   @format: A format string describing the error context.
+ * Behavior: Parses variadic arguments, formats them into an error message (typically via err or direct vfprintf),
+ *           and then calls exit(code).
+ */
 SSC_API
-void SSC_errxCodeVargs(int const, const char* R_ fmt, ...);
+void SSC_errxCodeVargs(const int code, const char* R_ format, ...);
 
 #ifdef SSC_ERRX_CODE_LIST_INLINE
  #define  API_      SSC_INLINE
@@ -57,26 +63,50 @@ void SSC_errxCodeVargs(int const, const char* R_ fmt, ...);
  #define  API_      SSC_API
  #define IMPL_(...) ;
 #endif
-/* TODO: Document. */
+/* Internal core function that handles the actual formatting of error messages and program termination.
+ * Parameters:
+ *   @code: The exit status code to return after logging the error.
+ *   @format: The format string for the error message.
+ *   @args: A variadic argument list (va_list) initialized by the caller (via va_start).
+ * Behavior: Dispatches the formatted error output either through the system's err function
+ *           (if available on Unix-like systems) or directly to stderr. It subsequently calls exit(code)
+ *           to terminate the process.
+ */
 API_ void
-SSC_errxCodeList(int const code, const char* R_ fmt, va_list args)
-IMPL_(code, fmt, args)
+SSC_errxCodeList(int const code, const char* R_ format, va_list args)
+IMPL_(code, format, args)
 #undef  API_
 #undef IMPL_
 
-/* TODO: Document. */
+/* Reports a generic fatal error and terminates the program with status code EXIT_FAILURE.
+ * Parameters:
+ *   @format: A format string describing the failure and any associated data.
+ * Behavior: Treats the provided arguments as an error description, prints them to standard error,
+ *           and exits the application immediately.
+ */
 SSC_API void
-SSC_errx(const char* R_ fmt, ...);
+SSC_errx(const char* R_ format, ...);
 
-/* TODO: Document. */
+/* Issues an assertion error and terminates execution if the provided boolean condition evaluates to false.
+ * Parameters:
+ *   @condition: The boolean expression that must be true; otherwise, an error occurs.
+ *   @format:    A format string (similar to printf) containing details about the failure and any additional variables.
+ * Behavior: If condition is false, the function prints the formatted message to standard error and immediately
+ *           exits the program with status code EXIT_FAILURE.
+ */
 SSC_API void
-SSC_assertMsg(bool, const char* R_, ...);
+SSC_assertMsg(bool condition, const char* R_ format, ...);
 
-/* TODO: Document. */
+/* Issues a non-fatal warning if the provided boolean condition evaluates to false.
+ * Parameters:
+ *   @condition: The boolean expression that must be true; otherwise, a warning is generated.
+ *   @fmt: A format string containing details about the issue and any additional variables.
+ * Behavior: If condition is false, the function prints the formatted message to standard error (stderr).
+ *           Unlike an assertion, execution continues after printing the warning.
+ */
 SSC_API void
-SSC_warnMsg(bool, const char* R_, ...);
+SSC_warnMsg(bool condition, const char* R_ format, ...);
 
-/* TODO: Document. */
 SSC_INLINE void
 SSC_assert(bool b)
 {
