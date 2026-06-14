@@ -46,9 +46,9 @@ SSC_FilePath_getSize(const char* R_ fpath, size_t* R_ storesize)
   return SSC_OK;
 #else /* Any other OS. */
   SSC_File_t f;
-  if (SSC_FilePath_open(fpath, true, &f))
+  if (SSC_FilePath_open(fpath, true, &f) != SSC_OK)
     return SSC_ERR;
-  if (SSC_File_getSize(f, storesize)) {
+  if (SSC_File_getSize(f, storesize) != SSC_OK) {
     SSC_File_close(f);
     return SSC_ERR;
   }
@@ -60,11 +60,23 @@ bool
 SSC_FilePath_exists(const char* filepath)
 {
   bool exists = false;
+#if   defined(SSC_OS_UNIXLIKE)
+  Stat_t s;
+  if (stat(filepath, &s) == 0)
+    exists = true;
+#elif defined(SSC_OS_WINDOWS)
+  const Dw32_t attrib = GetFileAttributesA(filepath);
+  /* (The file exists and it is not a directory.) */
+  if (attrib != INVALID_FILE_ATTRIBUTES &&
+      !(attrib & FILE_ATTRIBUTE_DIRECTORY))
+    exists = true;
+#else /* In practice, this codepath is presently unreachable. */
   FILE* test = fopen(filepath, "r");
   if (test != SSC_NULL) {
     fclose(test);
     exists = true;
   }
+#endif
   return exists;
 }
 
@@ -77,21 +89,35 @@ SSC_FilePath_forceExistOrDie(const char* R_ filepath, bool force_to_exist)
     SSC_assertMsg(!SSC_FilePath_exists(filepath), "Error: The filepath %s seems to already exist.\n", filepath);
 }
 
-#ifdef SSC_OS_WINDOWS
+#if   defined(SSC_OS_UNIXLIKE)
+ /* Files can only be accessed by the creator by default.
+  */
+ #define UNIX_MODE_ ((mode_t)0600)
+#elif defined(SSC_OS_WINDOWS)
  /* When creating files on Windows we provide all the FILE_SHARE_* bits
   * to CreateFileA() so behavior is the same between Win32 and POSIX.
   */
- #define SHARE_MODE_ (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+ #define WIN_SHARE_MODE_ (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+ #define WIN_READONLY_   (GENERIC_READ)
+ #define WIN_READWRITE_  (GENERIC_READ | GENERIC_WRITE)
 #endif
 
 SSC_Error_t
 SSC_FilePath_open(const char* R_ filepath, bool readonly, SSC_File_t* R_ storefile)
 {
 #if    defined(SSC_OS_UNIXLIKE)
-  *storefile = open(filepath, (readonly ? O_RDONLY : O_RDWR), (mode_t)0600);
+  *storefile = open(filepath, (readonly ? O_RDONLY : O_RDWR), UNIX_MODE_);
 #elif  defined(SSC_OS_WINDOWS)
-  const Dw32_t rw = readonly ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE);
-  *storefile = CreateFileA(filepath, rw, SHARE_MODE_, SSC_NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
+  const Dw32_t rw = readonly ? WIN_READONLY_ : WIN_READWRITE_;
+  *storefile = CreateFileA(
+    filepath,
+    rw,
+    WIN_SHARE_MODE_,
+    SSC_NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    SSC_NULL
+  );
 #else
  #error "Unsupported operating system."
 #endif
@@ -102,9 +128,17 @@ SSC_Error_t
 SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 {
 #if    defined(SSC_OS_UNIXLIKE)
-  *storefile = open(filepath, (O_RDWR|O_TRUNC|O_CREAT), (mode_t)0600);
+  *storefile = open(filepath, (O_RDWR|O_CREAT|O_EXCL), UNIX_MODE_);
 #elif  defined(SSC_OS_WINDOWS)
-  *storefile = CreateFileA(filepath, (GENERIC_READ|GENERIC_WRITE), SHARE_MODE_, SSC_NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, SSC_NULL);
+  *storefile = CreateFileA(
+    filepath,
+    WIN_READWRITE_,
+    WIN_SHARE_MODE_,
+    SSC_NULL,
+    CREATE_NEW,
+    FILE_ATTRIBUTE_NORMAL,
+    SSC_NULL
+  );
 #else
  #error "Unsupported operating system."
 #endif
@@ -134,14 +168,12 @@ SSC_File_createSecretIsAvailable(void)
   SSC_File_t  f;
   SSC_Error_t result = SSC_File_createSecret(&f);
   if (result == SSC_OK) {
-    SSC_File_close(f);
-    return true;
-  } else {
+    if (SSC_File_close(f) == SSC_OK)
+      return true;
     return false;
   }
- #else
-  return false;
  #endif
+ return false;
 }
 
 SSC_Error_t

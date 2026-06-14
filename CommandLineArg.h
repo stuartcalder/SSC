@@ -22,12 +22,12 @@ typedef enum {
 /*==============================================================================*/
 
 /*##############################################################################*/
-/* Return SSC_ARG_PROC_ONECHAR when processing
+/* Return SSC_ARGPROC_ONECHAR when processing
  * short options, and we consume only 1 char
  * during processing. */
 /*##############################################################################*/
 enum {
-  SSC_ARG_PROC_ONECHAR = -1
+  SSC_ARGPROC_ONECHAR = -1
 };
 /*==============================================================================*/
 
@@ -38,7 +38,7 @@ enum {
  * @state:  Void pointer to data that will be modified by the procedure.
  * ->int(@x) Represents the number of words consumed.
  *            0, meaning "no additional" words (i.e. 1 word was consumed),
- *            SSC_ARG_PROC_ONECHAR, meaning only 1 char of 1 word was consumed. */
+ *            SSC_ARGPROC_ONECHAR, meaning only 1 char of 1 word was consumed. */
 /*##############################################################################*/
 typedef int SSC_ArgProc_f(const int wordc, char** R_ wordv, const int offset, void* R_ state);
 /*==============================================================================*/
@@ -162,12 +162,12 @@ SSC_API int SSC_ArgParser_process(
 /*==============================================================================*/
 
 /*##############################################################################*/
-/* When @ch is NOT zero, return SSC_ARG_PROC_ONECHAR else return zero. */
+/* When @ch is NOT zero, return SSC_ARGPROC_ONECHAR else return zero. */
 /*##############################################################################*/
 SSC_INLINE int
 SSC_1opt(const char ch)
 {
-  return ch ? SSC_ARG_PROC_ONECHAR : 0;
+  return ch ? SSC_ARGPROC_ONECHAR : 0;
 }
 /*==============================================================================*/
 

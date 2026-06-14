@@ -262,12 +262,12 @@ void SSC_MemMap_del(SSC_MemMap* map)
 SSC_Error_t SSC_MemMap_sync(const SSC_MemMap* map)
 {
 #if   defined(SSC_OS_UNIXLIKE)
-  if (msync(M->ptr, M->size, MS_SYNC))
+  if (msync(map->ptr, map->size, MS_SYNC))
     return SSC_ERR;
 #elif defined(SSC_OS_WINDOWS)
-  if (!FlushViewOfFile((LPCVOID)M->ptr, M->size))
+  if (!FlushViewOfFile((LPCVOID)map->ptr, map->size))
     return SSC_ERR;
-  if (!FlushFileBuffers(M->file))
+  if (!FlushFileBuffers(map->file))
     return SSC_ERR;
 #else
  #error "Unsupported OS!"

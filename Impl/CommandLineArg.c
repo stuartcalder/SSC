@@ -178,11 +178,11 @@ processShorts_(
   if (len < 2)
     return 0; /* Long enough to process? */
   for (int i = 1; i < len; ++i) {
-    int short_i;
-    if ((short_i = shortMatch_(shortc, shortv, s[i])) == NOMATCH_)
+    int short_i = shortMatch_(shortc, shortv, s[i]);
+    if (short_i == NOMATCH_)
       SSC_errx("Error: Invalid short option: %c!\n", s[i]);
     const int result = (shortv[short_i].proc)(argc, argv, i + 1, state);
-    if (result == SSC_ARG_PROC_ONECHAR)
+    if (result == SSC_ARGPROC_ONECHAR)
       continue;
     else
       return result;
@@ -205,8 +205,8 @@ processLongsFlag_(
   const int len = (int)strlen(argv[0]);
   if (len < 3)
     return 0;
-  int long_i;
-  if ((long_i = longMatch_(longc, longv, len - 1, argv[0] + 2)) == NOMATCH_)
+  int long_i = longMatch_(longc, longv, len - 1, argv[0] + 2);
+  if (long_i == NOMATCH_)
     SSC_errx("Error: Invalid long option %s!\n", argv[0]);
   /* If '=' is invalid it signifies assignment. If we're doing assignment,
    * then we need to scan and find a '=', if any, and start reading from there

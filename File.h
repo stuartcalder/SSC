@@ -53,9 +53,9 @@ SSC_File_getSizeOrDie(SSC_File_t file)
 {
   size_t s;
   #ifdef SSC_FILE_IS_INT
-  SSC_assertMsg(!SSC_File_getSize(file, &s), "Error: SSC_File_getSize() failed to store the size of file %d at %p!", file, (void*)&s);
+  SSC_assertMsg(SSC_File_getSize(file, &s) == SSC_OK, "Error: SSC_File_getSize() failed to store the size of file %d at %p!", file, (void*)&s);
   #else
-  SSC_assertMsg(!SSC_File_getSize(file, &s), "Error: SSC_File_getSize() failed to store the size of a file at %p!", (void*)&s);
+  SSC_assertMsg(SSC_File_getSize(file, &s) == SSC_OK, "Error: SSC_File_getSize() failed to store the size of a file at %p!", (void*)&s);
   #endif
   return s;
 }
@@ -71,7 +71,7 @@ SSC_INLINE size_t
 SSC_FilePath_getSizeOrDie(const char* fpath)
 {
   size_t s;
-  SSC_assertMsg(!SSC_FilePath_getSize(fpath, &s), "Error: SSC_FilePath_getSize() failed to obtain the size of %s!\n", fpath);
+  SSC_assertMsg(SSC_FilePath_getSize(fpath, &s) == SSC_OK, "Error: SSC_FilePath_getSize() failed to obtain the size of %s!\n", fpath);
   return s;
 }
 /*==========================================================================================*/
@@ -121,7 +121,7 @@ SSC_INLINE SSC_File_t
 SSC_FilePath_createOrDie(const char* fpath)
 {
   SSC_File_t f;
-  SSC_assertMsg(!SSC_FilePath_create(fpath, &f), "Error: SSC_FilePath_create() failed to create %s!\n", fpath);
+  SSC_assertMsg(SSC_FilePath_create(fpath, &f) == SSC_OK, "Error: SSC_FilePath_create() failed to create %s!\n", fpath);
   return f;
 }
 /*==========================================================================================*/
