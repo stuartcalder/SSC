@@ -23,7 +23,7 @@
  typedef int SSC_File_t;
  #define SSC_FILE_IS_INT
  #define SSC_FILE_NULL_LITERAL (-1) /* -1 is an invalid file descriptor representing failure. */
- #ifdef __gnu_linux__
+ #ifdef __linux__
   /* Assume that memfd_secret() is supported if no Linux kernel version is specified. */
   #if !SSC_LINUX_VERSION_VALUE_ISDEFINED || (SSC_LINUX_VERSION_VALUE >= SSC_LINUX_VERSION(5, 14, 0))
    #define SSC_FILE_HAS_CREATESECRET
@@ -149,15 +149,15 @@ SSC_INLINE void
 SSC_File_closeOrDie(SSC_File_t file)
 {
   #ifdef SSC_FILE_IS_INT
-  SSC_assertMsg(!SSC_File_close(file), "Error: SSC_File_close() failed to close file %d!\n", file);
+  SSC_assertMsg(SSC_File_close(file) == SSC_OK, "Error: SSC_File_close() failed to close file %d!\n", file);
   #else
-  SSC_assertMsg(!SSC_File_close(file), SSC_ERR_S_FAILED_IN("SSC_File_close()"));
+  SSC_assertMsg(SSC_File_close(file) == SSC_OK, SSC_ERR_S_FAILED_IN("SSC_File_close()"));
   #endif
 }
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Set the size of a file in bytes. Fill the void with zeroes. */
+/* Set the size of a file in bytes. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size);
@@ -166,9 +166,9 @@ SSC_INLINE void
 SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
 {
   #ifdef SSC_FILE_IS_INT
-  SSC_assertMsg(!SSC_File_setSize(file, size), "Error: SSC_File_setSize() failed to set file %d to size %zu!\n", file, size);
+  SSC_assertMsg(SSC_File_setSize(file, size) == SSC_OK, "Error: SSC_File_setSize() failed to set file %d to size %zu!\n", file, size);
   #else
-  SSC_assertMsg(!SSC_File_setSize(file, size), "Error: SSC_File_setSize() failed to set a file to size %zu!\n", size);
+  SSC_assertMsg(SSC_File_setSize(file, size) == SSC_OK, "Error: SSC_File_setSize() failed to set a file to size %zu!\n", size);
   #endif
 }
 /*==========================================================================================*/

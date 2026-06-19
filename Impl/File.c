@@ -2,7 +2,7 @@
  * See accompanying LICENSE file for licensing information. */
 #include "File.h"
 
-#if defined(__gnu_linux__) && defined(SSC_FILE_HAS_CREATESECRET)
+#if defined(__linux__) && defined(SSC_FILE_HAS_CREATESECRET)
  #include <sys/syscall.h>
  #include <unistd.h>
 #endif
@@ -149,7 +149,7 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 SSC_Error_t
 SSC_File_createSecret(SSC_File_t* storefile)
 {
- #ifdef __gnu_linux__
+ #ifdef __linux__
  int f = syscall(SYS_memfd_secret, 0U);
  if (f == -1)
   return SSC_ERR;

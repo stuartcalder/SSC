@@ -225,7 +225,7 @@ SSC_MemMap_initSecret(
  size_t      size)
 {
   *map = SSC_MEMMAP_NULL_LITERAL;
-  #ifdef __gnu_linux__
+  #ifdef __linux__
   /* Try to create a secret file. */
   if (SSC_File_createSecret(&map->file) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_SECRET;

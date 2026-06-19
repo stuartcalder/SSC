@@ -19,7 +19,7 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined(SSC_OS_UNIXLIKE) or defined(SSC_OS_WINDOWS) */
 
-#ifdef __gnu_linux__
+#ifdef __linux__
  #define SSC_MEMMAP_HAS_INITSECRET
 #endif
 

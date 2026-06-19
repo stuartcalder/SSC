@@ -56,7 +56,7 @@
      defined(__ANDROID__)   ||\
      defined(__Dragonfly__) ||\
      defined(__FreeBSD__)   ||\
-     defined(__gnu_linux__) ||\
+     defined(__linux__)     ||\
      defined(__NetBSD__)    ||\
      defined(__OpenBSD__))
  #define SSC_OS_UNIXLIKE
@@ -72,8 +72,8 @@
  #error "Unsupported."
 #endif /* ! #if defined (unixlike os's ...) */
 
-/* GNU/Linux Specific. */
-#ifdef __gnu_linux__
+/* Linux Specific. */
+#ifdef __linux__
  #define SSC_LINUX_VERSION_MAJOR(Num)    ((Num) * 1000000ULL)
  #define SSC_LINUX_VERSION_MINOR(Num)    ((Num) * 1000ULL)
  #define SSC_LINUX_VERSION_REVISION(Num) ((Num) * 1ULL)
@@ -116,7 +116,7 @@
    SSC_LINUX_VERSION_REVISION_VALUE)
  #define SSC_LINUX_VERSION_VALUE_ISDEFINED \
   (SSC_LINUX_VERSION_MAJOR_VALUE_ISDEFINED && SSC_LINUX_VERSION_MINOR_VALUE_ISDEFINED)
-#endif /* ! ifdef __gnu_linux__ */
+#endif /* ! ifdef __linux__ */
 
 /* C language standards. */
 #define SSC_C_89 199409L

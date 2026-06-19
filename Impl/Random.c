@@ -14,7 +14,7 @@
   SSC_assertMsg((read(dev, Ptr, Size) == (ssize_t)Size), SSC_ERR_S_FAILED("SSC_get_os_entropy: read"));\
   SSC_File_closeOrDie(dev);\
  }
-#elif defined(__gnu_linux__) || defined(__FreeBSD__)
+#elif defined(__linux__) || defined(__FreeBSD__)
  #include <sys/random.h>
  #define SSC_RANDOM_MAX_ 256
  #define SSC_GETENTROPY_IMPL_(Ptr, Size) {\

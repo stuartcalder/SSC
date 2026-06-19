@@ -17,63 +17,18 @@
  #include <unistd.h>
  #include <stdlib.h>
  int posix_memalign(void **, size_t, size_t);
-/* SSC_alignedMalloc */
- #define SSC_ALIGNED_MALLOC_IMPL(Alignment, Size) {\
-  void* p;\
-  if (posix_memalign(&p, Alignment, Size))\
-    return SSC_NULL;\
-  return p;\
- }
- /* SSC_alignedFree */
- #define SSC_ALIGNED_FREE_IMPL(Ptr) { free(Ptr); }
  #define SSC_ALIGNED_FREE_IS_POSIX_FREE
- /* SSC_getPageSize */
- #define SSC_GET_PAGE_SIZE_IMPL { return (size_t)sysconf(_SC_PAGESIZE); }
- /* SSC_getTotalSystemMemory */
- #if defined(_SC_PHYS_PAGES)
+ #ifdef _SC_PHYS_PAGES
   #define SSC_HAS_GETTOTALSYSTEMMEMORY
-  #define SSC_GETTOTALSYSTEMMEMORY_IMPL {\
-   long pages = sysconf(_SC_PHYS_PAGES);\
-   long page_size = sysconf(_SC_PAGE_SIZE);\
-   return (size_t)pages * (size_t)page_size;\
-  }
  #endif
- #if defined(_SC_AVPHYS_PAGES)
+ #ifdef _SC_AVPHYS_PAGES
   #define SSC_HAS_GETAVAILABLESYSTEMMEMORY
-  #define SSC_GETAVAILABLESYSTEMMEMORY_IMPL {\
-   long pages = sysconf(_SC_AVPHYS_PAGES);\
-   long page_size = sysconf(_SC_PAGE_SIZE);\
-   return (size_t)pages * (size_t)page_size;\
-  }
  #endif
 #elif defined(SSC_OS_WINDOWS)
  #include <malloc.h>
  #include <sysinfoapi.h>
- /* SSC_alignedMalloc */
- #define SSC_ALIGNED_MALLOC_IMPL(Alignment, Size) { return _aligned_malloc(Size, Alignment); }
- /* SSC_alignedFree */
- #define SSC_ALIGNED_FREE_IMPL(Ptr) { _aligned_free(Ptr); }
- /* SSC_getPageSize */
- #define SSC_GET_PAGE_SIZE_IMPL {\
-  SYSTEM_INFO si;\
-  GetSystemInfo(&si);\
-  return (size_t)si.dwPageSize;\
- }
- /* SSC_getTotalSystemMemory */
  #define SSC_HAS_GETTOTALSYSTEMMEMORY
- #define SSC_GETTOTALSYSTEMMEMORY_IMPL {\
-  MEMORYSTATUSEX status;\
-  status.dwLength = sizeof(status);\
-  GlobalMemoryStatusEx(&status);\
-  return (size_t)status.ullTotalPhys;\
- }
  #define SSC_HAS_GETAVAILABLESYSTEMMEMORY
- #define SSC_GETAVAILABLESYSTEMMEMORY_IMPL {\
-  MEMORYSTATUSEX status;\
-  status.dwLength = sizeof(status);\
-  GlobalMemoryStatusEx(&status);\
-  return (size_t)status.ullAvailPhys;\
- }
 #else
  #error "Unsupported."
 #endif
@@ -84,7 +39,18 @@ SSC_BEGIN_C_DECLS
 /* Return an object pointer to @size heap bytes, aligned to @alignment. */
 SSC_INLINE void*
 SSC_alignedMalloc(size_t alignment, size_t size)
-SSC_ALIGNED_MALLOC_IMPL(alignment, size)
+{
+  #if   defined(SSC_OS_UNIXLIKE)
+  void* p;
+  if (posix_memalign(&p, alignment, size))
+    return SSC_NULL;
+  return p;
+  #elif defined(SSC_OS_WINDOWS)
+  return _aligned_malloc(size, alignment);
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
 /* On failure, return SSC_NULL. */
 
 /* Return an object pointer to @size heap bytes, aligned to @alignment. */
@@ -99,12 +65,30 @@ SSC_alignedMallocOrDie(size_t alignment, size_t size)
 /* Free memory allocated with SSC_alignedMalloc* */
 SSC_INLINE void
 SSC_alignedFree(void* p)
-SSC_ALIGNED_FREE_IMPL(p)
+{
+  #if   defined(SSC_OS_UNIXLIKE) && defined(SSC_ALIGNED_FREE_IS_POSIX_FREE)
+  free(p);
+  #elif defined(SSC_OS_WINDOWS)
+  _aligned_free(p);
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
 
 /* Get the size of the OS's virtual memory pages. */
 SSC_INLINE size_t
 SSC_getPageSize(void)
-SSC_GET_PAGE_SIZE_IMPL
+{
+  #if defined(SSC_OS_UNIXLIKE)
+  return (size_t)sysconf(_SC_PAGESIZE);
+  #elif defined(SSC_OS_WINDOWS)
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  return (size_t)si.dwPageSize;
+  #else
+   #error "Unsupported OS!"
+  #endif
+}
 
 #ifdef SSC_HAS_GETTOTALSYSTEMMEMORY
 /* Get the total amount of OS physical memory. */
