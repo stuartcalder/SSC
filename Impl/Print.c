@@ -5,16 +5,18 @@
 #define HEX_FORMAT_STR_ "%02hhx"
 
 static void
-print_hex_(const uint8_t* R_ bytes, size_t n_bytes, SSC_BitFlag8_t mode)
+print_hex_(const uint8_t* R_ bytes, size_t n_bytes, SSC_BitFlag8_t flags)
 {
-  if (mode & SSC_PRINT_PREFIX)
+  if (flags & SSC_PRINT_PREFIX)
     printf("0x");
   for (size_t i = 0; i < n_bytes; ++i)
     printf(HEX_FORMAT_STR_, bytes[i]);
+  if (flags & SSC_PRINT_NEWLINE)
+    putchar('\n');
 }
 
 static void
-print_bin_(const uint8_t* R_ bytes, size_t n_bytes, SSC_BitFlag8_t mode)
+print_bin_(const uint8_t* R_ bytes, size_t n_bytes, SSC_BitFlag8_t flags)
 {
   static const char* const nibble_table[16] = {
     "0000", /* 0x0 */
@@ -35,26 +37,28 @@ print_bin_(const uint8_t* R_ bytes, size_t n_bytes, SSC_BitFlag8_t mode)
     "1111"  /* 0xF */
   };
 
-  if (mode & SSC_PRINT_PREFIX)
+  if (flags & SSC_PRINT_PREFIX)
     printf("0b");
   for (size_t i = 0; i < n_bytes; ++i) {
     const uint8_t upper = bytes[i] >> 4;
     const uint8_t lower = bytes[i] &  UINT8_C(0xF);
     printf("%s%s", nibble_table[upper], nibble_table[lower]);
   }
+  if (flags & SSC_PRINT_NEWLINE)
+    putchar('\n');
 }
 
 void
-SSC_printBytesMode(const void* R_ vbytes, size_t n_bytes, SSC_BitFlag8_t mode)
+SSC_printBytesMode(const void* R_ vbytes, size_t n_bytes, SSC_BitFlag8_t flags)
 {
   SSC_ASSERT(vbytes != SSC_NULL);
   if (n_bytes == 0)
     return;
   const uint8_t* bytes = (const uint8_t*)vbytes;
 
-  if (mode & SSC_PRINT_BIN) {
-    print_bin_(bytes, n_bytes, mode);
+  if (flags & SSC_PRINT_BIN) {
+    print_bin_(bytes, n_bytes, flags);
   } else { /* Just assume HEX mode if it's not BIN mode. */
-    print_hex_(bytes, n_bytes, mode);
+    print_hex_(bytes, n_bytes, flags);
   }
 }

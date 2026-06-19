@@ -1,6 +1,10 @@
 /* Copyright (C) 2020-2025 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
 #include "MemMap.h"
+#ifdef SSC_MEMMAP_HAS_INITSECRET
+ #include "Operation.h"
+#endif
+
 #define R_ SSC_RESTRICT
 
 #if   defined(SSC_OS_UNIXLIKE)
@@ -39,7 +43,7 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
     return SSC_ERR;
   map->ptr = (uint8_t*)MapViewOfFile(map->windows_filemap, map_rw, 0, 0, map->size);
   if (map->ptr == MAP_FAIL_) {
-    if (!SSC_File_close(map->windows_filemap))
+    if (SSC_File_close(map->windows_filemap) != SSC_OK)
       map->windows_filemap = SSC_FILE_NULL_LITERAL;
     return SSC_ERR;
   }
@@ -68,7 +72,7 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
     ret = SSC_ERR;
   else
     map->ptr = SSC_NULL;
-  if (SSC_File_close(map->windows_filemap))
+  if (SSC_File_close(map->windows_filemap) != SSC_OK)
     ret = SSC_ERR;
   else
     map->windows_filemap = SSC_FILE_NULL_LITERAL;
@@ -128,10 +132,10 @@ SSC_CodeError_t SSC_MemMap_init(
   /* It does exist. */
   if (exists) {
     /* Open it and store the SSC_File_t in @map. */
-    if (SSC_FilePath_open(filepath, readonly, &map->file))
+    if (SSC_FilePath_open(filepath, readonly, &map->file) != SSC_OK)
       return ERR_OPEN_FILEPATH_;
     /* Store the size of the file in @map->size. */
-    if (SSC_File_getSize(map->file, &map->size))
+    if (SSC_File_getSize(map->file, &map->size) != SSC_OK)
       return ERR_GET_FILE_SIZE_;
     /* When not readonly and a size has been requested by the caller... */
     if (!readonly && size > 0) {
@@ -155,17 +159,17 @@ SSC_CodeError_t SSC_MemMap_init(
     if (size == 0)
       return ERR_NOSIZE_;
     /* Create the file at the @filepath and store the SSC_File_t in @map. */
-    if (SSC_FilePath_create(filepath, &map->file))
+    if (SSC_FilePath_create(filepath, &map->file) != SSC_OK)
       return ERR_CREATE_FILEPATH_;
   }
   if (setsize) {
     /* Set the size according to that specified by the caller. */
     map->size = size;
-    if (SSC_File_setSize(map->file, map->size))
+    if (SSC_File_setSize(map->file, map->size) != SSC_OK)
       return ERR_SET_FILE_SIZE_;
   }
   /* When we create a new file, it's implicitly readwrite, not readonly. */
-  if (SSC_MemMap_map(map, readonly))
+  if (SSC_MemMap_map(map, readonly) != SSC_OK)
     return ERR_MAP_;
   return OK_;
 }
@@ -225,21 +229,17 @@ SSC_MemMap_initSecret(
  size_t      size)
 {
   *map = SSC_MEMMAP_NULL_LITERAL;
-  #ifdef __linux__
   /* Try to create a secret file. */
   if (SSC_File_createSecret(&map->file) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_SECRET;
+  /* Set the size of the secret file. */
+  if (SSC_File_setSize(map->file, size) != SSC_OK)
+    return SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE;
   /* Store the requested size in the MemMap struct. */
   map->size = size;
-  /* Set the size of the secret file. */
-  if (SSC_File_setSize(map->file, map->size) != SSC_OK)
-    return SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE;
   /* Map the secret file. */
   if (SSC_MemMap_map(map, false) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_MAP;
-  #else
-   #error "Unsupported OS!"
-  #endif
   /* Denote that this is a secret Memory Map. */
   map->flags |= SSC_MEMMAP_FLAG_SECRET;
   return SSC_MEMMAP_INIT_CODE_OK;
@@ -248,12 +248,17 @@ SSC_MemMap_initSecret(
 
 void SSC_MemMap_del(SSC_MemMap* map)
 {
-  if (map->ptr && SSC_MemMap_unmap(map))
+  const bool is_initialized = (map->ptr != SSC_NULL);
+  #ifdef SSC_MEMMAP_HAS_INITSECRET
+  if (is_initialized && (map->flags & SSC_MEMMAP_FLAG_SECRET))
+    SSC_secureZero(map->ptr, map->size);
+  #endif
+  if (is_initialized && (SSC_MemMap_unmap(map) != SSC_OK))
     SSC_errx(SSC_ERR_S_FAILED_IN("SSC_MemMap_unmap()"));
-  if ((map->file != SSC_FILE_NULL_LITERAL) && SSC_File_close(map->file))
+  if ((map->file != SSC_FILE_NULL_LITERAL) && (SSC_File_close(map->file) != SSC_OK))
     SSC_errx(SSC_ERR_S_FAILED_IN("SSC_File_close()"));
   #ifdef SSC_MEMMAP_HAS_WINDOWS_FILEMAP
-  if ((map->windows_filemap != SSC_FILE_NULL_LITERAL) && SSC_File_close(map->windows_filemap))
+  if ((map->windows_filemap != SSC_FILE_NULL_LITERAL) && (SSC_File_close(map->windows_filemap) != SSC_OK))
     SSC_errx(SSC_ERR_S_FAILED_IN("SSC_File_close()"));
   #endif
   *map = SSC_MEMMAP_NULL_LITERAL;
@@ -280,12 +285,13 @@ SSC_MemMap_resize(SSC_MemMap* map, size_t new_size)
 {
   if (map == SSC_NULL || map->file == SSC_FILE_NULL_LITERAL)
     return SSC_ERR;
+
   /* If readonly resizing makes no sense. */
   if (map->flags & SSC_MEMMAP_FLAG_READONLY)
     return SSC_ERR;
 
   /* First, unmap. */
-  if (map->ptr != SSC_NULL && SSC_MemMap_unmap(map) != SSC_OK)
+  if ((map->ptr != SSC_NULL) && (SSC_MemMap_unmap(map) != SSC_OK))
     return SSC_ERR;
 
   /* Adjust the underlying file size. */
