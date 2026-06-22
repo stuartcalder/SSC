@@ -73,8 +73,12 @@ set(SRC
     Impl/Random.c
     Impl/SSC_String.c
     Impl/Swap.c
-    Impl/Terminal.c
 )
+
+option(ENABLE_TERMINAL "Enable Terminal module" ON)
+if (ENABLE_TERMINAL)
+  list(APPEND SRC Impl/Terminal.c)
+endif()
 
 set(LANG_FLAGS "")
 set(INCLUDE_DIRS "")
@@ -130,12 +134,14 @@ endif()
 
 # ---------- Dependencies ----------
 set(LIB_DEPS "")
-if (OS_LOWER IN_LIST UNIXLIKE_OPERATING_SYSTEMS)
-    find_library(NCURSES_LIB ncurses PATHS ${lib_dir})
-    list(APPEND LIB_DEPS ${NCURSES_LIB})
-    if (OS_LOWER STREQUAL "linux")
-        find_library(TINFO_LIB tinfo PATHS ${lib_dir})
-        list(APPEND LIB_DEPS ${TINFO_LIB})
+if (OS_LOWER IN_LIST UNIXLIKE_OPERATING_SYSTEMS )
+    if (ENABLE_TERMINAL)
+        find_library(NCURSES_LIB ncurses PATHS ${lib_dir})
+        list(APPEND LIB_DEPS ${NCURSES_LIB})
+        if (OS_LOWER STREQUAL "linux")
+            find_library(TINFO_LIB tinfo PATHS ${lib_dir})
+            list(APPEND LIB_DEPS ${TINFO_LIB})
+        endif()
     endif()
 
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")

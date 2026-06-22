@@ -154,26 +154,23 @@ SSC_File_createSecret(SSC_File_t* storefile)
  if (f == -1)
   return SSC_ERR;
  *storefile = f;
- return SSC_OK;
  #else
   #error "Unsupported OS!"
  #endif
+ return SSC_OK;
 }
 #endif /* ! SSC_FILE_HAS_CREATESECRET */
 
 bool
 SSC_File_createSecretIsAvailable(void)
 {
- #ifdef SSC_FILE_HAS_CREATESECRET
+  #ifdef SSC_FILE_HAS_CREATESECRET
   SSC_File_t  f;
-  SSC_Error_t result = SSC_File_createSecret(&f);
-  if (result == SSC_OK) {
-    if (SSC_File_close(f) == SSC_OK)
-      return true;
-    return false;
-  }
- #endif
- return false;
+  if (SSC_File_createSecret(&f) == SSC_OK &&
+      SSC_File_close(f) == SSC_OK)
+    return true;
+  #endif
+  return false;
 }
 
 SSC_Error_t
