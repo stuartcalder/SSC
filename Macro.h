@@ -489,7 +489,7 @@
  * The following macros must remain at the end of `Macro.h' to avoid circular dependence problems.*/
 
 /* OpenBSD-specific mitigations */
-#ifdef	__OpenBSD__
+#ifdef __OpenBSD__
  #include <unistd.h>
  #include "Error.h"
  #define SSC_OPENBSD_PLEDGE(Promises, Execpromises) SSC_assertMsg(!pledge(Promises, Execpromises), "Failed to pledge()!\n")

@@ -62,20 +62,24 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
   SSC_Error_t ret;
 #if defined(SSC_OS_UNIXLIKE)
   ret = munmap(map->ptr, map->size);
-  if (!ret) {
+  if (ret != SSC_OK) {
     map->ptr   = SSC_NULL;
     map->flags = 0U;
   }
 #elif defined(SSC_OS_WINDOWS)
   ret = SSC_OK;
-  if (!UnmapViewOfFile((LPCVOID)map->ptr))
+  if (!UnmapViewOfFile((LPCVOID)map->ptr)) {
     ret = SSC_ERR;
-  else
+    map->ptr   = SSC_NULL;
+    map->flags = 0U;
+  } else {
     map->ptr = SSC_NULL;
-  if (SSC_File_close(map->windows_filemap) != SSC_OK)
-    ret = SSC_ERR;
-  else
+  }
+  if (SSC_File_close(map->windows_filemap) == SSC_OK) {
     map->windows_filemap = SSC_FILE_NULL_LITERAL;
+  } else {
+    ret = SSC_ERR;
+  }
   if (ret == SSC_ERR)
     map->flags = 0U;
 #else
@@ -143,7 +147,7 @@ SSC_CodeError_t SSC_MemMap_init(
       if (map->size > size) {
         /* ... only allow it when we are allowing shrinkage. */
         if (!allowshrink)
-	        return ERR_SHRINK_;
+          return ERR_SHRINK_;
       }
       /* ... and the stored size in @map equals the size requested by the caller ... */
       else if (map->size == size)

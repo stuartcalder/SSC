@@ -247,9 +247,9 @@ SSC_processCommandLineArgs(
       case SSC_ARGTYPE_NONE: {
         /* The string did not appear to be an option. */
         if (alone)
-	        arg_i += alone(argc_left, argv_left, 0, state);
-	      else
-	        SSC_errx("Error: Invalid argument: %s!\n", *argv_left);
+          arg_i += alone(argc_left, argv_left, 0, state);
+        else
+          SSC_errx("Error: Invalid argument: %s!\n", *argv_left);
       } break;
     } /* ! switch (typ) */
   } /* ! for (int arg_i = 0; arg_i < argc; ++arg_i) */
