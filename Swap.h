@@ -169,16 +169,70 @@
 #endif
 
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Swap the byte order of a 16-bit unsigned integer.
+ *
+ * Behavior:
+ *   - Little-endian to big-endian: Reverses byte order (e.g., 0x0102 -> 0x0201).
+ *   - Big-endian to little-endian: Reverses byte order (e.g., 0x0201 -> 0x0102).
+ *   - On same-endian systems: Returns value unchanged.
+ *
+ * Parameters:
+ *   @u16:  A 16-bit unsigned integer to swap bytes in.
+ *
+ * Returns:
+ *   - The byte-swapped 16-bit value.
+ *
+ * Notes:
+ *   - Uses platform-specific optimized implementations (GCC builtins, std::byteswap, OS APIs).
+ *   - Fallback to raw bit manipulation if no specialized implementation is available.
+ *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_BEGIN_C_DECLS
 
 API_ uint16_t
 SSC_swap16(uint16_t u16)
 IMPL16_(u16)
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Swap the byte order of a 32-bit unsigned integer.
+ *
+ * Behavior:
+ *   - Little-endian to big-endian: Reverses byte order (e.g., 0x01020304 -> 0x04030201).
+ *   - Big-endian to little-endian: Reverses byte order (e.g., 0x04030201 -> 0x01020304).
+ *   - On same-endian systems: Returns value unchanged.
+ *
+ * Parameters:
+ *   @u32:  A 32-bit unsigned integer to swap bytes in.
+ *
+ * Returns:
+ *   - The byte-swapped 32-bit value.
+ *
+ * Notes:
+ *   - Uses platform-specific optimized implementations (GCC builtins, std::byteswap, OS APIs).
+ *   - Fallback to raw bit manipulation if no specialized implementation is available.
+ *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 API_ uint32_t
 SSC_swap32(uint32_t u32)
 IMPL32_(u32)
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Swap the byte order of a 64-bit unsigned integer.
+ *
+ * Behavior:
+ *   - Little-endian to big-endian: Reverses byte order (e.g., 0x0102030405060708 -> 0x0807060504030201).
+ *   - Big-endian to little-endian: Reverses byte order (e.g., 0x0807060504030201 -> 0x0102030405060708).
+ *   - On same-endian systems: Returns value unchanged.
+ *
+ * Parameters:
+ *   @u64:  A 64-bit unsigned integer to swap bytes in.
+ *
+ * Returns:
+ *   - The byte-swapped 64-bit value.
+ *
+ * Notes:
+ *   - Uses platform-specific optimized implementations (GCC builtins, std::byteswap, OS APIs).
+ *   - Fallback to raw bit manipulation if no specialized implementation is available.
+ *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 API_ uint64_t
 SSC_swap64(uint64_t u64)
 IMPL64_(u64)
