@@ -73,22 +73,22 @@ TERM_API_ void SSC_Terminal_end(void)  TERM_IMPL_
 /* Prompt the user for "secret" input (e.g., password) without echoing characters.
  * The input is stored at @buffer and displayed as '*' on Unixlike systems, or '*'
  * per character on Windows.
- * 
+ *
  * Parameters:
  *   @buffer:    Pointer to a buffer of size @buffer_size where the secret string will be stored.
  *               Must have at least 2 bytes available (min buffer size enforced).
  *   @prompt:    A null-terminated prompt string displayed before input.
  *   @buffer_size: The total size of the buffer in bytes.
- * 
+ *
  * Behavior:
  *   - Unixlike: Uses ncurses to create an off-screen window for secure input, displaying '*'
  *               characters and allowing backspace/deletion keys. The terminal is restored upon exit.
  *   - Windows: Uses _getch() with conio.h, echoing '*' per character, clearing screen on each attempt.
- * 
+ *
  * Returns:
  *   - Size of the secret string entered (0 if empty).
  *   - Caller must null-terminate the buffer after use.
- * 
+ *
  * Notes:
  *   - The function loops until valid input is received or Enter/Return key is pressed.
  *   - Buffer size constraint: minimum 2 bytes required to handle edge cases.
@@ -99,7 +99,7 @@ SSC_API int SSC_Terminal_getSecretString(uint8_t* R_ buffer, const char* R_ prom
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Prompt the user to input a password with validation for minimum and maximum length.
  * The function loops until a valid password is entered (within size constraints).
- * 
+ *
  * Parameters:
  *   @buffer:         Pointer to a buffer of size @buffer_size where the password will be stored.
  *                    Must have at least (max_pw_size + 1) bytes available.
@@ -107,15 +107,15 @@ SSC_API int SSC_Terminal_getSecretString(uint8_t* R_ buffer, const char* R_ prom
  *   @min_pw_size:    The minimum acceptable password length. Passwords shorter than this are rejected.
  *   @max_pw_size:    The maximum acceptable password length. Passwords longer than this are rejected.
  *   @buffer_size:    The total size of the buffer in bytes (must be >= max_pw_size + 1).
- * 
+ *
  * Behavior:
  *   - Uses SSC_Terminal_getSecretString() internally to capture input without echo.
  *   - If password length is outside [min_pw_size, max_pw_size], displays "Password is not long enough" or
  *     "password is too long" and prompts again.
- * 
+ *
  * Returns:
  *   - Size of the valid password entered (between min_pw_size and max_pw_size inclusive).
- * 
+ *
  * Notes:
  *   - The caller must null-terminate the buffer after use.
  *   - Loop continues until a valid password is provided.
@@ -133,7 +133,7 @@ SSC_API int SSC_Terminal_getPassword(
  *   1) Both passwords have length within [min_pw_size, max_pw_size]
  *   2) Both passwords are of equal length
  *   3) Passwords match (using constant-time memory comparison for side-channel resistance)
- * 
+ *
  * Parameters:
  *   @password_buffer: Pointer to first buffer where the initial password is stored.
  *                     Must have at least (max_pw_size + 1) bytes available.
@@ -144,7 +144,7 @@ SSC_API int SSC_Terminal_getPassword(
  *   @min_pw_size:     The minimum acceptable password length. Passwords shorter than this are rejected.
  *   @max_pw_size:     The maximum acceptable password length. Passwords longer than this are rejected.
  *   @buffer_size:     The total size of each buffer in bytes (must be >= max_pw_size + 1).
- * 
+ *
  * Behavior:
  *   - Prompts user for initial password, storing at @password_buffer.
  *   - If length is invalid (< min_pw_size or > max_pw_size), notifies and re-prompts.
@@ -152,10 +152,10 @@ SSC_API int SSC_Terminal_getPassword(
  *   - If lengths differ, notifies "Second password is not the same size" and re-prompts.
  *   - Uses SSC_constTimeMemDiff() to compare passwords (constant-time comparison prevents timing attacks).
  *   - If mismatch detected, notifies "Passwords do not match" and loops again.
- * 
+ *
  * Returns:
  *   - Size of the validated password (between min_pw_size and max_pw_size inclusive).
- * 
+ *
  * Notes:
  *   - Both buffers must be at least (max_pw_size + 1) bytes to handle edge cases.
  *   - The caller must null-terminate both buffers after use.
@@ -173,16 +173,16 @@ SSC_API int SSC_Terminal_getPasswordChecked(
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Display a notification message to the user and wait for acknowledgment before returning.
- * 
+ *
  * Parameters:
  *   @notify_prompt: A null-terminated string displayed as a system notification.
- * 
+ *
  * Behavior:
  *   - Unixlike: Creates an off-screen ncurses window displaying the prompt, then waits for any keypress
  *               (using wgetch) before returning and cleaning up.
  *   - Windows: Clears screen, displays the message using _cputs(), shows "Press any key to continue",
  *              clears screen again, then returns.
- * 
+ *
  * Notes:
  *   - Use this function for non-blocking user feedback during password prompts or other operations.
  *   - The caller must ensure @notify_prompt is null-terminated and reasonably sized (< 256 chars recommended).

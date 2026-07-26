@@ -16,7 +16,7 @@
  #error "Unsupported."
 #endif
 
-SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly) 
+SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
 {
 #if    defined(SSC_OS_UNIXLIKE)
   const int rw = readonly ? PROT_READ : (PROT_READ|PROT_WRITE);
