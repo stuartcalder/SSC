@@ -100,76 +100,133 @@ typedef int SSC_ArgParserFlag_t;
  *     Pointers to functions of this signature are intended to be passed to
  *     SSC_ArgParser_process(), where they implement the logic of processing
  *     command line strings that supply parameters should valid parameters to
- *     be found in SSC_ArgParser.to_read */
-/*##############################################################################*/
+ *     be found in SSC_ArgParser.to_read.
+ *
+ * Behavior:
+ *   - Processes input from parser->to_read until exhausted or error occurs.
+ *   - Parser tracks position via ->consumed (additional words consumed beyond first).
+ *   - Returns SSC_ERROR if processing fails, otherwise returns 0 for success.
+ *
+ * Parameters:
+ *   @parser: Pointer to the argument parser context containing input string.
+ *   @data:    User-provided data pointer passed through to the processor function.
+ *
+ * Returns:
+ *   - SSC_ERROR on failure (e.g., invalid parameter, malformed input).
+ *   - 0 on success.
+ *
+ * Notes:
+ *   - Processor functions must handle their own error reporting via SSC_errx().
+ *   - Parser->to_read may be NULL if no valid input is available.
+ *##############################################################################*/
 typedef SSC_Error_t SSC_ArgProc_Processor_f(SSC_ArgParser* R_ parser, void* R_ data);
-/*==============================================================================*/
 
 /*##############################################################################*/
-/* Get the argument type of the string. Short? Long? Neither? */
+/* Get the argument type of a command-line string: short (-x), long (--long-opt),
+ * or neither (regular argument). */
 /*##############################################################################*/
 SSC_API SSC_ArgType_t
 SSC_getArgType(const char* arg);
-/*==============================================================================*/
 
 /*##############################################################################*/
 /* SSC_processCommandLineArgs ()
- *     This procedure is typically called from main().
- *     Pass the traditional main @argc and @argv, as well as the
- *     short and long option vectors, @state pointer, as well as an SSC_ArgProc_f
- *     for handling long arguments, i.e. arguments not preceded by dashed words like
- *     -i or --input. */
-/*##############################################################################*/
+ *     Parse and process all command-line arguments, handling short options (-x),
+ *     long options (--long-opt), and standalone arguments. Typically called from main().
+ *
+ * Behavior:
+ *   - Iterates through @argv[@arg_i] for arg_i in [0, argc).
+ *   - Classifies each argument via SSC_getArgType() and routes to appropriate handler.
+ *   - Short options are processed character-by-character; long options may consume
+ *     additional arguments based on processor requirements.
+ *   - Standalone arguments (no dash prefix) invoke @alone if provided, else error.
+ *
+ * Parameters:
+ *   @argc:    Number of words passed to main().
+ *   @argv:    Argument vector from main().
+ *   @shortc:  Number of registered short options.
+ *   @shortv:  Short option vector (array of SSC_ArgShort).
+ *   @longc:   Number of registered long options.
+ *   @longv:   Long option vector (array of SSC_ArgLong).
+ *   @state:   User data pointer; modified by registered processors. Must outlive this call.
+ *   @alone:   Pointer to function handling standalone arguments. If SSC_NULL, standalone args error.
+ *
+ * Notes:
+ *   - Modifies @argv in-place as it consumes options and their arguments.
+ *   - Uses @state for cross-option state sharing between processors.
+ *##############################################################################*/
 SSC_API void
 SSC_processCommandLineArgs(
- const int              argc,   /* Number of words passed in from main(). */
- char** R_              argv,   /* Argument vector. */
- const int              shortc, /* Number of short options. */
- const SSC_ArgShort* R_ shortv, /* Short option vector. */
- const int              longc,  /* Number of long options. */
- const SSC_ArgLong* R_  longv,  /* Long option vector. */
- void* R_               state,  /* Pointer to data, to be modified and read by registered procedures. */
- SSC_ArgProc_f*         alone); /* Function pointer to handle "dashless" arguments. If SSC_NULL, we do not accept "dashless" arguments. */
-/*==============================================================================*/
+ const int              argc,   /* Number of words passed from main(). */
+ char** R_              argv,   /* Argument vector; modified during processing. */
+ const int              shortc, /* Count of registered short options. */
+ const SSC_ArgShort* R_ shortv, /* Short option vector array. */
+ const int              longc,  /* Count of registered long options. */
+ const SSC_ArgLong* R_  longv,  /* Long option vector array. */
+ void* R_               state,  /* User data; modified by processors. Must survive this call. */
+ SSC_ArgProc_f*         alone); /* Handle standalone args. SSC_NULL = error on standalone arg. */
 
 /*##############################################################################*/
-/* Initialize the SSC_ArgParser context @ctx.
- * Begin reading at @start. */
-/*##############################################################################*/
+/* Initialize the argument parser context @ctx for reading starting at @start.
+ *
+ * Behavior:
+ *   - If *@start != '\0': Sets ctx->to_read to @start, size to strlen(@start).
+ *   - If *@start == '\0' and argc >= 2: Reads next word argv[1].
+ *   - Otherwise (argc < 2): Sets ctx->to_read to NULL.
+ *
+ * Parameters:
+ *   @ctx:    Pointer to parser context to initialize.
+ *   @start:  Pointer to C-string to read from, or '\0' sentinel for next word.
+ *   @argc:   Total argument count (needed if @start == '\0').
+ *   @argv:   Argument vector; used when reading next word.
+ *
+ * Notes:
+ *   - After initialization, ctx->consumed indicates words consumed beyond first.
+ *##############################################################################*/
 SSC_API void SSC_ArgParser_init(
- SSC_ArgParser* R_ ctx,
- char* R_          start,
- const int         argc,
- char** R_         argv);
-/*==============================================================================*/
+ SSC_ArgParser* R_ ctx,    /* Parser context to initialize. */
+ char* R_          start,  /* Start string or '\0' sentinel for next word. */
+ const int         argc,   /* Total arg count (used if start == '\0'). */
+ char** R_         argv);  /* Argument vector (used if reading next word). */
 
 /*##############################################################################*/
-/* SSC_ArgParser_process ()
- *     Process the @argc C-strings pointed to by @argv.
- *     Begin processing at @argv[@offset].
- *     Pass @ctx and @data to the supplied SSC_ArgProc_Processor_f
- *     function pointer and store the result in @processor_status, if that
- *     pointer is not NULL. */
-/*##############################################################################*/
+/* Process @argc C-strings from @argv[@offset] using the registered processor.
+ *
+ * Behavior:
+ *   - Reinitializes parser context starting at argv[0] + offset.
+ *   - Invokes @processor(ctx, data) and stores result in *processor_status if provided.
+ *   - Returns ctx->consumed (words consumed beyond first).
+ *
+ * Parameters:
+ *   @ctx:        Parser context to use for processing.
+ *   @argc:       Number of C-strings to process from argv.
+ *   @argv:       Argument vector; offset indicates starting position.
+ *   @offset:     Offset into argv[0] where reading begins (for options like --input).
+ *   @data:       User data pointer passed to processor function.
+ *   @processor_status: Pointer to error status storage, if not NULL.
+ *   @processor:    Function pointer to process the input string.
+ *
+ * Returns:
+ *   - Number of additional words consumed beyond argv[0].
+ *##############################################################################*/
 SSC_API int SSC_ArgParser_process(
- SSC_ArgParser* R_        ctx,
- const int                argc,
- char** R_                argv,
- const int                offset,
- void* R_                 data,
- SSC_Error_t* R_          processor_status,
- SSC_ArgProc_Processor_f* processor);
-/*==============================================================================*/
+ SSC_ArgParser* R_        ctx,        /* Parser context. */
+ const int                argc,       /* Number of C-strings in argv. */
+ char** R_                argv,       /* Argument vector; offset into argv[0]. */
+ const int                offset,     /* Offset in argv[0] to start reading. */
+ void* R_                 data,       /* User data for processor function. */
+ SSC_Error_t* R_          processor_status,  /* Output error status (optional). */
+ SSC_ArgProc_Processor_f* processor); /* Function to process input string. */
 
 /*##############################################################################*/
-/* When @ch is NOT zero, return SSC_ARGPROC_ONECHAR else return zero. */
+/* Helper: Returns SSC_ARGPROC_ONECHAR if @ch is non-zero, else 0. Used by short option
+ * processors that consume exactly one character per invocation. */
 /*##############################################################################*/
 SSC_INLINE int
 SSC_1opt(const char ch)
 {
   return ch ? SSC_ARGPROC_ONECHAR : 0;
 }
-/*==============================================================================*/
+
 
 SSC_END_C_DECLS
 #undef R_
