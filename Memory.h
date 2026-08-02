@@ -317,7 +317,7 @@ SSC_reallocOrDie(void* R_ mem, size_t n)
 
 #ifndef SSC_ENDIAN
  #error "SSC_ENDIAN undefined!"
-#elif !SSC_ENDIAN_ISVALID(SSC_ENDIAN)
+#elif !SSC_ENDIAN_ISVALID
  #error "SSC_ENDIAN is invalid!"
 #elif SSC_ENDIAN == SSC_ENDIAN_LITTLE
  #define STORE_LE_IMPL_(Ptr, Val, Bits_) STORE_NATIVE_IMPL_(Ptr, Val)

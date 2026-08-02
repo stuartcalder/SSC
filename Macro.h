@@ -12,20 +12,23 @@
 #define SSC_ENDIAN_LITTLE 1 /* Least-Significant-Byte-First Ordering. */
 #define SSC_ENDIAN_BIG    2 /* Most-Significant-Byte-First Ordering. */
 #define SSC_ENDIAN_DEFAULT SSC_ENDIAN_LITTLE /* For now just assume little endian if unspecified. */
-#define SSC_ENDIAN_ISVALID(Endian) ((Endian) == SSC_ENDIAN_LITTLE || (Endian) == SSC_ENDIAN_BIG) /* NONE is invalid. */
+#define SSC_ENDIAN_ISVALID_FUNC(Endian) ((Endian) == SSC_ENDIAN_LITTLE || (Endian) == SSC_ENDIAN_BIG) /* NONE is invalid. */
+#define SSC_ENDIAN_ISVALID SSC_ENDIAN_ISVALID_FUNC(SSC_ENDIAN)
 /* How are we determining endianness? */
 #define SSC_ENDIAN_SRC_NONE     0 /* Endian source unestablished. */
 #define SSC_ENDIAN_SRC_EXTERN   1 /* Endianness was specified externally, in SSC_EXTERN_ENDIAN. */
 #define SSC_ENDIAN_SRC_ISA      2 /* Endianness was determined by the ISA of the CPU. */
 #define SSC_ENDIAN_SRC_COMPILER 3 /* Endianness was specified by the compiler. */
 #define SSC_ENDIAN_SRC_DEFAULT  4 /* Endianness was set to defaults. */
-#define SSC_ENDIAN_SRC_ISVALID(EndSrc) ((EndSrc) >= SSC_ENDIAN_SRC_EXTERN && (EndSrc) <= SSC_ENDIAN_SRC_DEFAULT) /* NONE is invalid. */
+#define SSC_ENDIAN_SRC_ISVALID_FUNC(EndSrc) ((EndSrc) >= SSC_ENDIAN_SRC_EXTERN && (EndSrc) <= SSC_ENDIAN_SRC_DEFAULT) /* NONE is invalid. */
+#define SSC_ENDIAN_SRC_ISVALID SSC_ENDIAN_SRC_ISVALID_FUNC(SSC_ENDIAN_SRC)
 /* What is the compiler? */
 #define SSC_COMPILER_UNKNOWN 0 /* Unrecognized compiler. */
 #define SSC_COMPILER_GCC     1 /* GNU C/C++ compiler. */
 #define SSC_COMPILER_CLANG   2 /* Clang C/C++ compiler. */
 #define SSC_COMPILER_MSVC    3 /* Microsoft Visual C/C++ compiler. */
-#define SSC_COMPILER_ISVALID(Comp) ((Comp) >= SSC_COMPILER_UNKNOWN && (Comp) <= SSC_COMPILER_MSVC) /* UNKNOWN is valid. */
+#define SSC_COMPILER_ISVALID_FUNC(Comp) ((Comp) >= SSC_COMPILER_GCC && (Comp) <= SSC_COMPILER_MSVC)
+#define SSC_COMPILER_ISVALID SSC_COMPILER_ISVALID_FUNC(SSC_COMPILER)
 #define SSC_COMPILER_IS_GCC_COMPATIBLE ((SSC_COMPILER == SSC_COMPILER_GCC) || (SSC_COMPILER == SSC_COMPILER_CLANG))
 
 /* Pointer-aliasing restrict support bits. */
@@ -138,7 +141,7 @@
  *   May be defined outside by the SSC_EXTERN_ENDIAN macro.
  *   Must equal to SSC_ENDIAN_LITTLE, or SSC_ENDIAN_BIG. */
 #if !defined(SSC_ENDIAN) && defined(SSC_EXTERN_ENDIAN)
- #if !SSC_ENDIAN_ISVALID(SSC_EXTERN_ENDIAN)
+ #if !SSC_ENDIAN_ISVALID_FUNC(SSC_EXTERN_ENDIAN)
   #error "SSC_EXTERN_ENDIAN is an invalid endianness!"
  #endif
   /* External definition trumps all endian detection methods. */
@@ -167,10 +170,12 @@
 #define SSC_ISA_UNKNOWN 0
 #define SSC_ISA_AMD64   1
 #define SSC_ISA_X86     2
-#define SSC_ISA_RISCV   3
-#define SSC_ISA_ARM64   4
-#define SSC_ISA_ARMV7   5
-#define SSC_ISA_ISVALID(Isa) ((Isa) >= SSC_ISA_UNKNOWN && (Isa) <= SSC_ISA_ARMV7) /* UNKNOWN arch is valid. */
+#define SSC_ISA_RISCV64 3
+#define SSC_ISA_RISCV32 4
+#define SSC_ISA_ARM64   5
+#define SSC_ISA_ARMV7   6
+#define SSC_ISA_ISVALID_FUNC(Isa) ((Isa) >= SSC_ISA_AMD64 && (Isa) <= SSC_ISA_ARMV7)
+#define SSC_ISA_ISVALID SSC_ISA_ISVALID_FUNC(SSC_ISA)
 
 /* Architecture macros. */
 #if (defined(__amd64)  || defined(__amd64__)  ||\
@@ -183,7 +188,17 @@
   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
  #endif
 #elif defined(__riscv)
- #define SSC_ISA SSC_ISA_RISCV
+ #if defined(__riscv_xlen)
+  #if   (__riscv_xlen == 64)
+   #define SSC_ISA SSC_ISA_RISCV64
+  #elif (__riscv_xlen == 32)
+   #define SSC_ISA SSC_ISA_RISCV32
+  #else
+   #error "__riscv_xlen was not properly defined!"
+  #endif
+ #else
+  #define SSC_ISA SSC_ISA_RISCV64 /* __riscv_xlen wasn't defined. Choose 64-bit and pray. */
+ #endif
  #ifndef SSC_ENDIAN
    /* RISCV is little endian. */
   #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
@@ -247,25 +262,6 @@
   #define SSC_ENDIAN     SSC_ENDIAN_DEFAULT
   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_DEFAULT
  #endif
-#endif
-
-/* Sanity assertions. */
-#if   !defined(SSC_COMPILER)
- #error "SSC_COMPILER is not defined!"
-#elif !SSC_COMPILER_ISVALID(SSC_COMPILER)
- #error "SSC_COMPILER is an invalid compiler!"
-#elif !defined(SSC_ENDIAN)
- #error "SSC_ENDIAN is not defined!"
-#elif !SSC_ENDIAN_ISVALID(SSC_ENDIAN)
- #error "SSC_ENDIAN is an invalid endianness!"
-#elif !defined(SSC_ENDIAN_SRC)
- #error "SSC_ENDIAN_SRC is not defined!"
-#elif !SSC_ENDIAN_SRC_ISVALID(SSC_ENDIAN_SRC)
- #error "SSC_ENDIAN_SRC is an invalid endian source!"
-#elif !defined(SSC_ISA)
- #error "SSC_ISA is not defined!"
-#elif !SSC_ISA_ISVALID(SSC_ISA)
- #error "SSC_ISA is an invalid ISA!"
 #endif
 
 /* C/C++ Interoperability Macros */
@@ -364,6 +360,56 @@
  #define SSC_CONSTEVAL_IS_NIL
 #endif /* ! #ifdef __cplusplus */
 
+/* Define data models. */
+#define SSC_DATAMODEL_UNKNOWN 0
+#define SSC_DATAMODEL_ILP32   1
+#define SSC_DATAMODEL_LLP64   2
+#define SSC_DATAMODEL_LP64    3
+#define SSC_DATAMODEL_ILP64   4
+#define SSC_DATAMODEL_SILP64  5
+#define SSC_DATAMODEL_ISVALID_FUNC(Dtm) ((Dtm) >= SSC_DATAMODEL_ILP32 && (Dtm) <= SSC_DATAMODEL_LP64) /* Others not used yet. */
+#define SSC_DATAMODEL_ISVALID SSC_DATAMODEL_ISVALID_FUNC(SSC_DATAMODEL)
+
+/* Identify the native data model. */
+#if defined(SSC_OS_WIN64) && (SSC_ISA == SSC_ISA_AMD64 || SSC_ISA == SSC_ISA_ARM64)
+ #define SSC_DATAMODEL SSC_DATAMODEL_LLP64
+#elif defined(SSC_OS_WIN32) && (SSC_ISA == SSC_ISA_X86) || (SSC_ISA == SSC_ISA_ARMV7)
+ #define SSC_DATAMODEL SSC_DATAMODEL_ILP32
+#elif defined(SSC_OS_UNIXLIKE)
+ #if defined(SSC_ISA_AMD64) || defined(SSC_ISA_ARM64) || defined(SSC_ISA_RISCV64)
+  #define SSC_DATAMODEL SSC_DATAMODEL_LP64
+ #else
+  #define SSC_DATAMODEL SSC_DATAMODEL_ILP32
+ #endif
+#endif
+
+/* Define the sizes of types based on the native data model. */
+#define SSC_SIZEOF_CHAR   1U
+#define SSC_SIZEOF_FLOAT  4U
+#define SSC_SIZEOF_DOUBLE 8U
+#if   (SSC_DATAMODEL == SSC_DATAMODEL_UNKNOWN)
+ #warning "WARNING: SSC_DATAMODEL is unknown!"
+#elif (SSC_DATAMODEL == SSC_DATAMODEL_ILP32)
+ #define SSC_SIZEOF_SHORT    2U
+ #define SSC_SIZEOF_INT      4U
+ #define SSC_SIZEOF_LONG     4U
+ #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_POINTER  4U
+#elif (SSC_DATAMODEL == SSC_DATAMODEL_LLP64)
+ #define SSC_SIZEOF_SHORT    2U
+ #define SSC_SIZEOF_INT      4U
+ #define SSC_SIZEOF_LONG     4U
+ #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_POINTER  8U
+#elif (SSC_DATAMODEL == SSC_DATAMODEL_LP64)
+ #define SSC_SIZEOF_SHORT    2U
+ #define SSC_SIZEOF_INT      4U
+ #define SSC_SIZEOF_LONG     8U
+ #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_POINTER  8U
+#endif
+
+
 /* If we can do a compile-time assertion, SSC_ANY_ASSERT()
  * is equivalent to SSC_STATIC_ASSERT(). If we cannot, the assertion
  * is runtime. Only pass compile-time boolean expressions as @Bool and
@@ -415,7 +461,7 @@
 /* Symbol Visibility, Export/Import Macros */
 #if !defined(SSC_COMPILER)
  #error "SSC_COMPILER undefined!"
-#elif !SSC_COMPILER_ISVALID(SSC_COMPILER)
+#elif !SSC_COMPILER_ISVALID
  #error "SSC_COMPILER is invalid!"
 #elif SSC_COMPILER == SSC_COMPILER_UNKNOWN
  /* When the compiler is unknown, NIL all the import and export
@@ -484,6 +530,30 @@
   #endif
  #endif /* ! #ifdef SSC_EXTERN_BUILD_DYNAMIC_LIB */
 #endif /* ! #ifdef SSC_EXTERN_STATIC_LIB */
+
+/* Sanity assertions. */
+#if   !defined(SSC_COMPILER)
+ #error "SSC_COMPILER is not defined!"
+#elif !SSC_COMPILER_ISVALID
+ #error "SSC_COMPILER is an invalid compiler!"
+#elif !defined(SSC_ENDIAN)
+ #error "SSC_ENDIAN is not defined!"
+#elif !SSC_ENDIAN_ISVALID
+ #error "SSC_ENDIAN is an invalid endianness!"
+#elif !defined(SSC_ENDIAN_SRC)
+ #error "SSC_ENDIAN_SRC is not defined!"
+#elif !SSC_ENDIAN_SRC_ISVALID
+ #error "SSC_ENDIAN_SRC is an invalid endian source!"
+#elif !defined(SSC_ISA)
+ #error "SSC_ISA is not defined!"
+#elif !SSC_ISA_ISVALID
+ #error "SSC_ISA is an invalid ISA!"
+#elif !defined(SSC_DATAMODEL)
+ #error "SSC_DATAMODEL is not defined!"
+#elif !SSC_DATAMODEL_ISVALID
+ #error "SSC_DATAMODEL is an invalid data model!"
+#endif
+
 
 /* We conditionally include `Error.h' below, but `Error.h' depends upon some macros defined here in `Macro.h'.
  * The following macros must remain at the end of `Macro.h' to avoid circular dependence problems.*/
