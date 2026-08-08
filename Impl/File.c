@@ -321,18 +321,28 @@ SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R
 #endif
 }
 
-//TODO: Make offset SSC_ssize_t and use -1 to specify seeking to the end.
 SSC_Error_t
-SSC_File_seek(SSC_File_t file, size_t offset)
+SSC_File_seek(SSC_File_t file, SSC_ssize_t offset)
 {
 #if   defined(SSC_OS_UNIXLIKE)
-  if (lseek(file, (off_t)offset, SEEK_SET) < 0)
-    return SSC_ERR;
+  if (offset < 0) {
+    if (lseek(file, -1, SEEK_END) < 0)
+      return SSC_ERR;
+  } else {
+    if (lseek(file, (off_t)offset, SEEK_SET) < 0)
+      return SSC_ERR;
+  }
   return SSC_OK;
 #elif defined(SSC_OS_WINDOWS)
+  DWORD whence = FILE_BEGIN;
+  LONGLONG quad = (LONGLONG)offset;
+  if (offset < 0) {
+    whence = FILE_END;
+    quad = -1;
+  }
   LARGE_INTEGER li;
-  li.QuadPart = (LONGLONG)offset;
-  if (!SetFilePointerEx(file, li, SSC_NULL, FILE_BEGIN))
+  li.QuadPart = quad;
+  if (!SetFilePointerEx(file, li, SSC_NULL, whence))
     return SSC_ERR;
   return SSC_OK;
 #else
@@ -341,7 +351,7 @@ SSC_File_seek(SSC_File_t file, size_t offset)
 }
 
 SSC_CodeError_t
-SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+SSC_File_seekRead(SSC_File_t file, SSC_ssize_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
 {
   if (SSC_File_seek(file, offset) != SSC_OK)
     return SSC_FILE_SEEK_ERR;
@@ -349,7 +359,7 @@ SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SS
 }
 
 SSC_CodeError_t
-SSC_File_seekWrite(SSC_File_t file, size_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+SSC_File_seekWrite(SSC_File_t file, SSC_ssize_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
 {
   if (SSC_File_seek(file, offset) != SSC_OK)
     return SSC_FILE_SEEK_ERR;

@@ -217,6 +217,9 @@ enum {
   SSC_FILE_SEEK_ERR      =  -3, /* lseek/SetFilePointerEx failed */
 };
 
+/* Seek to end-of-file. */
+#define SSC_FILE_SEEK_END ((SSC_ssize_t)-1)
+
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Read up to @count bytes from @file into @buf. Returns:
  *   SSC_FILE_READ_OK      : All @count bytes successfully read.
@@ -235,10 +238,10 @@ SSC_API SSC_CodeError_t
 SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* TODO: Document. */
+/* Seek to @offset within @file. Pass @SSC_FILE_SEEK_END for end-of-file (negative offsets are treated as SEEK_END). */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
-SSC_File_seek(SSC_File_t file, size_t offset); /*TODO*/
+SSC_File_seek(SSC_File_t file, SSC_ssize_t offset);
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -248,7 +251,7 @@ SSC_File_seek(SSC_File_t file, size_t offset); /*TODO*/
  *   SSC_FILE_SEEK_ERR     : Seek failed (no read attempted). */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
-SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
+SSC_File_seekRead(SSC_File_t file, SSC_ssize_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -258,7 +261,7 @@ SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SS
  *   SSC_FILE_SEEK_ERR     : Seek failed (no write attempted). */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
-SSC_File_seekWrite(SSC_File_t file, size_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
+SSC_File_seekWrite(SSC_File_t file, SSC_ssize_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
