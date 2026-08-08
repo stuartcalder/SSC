@@ -1,6 +1,7 @@
-/* Copyright (C) 2020-2025 Stuart Calder
+/* Copyright (C) 2020-2026 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
 #include "File.h"
+#include <errno.h>
 
 #if defined(__linux__) && defined(SSC_FILE_HAS_CREATESECRET)
  #include <sys/syscall.h>
@@ -9,23 +10,16 @@
 
 #define R_ SSC_RESTRICT
 
-#if   defined(SSC_OS_UNIXLIKE)
- typedef struct stat   Stat_t;
-#elif defined(SSC_OS_WINDOWS)
- typedef LARGE_INTEGER LargeInt_t;
- typedef DWORD         Dw32_t;
-#endif
-
 SSC_Error_t
 SSC_File_getSize(SSC_File_t file, size_t* R_ storesize)
 {
 #if    defined(SSC_OS_UNIXLIKE)
-  Stat_t s;
+  struct stat s;
   if (fstat(file, &s))
     return SSC_ERR;
   *storesize = (size_t)s.st_size;
 #elif  defined(SSC_OS_WINDOWS)
-  LargeInt_t li;
+  LARGE_INTEGER li;
   if (!GetFileSizeEx(file, &li))
     return SSC_ERR;
   *storesize = (size_t)li.QuadPart;
@@ -39,7 +33,7 @@ SSC_Error_t
 SSC_FilePath_getSize(const char* R_ fpath, size_t* R_ storesize)
 {
 #ifdef SSC_OS_UNIXLIKE
-  Stat_t s;
+  struct stat s;
   if (stat(fpath, &s))
     return SSC_ERR;
   *storesize = (size_t)s.st_size;
@@ -61,11 +55,11 @@ SSC_FilePath_exists(const char* filepath)
 {
   bool exists = false;
 #if   defined(SSC_OS_UNIXLIKE)
-  Stat_t s;
+  struct stat s;
   if (stat(filepath, &s) == 0)
     exists = true;
 #elif defined(SSC_OS_WINDOWS)
-  const Dw32_t attrib = GetFileAttributesA(filepath);
+  const DWORD attrib = GetFileAttributesA(filepath);
   /* (The file exists and it is not a directory.) */
   if (attrib != INVALID_FILE_ATTRIBUTES &&
       !(attrib & FILE_ATTRIBUTE_DIRECTORY))
@@ -108,7 +102,7 @@ SSC_FilePath_open(const char* R_ filepath, bool readonly, SSC_File_t* R_ storefi
 #if    defined(SSC_OS_UNIXLIKE)
   *storefile = open(filepath, (readonly ? O_RDONLY : O_RDWR), UNIX_MODE_);
 #elif  defined(SSC_OS_WINDOWS)
-  const Dw32_t rw = readonly ? WIN_READONLY_ : WIN_READWRITE_;
+  const DWORD rw = readonly ? WIN_READONLY_ : WIN_READWRITE_;
   *storefile = CreateFileA(
     filepath,
     rw,
@@ -195,14 +189,124 @@ SSC_File_setSize(SSC_File_t file, size_t size)
   #if   defined(SSC_OS_UNIXLIKE)
   return ftruncate(file, size) == 0 ? SSC_OK : SSC_ERR;
   #elif defined(SSC_OS_WINDOWS)
-  LargeInt_t i;
-  i.QuadPart = size;
+  LARGE_INTEGER i;
+  i.QuadPart = (LONGLONG)size;
   if (!SetFilePointerEx(file, i, SSC_NULL, FILE_BEGIN) || !SetEndOfFile(file))
     return SSC_ERR;
   return SSC_OK;
   #else
    #error "Unsupported OS!"
   #endif
+}
+
+SSC_CodeError_t
+SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  SSC_ssize_t total = 0;
+  size_t remaining = count;
+  while (remaining > 0) {
+    SSC_ssize_t r = read(file, ((uint8_t*)buf) + total, remaining);
+    if (r < 0) {
+      if (errno == EINTR) continue;
+      return SSC_FILE_READ_ERR;
+    }
+    if (r == 0 || total + r == (SSC_ssize_t)count) break;
+    total += r;
+    remaining -= (size_t)r;
+  }
+  *stored_count = total;
+  if (total < (SSC_ssize_t)count) return SSC_FILE_READ_EOF;
+  return SSC_FILE_READ_OK;
+#elif defined(SSC_OS_WINDOWS)
+  DWORD br;
+  if (!ReadFile(file, buf, (DWORD)count, &br, SSC_NULL)) {
+    if (GetLastError() == ERROR_HANDLE_EOF) {
+      *stored_count = 0;
+      return SSC_FILE_READ_EOF;
+    }
+    return SSC_FILE_READ_ERR;
+  }
+  *stored_count = (SSC_ssize_t)br;
+  return ((size_t)br == count) ? SSC_FILE_READ_OK : SSC_FILE_READ_EOF;
+#else
+ #error "Unsupported OS!"
+#endif
+}
+
+SSC_CodeError_t
+SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  SSC_ssize_t written = 0;
+  size_t remaining = count;
+  while (remaining > 0) {
+    SSC_ssize_t r = write(file, ((const uint8_t*)buf) + written, remaining);
+    if (r < 0) {
+      if (errno == EINTR) continue;
+      return SSC_FILE_WRITE_ERR;
+    }
+    written += r;
+    remaining -= (size_t)r;
+  }
+  *stored_count = written;
+  return SSC_FILE_WRITE_OK;
+#elif defined(SSC_OS_WINDOWS)
+  DWORD written_total = 0;
+  while (written_total < (DWORD)count) {
+    DWORD bw = 0;
+    BOOL result = WriteFile(
+     file,
+     (const uint8_t*)buf + written_total,
+     (DWORD)count - written_total,
+     &bw,
+     SSC_NULL
+    );
+    if (!result)
+      return SSC_FILE_WRITE_ERR;
+    written_total += bw;
+    if (bw == 0) break;
+  }
+  *stored_count = (SSC_ssize_t)written_total;
+  return ((size_t)written_total == count) ? SSC_FILE_WRITE_OK : SSC_FILE_WRITE_PARTIAL;
+#else
+ #error "Unsupported OS!"
+#endif
+}
+
+//TODO: Make offset SSC_ssize_t and use -1 to specify seeking to the end.
+SSC_Error_t
+SSC_File_seek(SSC_File_t file, size_t offset)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  if (lseek(file, (off_t)offset, SEEK_SET) < 0)
+    return SSC_ERR;
+  return SSC_OK;
+#elif defined(SSC_OS_WINDOWS)
+  LARGE_INTEGER li;
+  li.QuadPart = (LONGLONG)offset;
+  if (!SetFilePointerEx(file, li, SSC_NULL, FILE_BEGIN))
+    return SSC_ERR;
+  return SSC_OK;
+#else
+ #error "Unsupported OS!"
+#endif
+}
+
+SSC_CodeError_t
+SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+{
+  if (SSC_File_seek(file, offset) != SSC_OK)
+    return SSC_FILE_SEEK_ERR;
+  return SSC_File_read(file, buf, count, stored_count);
+}
+
+SSC_CodeError_t
+SSC_File_seekWrite(SSC_File_t file, size_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
+{
+  if (SSC_File_seek(file, offset) != SSC_OK)
+    return SSC_FILE_SEEK_ERR;
+  return SSC_File_write(file, buf, count, stored_count);
 }
 
 SSC_Error_t

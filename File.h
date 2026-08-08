@@ -1,4 +1,4 @@
-/* Copyright (C) 2020-2025 Stuart Calder
+/* Copyright (C) 2020-2026 Stuart Calder
  * See accompanying LICENSE file for licensing information. */
 #ifndef SSC_FILE_H
 #define SSC_FILE_H
@@ -11,6 +11,7 @@
 
 #include "Macro.h"
 #include "Error.h"
+#include "Typedef.h"
 
 #define SSC_FILE_DEFAULT_NEWFILE_SIZE 0
 
@@ -171,6 +172,63 @@ SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
   SSC_assertMsg(SSC_File_setSize(file, size) == SSC_OK, "Error: SSC_File_setSize() failed to set a file to size %zu!\n", size);
   #endif
 }
+/*==========================================================================================*/
+
+enum {
+  /* Read */
+  SSC_FILE_READ_OK      =   0, /* All @count bytes read successfully */
+  SSC_FILE_READ_EOF     =  -1, /* EOF reached before all bytes transferred; *stored_count holds partial count */
+  SSC_FILE_READ_ERR     =  -2, /* I/O error (no bytes read) */
+  /* Write */
+  SSC_FILE_WRITE_OK      =   0, /* All @count bytes written successfully */
+  SSC_FILE_WRITE_PARTIAL =  -1, /* Write error mid-stream; *stored_count holds partial count */
+  SSC_FILE_WRITE_ERR     =  -2, /* General write failure. */
+  /* Seek */
+  SSC_FILE_SEEK_ERR      =  -3, /* lseek/SetFilePointerEx failed */
+};
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Read up to @count bytes from @file into @buf. Returns:
+ *   SSC_FILE_READ_OK      : All @count bytes successfully read.
+ *   SSC_FILE_READ_EOF     : EOF reached before all bytes transferred; *stored_count holds partial count. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_CodeError_t
+SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Write up to @count bytes from @buf to @file. Returns:
+ *   SSC_FILE_WRITE_OK     : All @count bytes successfully written.
+ *   SSC_FILE_WRITE_PARTIAL: Write error mid-stream; *stored_count holds partial count. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_CodeError_t
+SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
+/*==========================================================================================*/
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* TODO: Document. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_File_seek(SSC_File_t file, size_t offset); /*TODO*/
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Seek to @offset within @file and read up to @count bytes into @buf. Returns:
+ *   SSC_FILE_READ_OK      : All @count bytes successfully read after seek.
+ *   SSC_FILE_READ_EOF     : EOF reached before all bytes transferred; *stored_count holds partial count.
+ *   SSC_FILE_SEEK_ERR     : Seek failed (no read attempted). */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_CodeError_t
+SSC_File_seekRead(SSC_File_t file, size_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Seek to @offset within @file and write up to @count bytes from @buf. Returns:
+ *   SSC_FILE_WRITE_OK     : All @count bytes successfully written after seek.
+ *   SSC_FILE_WRITE_PARTIAL: Write error mid-stream; *stored_count holds partial count.
+ *   SSC_FILE_SEEK_ERR     : Seek failed (no write attempted). */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_CodeError_t
+SSC_File_seekWrite(SSC_File_t file, size_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
