@@ -41,7 +41,6 @@ typedef uint64_t     SSC_BitFlag64_t;
  typedef ssize_t   SSC_ssize_t;
  #define SSC_SSIZE_PRI "zi"
 #else
- typedef ptrdiff_t SSC_ssize_t;
  #define SSC_NEED_SSIZE_TYPEDEF
 #endif
 
@@ -78,3 +77,5 @@ typedef uint64_t     SSC_BitFlag64_t;
 #endif
 
 #undef SSC_NEED_SSIZE_TYPEDEF
+
+#endif /* ! #ifndef SSC_TYPEDEF_H */

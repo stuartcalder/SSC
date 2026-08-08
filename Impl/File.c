@@ -8,6 +8,11 @@
  #include <unistd.h>
 #endif
 
+#if defined(SSC_OS_UNIXLIKE) && !defined(O_CLOEXEC)
+ #warning "O_CLOEXEC was NOT defined!"
+ #define O_CLOEXEC (0)
+#endif
+
 #define R_ SSC_RESTRICT
 
 SSC_Error_t
@@ -100,7 +105,7 @@ SSC_Error_t
 SSC_FilePath_open(const char* R_ filepath, bool readonly, SSC_File_t* R_ storefile)
 {
 #if    defined(SSC_OS_UNIXLIKE)
-  *storefile = open(filepath, (readonly ? O_RDONLY : O_RDWR), UNIX_MODE_);
+  *storefile = open(filepath, ((readonly ? O_RDONLY : O_RDWR) | O_CLOEXEC), UNIX_MODE_);
 #elif  defined(SSC_OS_WINDOWS)
   const DWORD rw = readonly ? WIN_READONLY_ : WIN_READWRITE_;
   *storefile = CreateFileA(
@@ -122,7 +127,7 @@ SSC_Error_t
 SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
 {
 #if    defined(SSC_OS_UNIXLIKE)
-  *storefile = open(filepath, (O_RDWR|O_CREAT|O_EXCL), UNIX_MODE_);
+  *storefile = open(filepath, (O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC), UNIX_MODE_);
 #elif  defined(SSC_OS_WINDOWS)
   *storefile = CreateFileA(
     filepath,
@@ -130,6 +135,48 @@ SSC_FilePath_create(const char* R_ filepath, SSC_File_t* R_ storefile)
     WIN_SHARE_MODE_,
     SSC_NULL,
     CREATE_NEW,
+    FILE_ATTRIBUTE_NORMAL,
+    SSC_NULL
+  );
+#else
+ #error "Unsupported operating system."
+#endif
+  return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
+}
+
+SSC_Error_t
+SSC_FilePath_openAppend(const char* R_ filepath, SSC_File_t* R_ storefile)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  *storefile = open(filepath, (O_RDWR|O_APPEND|O_CLOEXEC), UNIX_MODE_);
+#elif defined(SSC_OS_WINDOWS)
+  *storefile = CreateFileA(
+    filepath,
+    GENERIC_READ | FILE_APPEND_DATA,
+    WIN_SHARE_MODE_,
+    SSC_NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    SSC_NULL
+  );
+#else
+ #error "Unsupported operating system."
+#endif
+  return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
+}
+
+SSC_Error_t
+SSC_FilePath_createOrTruncate(const char* R_ filepath, SSC_File_t* R_ storefile)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  *storefile = open(filepath, (O_RDWR|O_CREAT|O_TRUNC|O_CLOEXEC), UNIX_MODE_);
+#elif defined(SSC_OS_WINDOWS)
+  *storefile = CreateFileA(
+    filepath,
+    WIN_READWRITE_,
+    WIN_SHARE_MODE_,
+    SSC_NULL,
+    CREATE_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     SSC_NULL
   );

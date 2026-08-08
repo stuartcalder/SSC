@@ -127,6 +127,36 @@ SSC_FilePath_createOrDie(const char* fpath)
 }
 /*==========================================================================================*/
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Open an existing file for appending. The file pointer is positioned at end-of-file so that all writes occur after existing content, without affecting other readers or writers (on systems that support atomic append). */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_FilePath_openAppend(const char* R_ fpath, SSC_File_t* R_ storefile);
+
+SSC_INLINE SSC_File_t
+SSC_FilePath_openAppendOrDie(const char* R_ fpath)
+{
+  SSC_File_t f;
+  SSC_assertMsg(SSC_FilePath_openAppend(fpath, &f) == SSC_OK, "Error: SSC_FilePath_openAppend() failed to open %s for appending!\n", fpath);
+  return f;
+}
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Create a new file at @fpath if it does not already exist. If the file already exists, truncate it to zero bytes. Always opens read-write. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_FilePath_createOrTruncate(const char* R_ fpath, SSC_File_t* R_ storefile);
+
+SSC_INLINE SSC_File_t
+SSC_FilePath_createOrTruncateOrDie(const char* R_ fpath)
+{
+  SSC_File_t f;
+  SSC_assertMsg(SSC_FilePath_createOrTruncate(fpath, &f) == SSC_OK, "Error: SSC_FilePath_createOrTruncate() failed to create or truncate %s!\n", fpath);
+  return f;
+}
+/*==========================================================================================*/
+
 #ifdef SSC_FILE_HAS_CREATESECRET
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Create a "secret" file, with more protections than usually afforded by RAM-backed
