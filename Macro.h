@@ -381,32 +381,33 @@
  #else
   #define SSC_DATAMODEL SSC_DATAMODEL_ILP32
  #endif
+#else
+ #define SSC_DATAMODEL SSC_DATAMODEL_UNKNOWN
+ #warning "WARNING: SSC_DATAMODEL is unknown!"
 #endif
 
 /* Define the sizes of types based on the native data model. */
 #define SSC_SIZEOF_CHAR   1U
 #define SSC_SIZEOF_FLOAT  4U
 #define SSC_SIZEOF_DOUBLE 8U
-#if   (SSC_DATAMODEL == SSC_DATAMODEL_UNKNOWN)
- #warning "WARNING: SSC_DATAMODEL is unknown!"
-#elif (SSC_DATAMODEL == SSC_DATAMODEL_ILP32)
+#if   (SSC_DATAMODEL == SSC_DATAMODEL_ILP32)
  #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     4U
- #define SSC_SIZEOF_LONGLONG 8U
  #define SSC_SIZEOF_POINTER  4U
+ #define SSC_SIZEOF_LONGLONG 8U
 #elif (SSC_DATAMODEL == SSC_DATAMODEL_LLP64)
  #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     4U
- #define SSC_SIZEOF_LONGLONG 8U
  #define SSC_SIZEOF_POINTER  8U
+ #define SSC_SIZEOF_LONGLONG 8U
 #elif (SSC_DATAMODEL == SSC_DATAMODEL_LP64)
  #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     8U
- #define SSC_SIZEOF_LONGLONG 8U
  #define SSC_SIZEOF_POINTER  8U
+ #define SSC_SIZEOF_LONGLONG 8U
 #endif
 
 
