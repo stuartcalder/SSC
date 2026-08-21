@@ -258,7 +258,7 @@ SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ store
       if (errno == EINTR) continue;
       return SSC_FILE_READ_ERR;
     }
-    if (r == 0 || total + r == (SSC_ssize_t)count) break;
+    if (r == 0) break;
     total += r;
     remaining -= (size_t)r;
   }
@@ -326,7 +326,7 @@ SSC_File_seek(SSC_File_t file, SSC_ssize_t offset)
 {
 #if   defined(SSC_OS_UNIXLIKE)
   if (offset < 0) {
-    if (lseek(file, -1, SEEK_END) < 0)
+    if (lseek(file, 0, SEEK_END) < 0)
       return SSC_ERR;
   } else {
     if (lseek(file, (off_t)offset, SEEK_SET) < 0)
@@ -338,7 +338,7 @@ SSC_File_seek(SSC_File_t file, SSC_ssize_t offset)
   LONGLONG quad = (LONGLONG)offset;
   if (offset < 0) {
     whence = FILE_END;
-    quad = -1;
+    quad = 0;
   }
   LARGE_INTEGER li;
   li.QuadPart = quad;

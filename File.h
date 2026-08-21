@@ -238,7 +238,7 @@ SSC_API SSC_CodeError_t
 SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Seek to @offset within @file. Pass @SSC_FILE_SEEK_END for end-of-file (negative offsets are treated as SEEK_END). */
+/* Seek to @offset within @file. Pass @SSC_FILE_SEEK_END (or any negative offset) to seek to true end-of-file: position == file size, one past the last byte; a subsequent read returns EOF immediately. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
 SSC_File_seek(SSC_File_t file, SSC_ssize_t offset);
