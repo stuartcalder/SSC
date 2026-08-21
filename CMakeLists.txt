@@ -196,6 +196,13 @@ target_include_directories(SSC PRIVATE ${INCLUDE_DIRS})
 target_compile_options(SSC PRIVATE ${LANG_FLAGS})
 target_link_libraries(SSC PRIVATE ${LIB_DEPS})
 
+# ---------- Tests ----------
+option(BUILD_TESTS "Build the test suite" ON)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(Tests)
+endif()
+
 # ---------- Installation ----------
 install(TARGETS SSC DESTINATION ${lib_dir_install})
 install(DIRECTORY ../SSC

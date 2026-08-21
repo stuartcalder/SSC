@@ -1,0 +1,11 @@
+# File I/O tests. Currently Unix-like only.
+if (NOT WIN32)
+    set(SSC_TEST_SOURCES TestFileRead TestFileSeek TestFileAppendTruncate)
+    foreach(test ${SSC_TEST_SOURCES})
+        add_executable(${test} ${test}.c)
+        target_include_directories(${test} PRIVATE ${CMAKE_SOURCE_DIR})
+        target_link_libraries(${test} PRIVATE SSC)
+        target_compile_options(${test} PRIVATE -Wall -Wextra)
+        add_test(NAME ${test} COMMAND ${test})
+    endforeach()
+endif()
