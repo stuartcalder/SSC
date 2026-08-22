@@ -226,10 +226,6 @@ SSC_File_close(SSC_File_t file)
   #endif
 }
 
-#ifdef SSC_OS_UNIXLIKE
-int ftruncate(int, off_t);
-#endif
-
 SSC_Error_t
 SSC_File_setSize(SSC_File_t file, size_t size)
 {
@@ -256,6 +252,7 @@ SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ store
     SSC_ssize_t r = read(file, ((uint8_t*)buf) + total, remaining);
     if (r < 0) {
       if (errno == EINTR) continue;
+      *stored_count = total;
       return SSC_FILE_READ_ERR;
     }
     if (r == 0) break;
@@ -266,16 +263,24 @@ SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ store
   if (total < (SSC_ssize_t)count) return SSC_FILE_READ_EOF;
   return SSC_FILE_READ_OK;
 #elif defined(SSC_OS_WINDOWS)
-  DWORD br;
-  if (!ReadFile(file, buf, (DWORD)count, &br, SSC_NULL)) {
-    if (GetLastError() == ERROR_HANDLE_EOF) {
-      *stored_count = 0;
-      return SSC_FILE_READ_EOF;
+  /* Loop to full count or EOF, chunked at UINT32_MAX (the largest
+   * value a single ReadFile() call can request). */
+  SSC_ssize_t total = 0;
+  size_t remaining = count;
+  while (remaining > 0) {
+    const DWORD chunk = (remaining > UINT32_MAX) ? UINT32_MAX : (DWORD)remaining;
+    DWORD br = 0;
+    if (!ReadFile(file, ((uint8_t*)buf) + total, chunk, &br, SSC_NULL)) {
+      *stored_count = total;
+      /* ERROR_HANDLE_EOF is a clean end-of-file, not an error. */
+      return (GetLastError() == ERROR_HANDLE_EOF) ? SSC_FILE_READ_EOF : SSC_FILE_READ_ERR;
     }
-    return SSC_FILE_READ_ERR;
+    if (br == 0) break;
+    total += (SSC_ssize_t)br;
+    remaining -= (size_t)br;
   }
-  *stored_count = (SSC_ssize_t)br;
-  return ((size_t)br == count) ? SSC_FILE_READ_OK : SSC_FILE_READ_EOF;
+  *stored_count = total;
+  return (total < (SSC_ssize_t)count) ? SSC_FILE_READ_EOF : SSC_FILE_READ_OK;
 #else
  #error "Unsupported OS!"
 #endif
@@ -291,7 +296,8 @@ SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R
     SSC_ssize_t r = write(file, ((const uint8_t*)buf) + written, remaining);
     if (r < 0) {
       if (errno == EINTR) continue;
-      return SSC_FILE_WRITE_ERR;
+      *stored_count = written;
+      return (written > 0) ? SSC_FILE_WRITE_PARTIAL : SSC_FILE_WRITE_ERR;
     }
     written += r;
     remaining -= (size_t)r;
@@ -299,23 +305,26 @@ SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R
   *stored_count = written;
   return SSC_FILE_WRITE_OK;
 #elif defined(SSC_OS_WINDOWS)
-  DWORD written_total = 0;
-  while (written_total < (DWORD)count) {
+  /* Loop to full count, chunked at UINT32_MAX (the largest value a
+   * single WriteFile() call can request). */
+  SSC_ssize_t written_total = 0;
+  size_t remaining = count;
+  while (remaining > 0) {
+    const DWORD chunk = (remaining > UINT32_MAX) ? UINT32_MAX : (DWORD)remaining;
     DWORD bw = 0;
-    BOOL result = WriteFile(
-     file,
-     (const uint8_t*)buf + written_total,
-     (DWORD)count - written_total,
-     &bw,
-     SSC_NULL
-    );
-    if (!result)
-      return SSC_FILE_WRITE_ERR;
-    written_total += bw;
-    if (bw == 0) break;
+    if (!WriteFile(file, ((const uint8_t*)buf) + written_total, chunk, &bw, SSC_NULL)) {
+      *stored_count = written_total;
+      return (written_total > 0) ? SSC_FILE_WRITE_PARTIAL : SSC_FILE_WRITE_ERR;
+    }
+    if (bw == 0) {
+      *stored_count = written_total;
+      return (written_total > 0) ? SSC_FILE_WRITE_PARTIAL : SSC_FILE_WRITE_ERR;
+    }
+    written_total += (SSC_ssize_t)bw;
+    remaining -= (size_t)bw;
   }
-  *stored_count = (SSC_ssize_t)written_total;
-  return ((size_t)written_total == count) ? SSC_FILE_WRITE_OK : SSC_FILE_WRITE_PARTIAL;
+  *stored_count = written_total;
+  return SSC_FILE_WRITE_OK;
 #else
  #error "Unsupported OS!"
 #endif
@@ -353,16 +362,20 @@ SSC_File_seek(SSC_File_t file, SSC_ssize_t offset)
 SSC_CodeError_t
 SSC_File_seekRead(SSC_File_t file, SSC_ssize_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
 {
-  if (SSC_File_seek(file, offset) != SSC_OK)
+  if (SSC_File_seek(file, offset) != SSC_OK) {
+    *stored_count = 0;
     return SSC_FILE_SEEK_ERR;
+  }
   return SSC_File_read(file, buf, count, stored_count);
 }
 
 SSC_CodeError_t
 SSC_File_seekWrite(SSC_File_t file, SSC_ssize_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count)
 {
-  if (SSC_File_seek(file, offset) != SSC_OK)
+  if (SSC_File_seek(file, offset) != SSC_OK) {
+    *stored_count = 0;
     return SSC_FILE_SEEK_ERR;
+  }
   return SSC_File_write(file, buf, count, stored_count);
 }
 

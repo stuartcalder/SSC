@@ -1,3 +1,5 @@
+/* Copyright (C) 2025-2026 Stuart Calder
+ * See accompanying LICENSE file for licensing information. */
 #include "Process.h"
 #include "Error.h"
 

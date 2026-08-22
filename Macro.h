@@ -63,6 +63,7 @@
      defined(__NetBSD__)    ||\
      defined(__OpenBSD__))
  #define SSC_OS_UNIXLIKE
+ #define _XOPEN_SOURCE 700
 /* Define MS Windows, naming scheme consistent with the above. */
 #elif defined(_WIN32) || defined(__CYGWIN__)
  #define SSC_OS_WINDOWS
@@ -373,7 +374,7 @@
 /* Identify the native data model. */
 #if defined(SSC_OS_WIN64) && (SSC_ISA == SSC_ISA_AMD64 || SSC_ISA == SSC_ISA_ARM64)
  #define SSC_DATAMODEL SSC_DATAMODEL_LLP64
-#elif defined(SSC_OS_WIN32) && (SSC_ISA == SSC_ISA_X86) || (SSC_ISA == SSC_ISA_ARMV7)
+#elif defined(SSC_OS_WIN32) && (SSC_ISA == SSC_ISA_X86 || SSC_ISA == SSC_ISA_ARMV7)
  #define SSC_DATAMODEL SSC_DATAMODEL_ILP32
 #elif defined(SSC_OS_UNIXLIKE)
  #if defined(SSC_ISA_AMD64) || defined(SSC_ISA_ARM64) || defined(SSC_ISA_RISCV64)
@@ -387,29 +388,27 @@
 #endif
 
 /* Define the sizes of types based on the native data model. */
-#define SSC_SIZEOF_CHAR   1U
-#define SSC_SIZEOF_FLOAT  4U
-#define SSC_SIZEOF_DOUBLE 8U
+#define SSC_SIZEOF_CHAR     1U
+#define SSC_SIZEOF_SHORT    2U
+#define SSC_SIZEOF_FLOAT    4U
+#define SSC_SIZEOF_DOUBLE   8U
+#define SSC_SIZEOF_LONGLONG 8U
 #if   (SSC_DATAMODEL == SSC_DATAMODEL_ILP32)
- #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     4U
  #define SSC_SIZEOF_POINTER  4U
- #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_SIZE     4U
 #elif (SSC_DATAMODEL == SSC_DATAMODEL_LLP64)
- #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     4U
  #define SSC_SIZEOF_POINTER  8U
- #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_SIZE     8U
 #elif (SSC_DATAMODEL == SSC_DATAMODEL_LP64)
- #define SSC_SIZEOF_SHORT    2U
  #define SSC_SIZEOF_INT      4U
  #define SSC_SIZEOF_LONG     8U
  #define SSC_SIZEOF_POINTER  8U
- #define SSC_SIZEOF_LONGLONG 8U
+ #define SSC_SIZEOF_SIZE     8U
 #endif
-
 
 /* If we can do a compile-time assertion, SSC_ANY_ASSERT()
  * is equivalent to SSC_STATIC_ASSERT(). If we cannot, the assertion
@@ -555,6 +554,17 @@
  #error "SSC_DATAMODEL is an invalid data model!"
 #endif
 
+/* Floating point size correctness assertions. */
+SSC_STATIC_ASSERT(SSC_SIZEOF_FLOAT    == sizeof(float),     "Invalid float size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_DOUBLE   == sizeof(double),    "Invalid double size!");
+/* Integer/Pointer size correctness assertions. */
+SSC_STATIC_ASSERT(SSC_SIZEOF_CHAR     == sizeof(char),      "Invalid char size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_SHORT    == sizeof(short),     "Invalid short size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_INT      == sizeof(int),       "Invalid int size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_LONG     == sizeof(long),      "Invalid long size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_LONGLONG == sizeof(long long), "Invalid long long size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_SIZE     == sizeof(size_t),    "Invalid size_t size!");
+SSC_STATIC_ASSERT(SSC_SIZEOF_POINTER  == sizeof(void*),     "Invalid pointer size!");
 
 /* We conditionally include `Error.h' below, but `Error.h' depends upon some macros defined here in `Macro.h'.
  * The following macros must remain at the end of `Macro.h' to avoid circular dependence problems.*/

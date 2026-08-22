@@ -206,33 +206,37 @@ SSC_File_setSizeOrDie(SSC_File_t file, size_t size)
 
 enum {
   /* Read */
-  SSC_FILE_READ_OK      =   0, /* All @count bytes read successfully */
-  SSC_FILE_READ_EOF     =  -1, /* EOF reached before all bytes transferred; *stored_count holds partial count */
-  SSC_FILE_READ_ERR     =  -2, /* I/O error (no bytes read) */
+  SSC_FILE_READ_OK      =   0, /* All @count bytes read successfully. */
+  SSC_FILE_READ_EOF     =  -1, /* EOF reached before all bytes transferred; *stored_count holds partial count. */
+  SSC_FILE_READ_ERR     =  -2, /* I/O error; *stored_count may hold a partial count of bytes transferred before the failure. */
   /* Write */
-  SSC_FILE_WRITE_OK      =   0, /* All @count bytes written successfully */
-  SSC_FILE_WRITE_PARTIAL =  -1, /* Write error mid-stream; *stored_count holds partial count */
-  SSC_FILE_WRITE_ERR     =  -2, /* General write failure. */
+  SSC_FILE_WRITE_OK      =   0, /* All @count bytes written successfully. */
+  SSC_FILE_WRITE_PARTIAL =  -1, /* Partial transfer then failure; *stored_count holds the number of bytes written before the error. */
+  SSC_FILE_WRITE_ERR     =  -2, /* Write failure with nothing transferred; *stored_count is zero. */
   /* Seek */
-  SSC_FILE_SEEK_ERR      =  -3, /* lseek/SetFilePointerEx failed */
+  SSC_FILE_SEEK_ERR      =  -3, /* lseek/SetFilePointerEx failed (no read or write attempted); *stored_count is zero. */
 };
 
 /* Seek to end-of-file. */
 #define SSC_FILE_SEEK_END ((SSC_ssize_t)-1)
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Read up to @count bytes from @file into @buf. Returns:
+/* Read up to @count bytes from @file into @buf, looping until @count bytes are
+ * transferred or EOF is reached. Returns:
  *   SSC_FILE_READ_OK      : All @count bytes successfully read.
- *   SSC_FILE_READ_EOF     : EOF reached before all bytes transferred; *stored_count holds partial count. */
+ *   SSC_FILE_READ_EOF     : EOF reached before all bytes transferred; *stored_count holds partial count.
+ *   SSC_FILE_READ_ERR     : I/O error; *stored_count may hold a partial count of bytes transferred before the failure. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_File_read(SSC_File_t file, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Write up to @count bytes from @buf to @file. Returns:
+/* Write up to @count bytes from @buf to @file, looping until all bytes are
+ * transferred or an error occurs. Returns:
  *   SSC_FILE_WRITE_OK     : All @count bytes successfully written.
- *   SSC_FILE_WRITE_PARTIAL: Write error mid-stream; *stored_count holds partial count. */
+ *   SSC_FILE_WRITE_PARTIAL: Partial transfer then failure; *stored_count holds the number of bytes written before the error.
+ *   SSC_FILE_WRITE_ERR    : Write failure with nothing transferred; *stored_count is zero. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_File_write(SSC_File_t file, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
@@ -248,7 +252,8 @@ SSC_File_seek(SSC_File_t file, SSC_ssize_t offset);
 /* Seek to @offset within @file and read up to @count bytes into @buf. Returns:
  *   SSC_FILE_READ_OK      : All @count bytes successfully read after seek.
  *   SSC_FILE_READ_EOF     : EOF reached before all bytes transferred; *stored_count holds partial count.
- *   SSC_FILE_SEEK_ERR     : Seek failed (no read attempted). */
+ *   SSC_FILE_READ_ERR     : I/O error; *stored_count may hold a partial count of bytes transferred before the failure.
+ *   SSC_FILE_SEEK_ERR     : Seek failed (no read attempted); *stored_count is zero. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_File_seekRead(SSC_File_t file, SSC_ssize_t offset, void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);
@@ -257,8 +262,9 @@ SSC_File_seekRead(SSC_File_t file, SSC_ssize_t offset, void* R_ buf, size_t coun
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Seek to @offset within @file and write up to @count bytes from @buf. Returns:
  *   SSC_FILE_WRITE_OK     : All @count bytes successfully written after seek.
- *   SSC_FILE_WRITE_PARTIAL: Write error mid-stream; *stored_count holds partial count.
- *   SSC_FILE_SEEK_ERR     : Seek failed (no write attempted). */
+ *   SSC_FILE_WRITE_PARTIAL: Partial transfer then failure; *stored_count holds the number of bytes written before the error.
+ *   SSC_FILE_WRITE_ERR    : Write failure with nothing transferred; *stored_count is zero.
+ *   SSC_FILE_SEEK_ERR     : Seek failed (no write attempted); *stored_count is zero. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_File_seekWrite(SSC_File_t file, SSC_ssize_t offset, const void* R_ buf, size_t count, SSC_ssize_t* R_ stored_count);

@@ -65,6 +65,7 @@ int main(void)
   TEST_CHECK(SSC_FilePath_open(path, true, &ro) == SSC_OK);
   written = -1;
   TEST_CHECK(SSC_File_write(ro, "x", 1, &written) == SSC_FILE_WRITE_ERR);
+  TEST_CHECK_MSG(written == 0, "written = %" SSC_SSIZE_PRI, written);
 
   SSC_File_close(f);
   SSC_File_close(ef);

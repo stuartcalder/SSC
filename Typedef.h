@@ -80,6 +80,8 @@ typedef uint64_t     SSC_BitFlag64_t;
  #error "Impossible."
 #endif
 
+SSC_STATIC_ASSERT(SSC_SIZEOF_SIZE == SSC_SIZEOF_SSIZE, "Invalid size of SSC_ssize_t!");
+
 #undef SSC_NEED_SSIZE_TYPEDEF
 
 #endif /* ! #ifndef SSC_TYPEDEF_H */

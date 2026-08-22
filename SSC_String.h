@@ -125,6 +125,7 @@ SSC_String_getData(SSC_String_t ctx)
 SSC_INLINE bool
 SSC_String_isEmpty(SSC_String_t ctx)
 {
+  (void)ctx;
   //TODO
   return true;
 }

@@ -151,6 +151,8 @@ longMatchFlag_(
  const size_t     str_n,
  char* R_         str)
 {
+  (void)flag;
+  (void)str_n;
   for (int longi = 0; longi < longc; ++longi) {
     const int cmp_res = memcmp(str, longv[longi].str, longv[longi].str_n);
     if (cmp_res > 0)

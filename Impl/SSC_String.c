@@ -21,6 +21,7 @@ SSC_String_init(
  const Size_t cstr_len,
  const Flag_t flags)
 {
+  (void)flags;
   String_t ctx;
 
   /* If we're initializing from a C string, we need to have enough space. */

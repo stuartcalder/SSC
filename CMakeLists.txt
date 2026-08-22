@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(SSC C)
 set(CMAKE_C_STANDARD 17)
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -s")
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type." FORCE)
+endif()
 
 # ---------- OS & Compiler detection ----------
 set(UNIXLIKE_OPERATING_SYSTEMS openbsd freebsd netbsd darwin linux)
@@ -34,6 +35,11 @@ if (NOT OS_LOWER IN_LIST SUPPORTED_OPERATING_SYSTEMS)
 endif()
 if (NOT CMAKE_C_COMPILER_ID IN_LIST SUPPORTED_COMPILERS)
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}")
+endif()
+
+# -O3 and -s are GCC-compatible flags; do not apply them to MSVC.
+if (CMAKE_C_COMPILER_ID IN_LIST GCC_COMPATIBLE_COMPILERS)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -s")
 endif()
 
 if (NOT OS_LOWER STREQUAL "netbsd" AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -205,10 +211,19 @@ endif()
 
 # ---------- Installation ----------
 install(TARGETS SSC DESTINATION ${lib_dir_install})
-install(DIRECTORY ../SSC
+set(_INSTALL_EXCLUDES
+    PATTERN "Impl" EXCLUDE
+    PATTERN "Impl/*" EXCLUDE
+    PATTERN ".git" EXCLUDE
+    PATTERN ".git/*" EXCLUDE
+    PATTERN ".gitignore" EXCLUDE
+    PATTERN "Tests" EXCLUDE
+    PATTERN "Tests/*" EXCLUDE)
+if (NOT ENABLE_LUA)
+    list(APPEND _INSTALL_EXCLUDES PATTERN "Lua" EXCLUDE PATTERN "Lua/*" EXCLUDE)
+endif()
+install(DIRECTORY ${CMAKE_SOURCE_DIR}
         DESTINATION ${include_install}
         FILES_MATCHING PATTERN "*.h"
-        PATTERN "Impl/" EXCLUDE
-        PATTERN ".git" EXCLUDE
-        PATTERN ".gitignore" EXCLUDE)
+        ${_INSTALL_EXCLUDES})
 
