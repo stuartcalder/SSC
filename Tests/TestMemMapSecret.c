@@ -40,8 +40,8 @@ int main(void)
   memcpy(back, m.ptr, SECRET_SIZE);
   TEST_CHECK(memcmp(back, buf, SECRET_SIZE) == 0);
 
-  /* Note: SSC_MemMap_sync() is not exercised here; msync(MS_SYNC) fails with
-   * EINVAL on memfd_secret mappings, which do not support synchronous writeback. */
+  /* Secret maps are RAM-backed and never written out; sync() is a no-op success. */
+  TEST_CHECK(SSC_MemMap_sync(&m) == SSC_OK);
 
   /* del() zeroes the secret buffer and resets the struct. */
   SSC_MemMap_del(&m);

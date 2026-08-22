@@ -286,6 +286,10 @@ void SSC_MemMap_del(SSC_MemMap* map)
 
 SSC_Error_t SSC_MemMap_sync(const SSC_MemMap* map)
 {
+  /* Secret maps are RAM-backed and never written out to disk, so there is
+   * nothing to synchronize: report success without calling the kernel. */
+  if (map->flags & SSC_MEMMAP_FLAG_SECRET)
+    return SSC_OK;
 #if   defined(SSC_OS_UNIXLIKE)
   if (msync(map->ptr, map->size, MS_SYNC))
     return SSC_ERR;

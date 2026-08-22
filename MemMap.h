@@ -188,7 +188,10 @@ SSC_MemMap_unmapOrDie(SSC_MemMap* map)
 /*=========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Synchronize mapped memory with the filesystem. */
+/* Synchronize mapped memory with the filesystem.
+ * Secret maps (created by SSC_MemMap_initSecret()) are RAM-backed and never
+ * written out to disk, so there is nothing to synchronize; sync() on a secret
+ * map is a no-op that returns SSC_OK. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_Error_t
 SSC_MemMap_sync(const SSC_MemMap* map);
