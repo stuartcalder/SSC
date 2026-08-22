@@ -151,14 +151,14 @@ int main(void)
   TEST_CHECK(m.ptr != SSC_NULL);
   TEST_CHECK((m.flags & SSC_MEMMAP_FLAG_READONLY) == 0);
   TEST_CHECK(SSC_MemMap_sync(&m) == SSC_OK);
-  /* Note: the Unix branch of SSC_MemMap_unmap() does not clear map->ptr on
-   * success, so only the return code is checked here. */
   TEST_CHECK(SSC_MemMap_unmap(&m) == SSC_OK);
+  TEST_CHECK(m.ptr == SSC_NULL);
   /* Remapping read-only sets the readonly flag. */
   TEST_CHECK(SSC_MemMap_map(&m, true) == SSC_OK);
   TEST_CHECK(m.ptr != SSC_NULL);
   TEST_CHECK((m.flags & SSC_MEMMAP_FLAG_READONLY) != 0);
   TEST_CHECK(SSC_MemMap_unmap(&m) == SSC_OK);
+  TEST_CHECK(m.ptr == SSC_NULL);
   SSC_MemMap_del(&m);
   TEST_CHECK(m.ptr == SSC_NULL);
   TEST_CHECK(m.file == SSC_FILE_NULL_LITERAL);

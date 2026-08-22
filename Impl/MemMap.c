@@ -61,11 +61,9 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
 {
   SSC_Error_t ret;
 #if defined(SSC_OS_UNIXLIKE)
-  ret = munmap(map->ptr, map->size);
-  if (ret != SSC_OK) {
-    map->ptr   = SSC_NULL;
-    map->flags = 0U;
-  }
+  ret        = (SSC_Error_t)munmap(map->ptr, map->size);
+  map->ptr   = SSC_NULL;
+  map->flags = 0U;
 #elif defined(SSC_OS_WINDOWS)
   ret = SSC_OK;
   if (!UnmapViewOfFile((LPCVOID)map->ptr)) {
