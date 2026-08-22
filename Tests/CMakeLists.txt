@@ -1,6 +1,6 @@
-# File I/O tests. Currently Unix-like only.
+# File I/O and memory-map tests. Currently Unix-like only.
 if (NOT WIN32)
-    set(SSC_TEST_SOURCES TestFileRead TestFileSeek TestFileAppendTruncate)
+    set(SSC_TEST_SOURCES TestFileRead TestFileSeek TestFileAppendTruncate TestMemMapInit TestMemMapResize TestMemMapSecret)
     foreach(test ${SSC_TEST_SOURCES})
         add_executable(${test} ${test}.c)
         target_include_directories(${test} PRIVATE ${CMAKE_SOURCE_DIR})
