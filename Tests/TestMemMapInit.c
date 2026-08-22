@@ -117,6 +117,15 @@ int main(void)
   TEST_CHECK(SSC_MemMap_init(&m, npath, 0U, 0U) == SSC_MEMMAP_INIT_CODE_ERR_NOSIZE);
   TEST_CHECK(!SSC_FilePath_exists(npath));
 
+  /* A read-only request on a missing filepath is refused; no file is created. */
+  char rpath[PATH_MAX];
+  TestUtil_Path(rpath, sizeof(rpath), "memmap_ro_missing.bin");
+  m = SSC_MEMMAP_NULL_LITERAL;
+  TEST_CHECK(SSC_MemMap_init(&m, rpath, 32U, SSC_MEMMAP_INIT_READONLY) == SSC_MEMMAP_INIT_CODE_ERR_READONLY);
+  TEST_CHECK(m.ptr == SSC_NULL);
+  TEST_CHECK(m.file == SSC_FILE_NULL_LITERAL);
+  TEST_CHECK(!SSC_FilePath_exists(rpath));
+
   /* A filepath whose parent directory does not exist cannot be created. */
   char badpath[PATH_MAX];
   snprintf(badpath, sizeof(badpath), "%s/nodir/memmap.bin", TestUtil_TempDir());

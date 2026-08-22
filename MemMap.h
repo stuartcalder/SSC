@@ -85,7 +85,7 @@ enum {
   SSC_MEMMAP_INIT_CODE_OK =                   0,
   SSC_MEMMAP_INIT_CODE_ERR_FEXIST_NO =       -1, /* Failure to force non-existence of a file. */
   SSC_MEMMAP_INIT_CODE_ERR_FEXIST_YES =      -2, /* Failure to force existence of a file. */
-  SSC_MEMMAP_INIT_CODE_ERR_READONLY =        -3, /* Failure to enforce read-only. */
+  SSC_MEMMAP_INIT_CODE_ERR_READONLY =        -3, /* Read-only requested for a missing filepath; no file was created. */
   SSC_MEMMAP_INIT_CODE_ERR_SHRINK =          -4, /* Attempted to shrink while disallowed */
   SSC_MEMMAP_INIT_CODE_ERR_NOSIZE =          -5, /* Size not provided. */
   SSC_MEMMAP_INIT_CODE_ERR_OPEN_FILEPATH =   -6, /* Failed to open a filepath. */
@@ -99,7 +99,9 @@ enum {
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Open a file at @filepath with constraints passed as init flags in @init_flags,
  * then map the file into memory.
- * If a file does not exist at @filepath, an attempt will be made to create one there. */
+ * If a file does not exist at @filepath, an attempt will be made to create one there,
+ * unless SSC_MEMMAP_INIT_READONLY is set: creating a new file would make it read-write,
+ * so init() fails with SSC_MEMMAP_INIT_CODE_ERR_READONLY and no file is created. */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API SSC_CodeError_t
 SSC_MemMap_init(

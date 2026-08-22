@@ -118,7 +118,9 @@ SSC_CodeError_t SSC_MemMap_init(
   bool exists, readonly, allowshrink, setsize;
 
   exists = SSC_FilePath_exists(filepath);
-  readonly = exists && (flags & RONLY_);
+  /* A read-only request is enforced even when the file does not exist:
+   * creating a new file would make it read-write, so init() refuses. */
+  readonly = (flags & RONLY_);
   allowshrink = (flags & ALLOWSHRINK_);
   /* We will set the size when the filepath
    * doesn't exist, and when it does exist and a size has been requested. */
@@ -164,7 +166,7 @@ SSC_CodeError_t SSC_MemMap_init(
   }
   /* The file didn't exist. */
   else {
-    /* Since it didn't exist requesting readonly makes no sense. */
+    /* A read-only map cannot be created from a missing file; refuse rather than create one. */
     if (readonly)
       return ERR_READONLY_;
     /* Since it didn't exist a size must be provided by the caller. */
