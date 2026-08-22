@@ -103,6 +103,12 @@ SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
 #define ERR_SET_FILE_SIZE_   SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE
 #define ERR_MAP_             SSC_MEMMAP_INIT_CODE_ERR_MAP
 
+static void SSC_MemMap_closeFile(SSC_MemMap* map)
+{
+  if ((map->file != SSC_FILE_NULL_LITERAL) && (SSC_File_close(map->file) == SSC_OK))
+    map->file = SSC_FILE_NULL_LITERAL;
+}
+
 SSC_CodeError_t SSC_MemMap_init(
  SSC_MemMap* R_ map,
  const char* R_ filepath,
@@ -137,15 +143,19 @@ SSC_CodeError_t SSC_MemMap_init(
     if (SSC_FilePath_open(filepath, readonly, &map->file) != SSC_OK)
       return ERR_OPEN_FILEPATH_;
     /* Store the size of the file in @map->size. */
-    if (SSC_File_getSize(map->file, &map->size) != SSC_OK)
+    if (SSC_File_getSize(map->file, &map->size) != SSC_OK) {
+      SSC_MemMap_closeFile(map);
       return ERR_GET_FILE_SIZE_;
+    }
     /* When not readonly and a size has been requested by the caller... */
     if (!readonly && size > 0) {
       /* ... and the stored size in @map exceeds the size requested by the caller... */
       if (map->size > size) {
         /* ... only allow it when we are allowing shrinkage. */
-        if (!allowshrink)
+        if (!allowshrink) {
+          SSC_MemMap_closeFile(map);
           return ERR_SHRINK_;
+        }
       }
       /* ... and the stored size in @map equals the size requested by the caller ... */
       else if (map->size == size)
@@ -167,12 +177,16 @@ SSC_CodeError_t SSC_MemMap_init(
   if (setsize) {
     /* Set the size according to that specified by the caller. */
     map->size = size;
-    if (SSC_File_setSize(map->file, map->size) != SSC_OK)
+    if (SSC_File_setSize(map->file, map->size) != SSC_OK) {
+      SSC_MemMap_closeFile(map);
       return ERR_SET_FILE_SIZE_;
+    }
   }
   /* When we create a new file, it's implicitly readwrite, not readonly. */
-  if (SSC_MemMap_map(map, readonly) != SSC_OK)
+  if (SSC_MemMap_map(map, readonly) != SSC_OK) {
+    SSC_MemMap_closeFile(map);
     return ERR_MAP_;
+  }
   return OK_;
 }
 
@@ -235,13 +249,17 @@ SSC_MemMap_initSecret(
   if (SSC_File_createSecret(&map->file) != SSC_OK)
     return SSC_MEMMAP_INIT_CODE_ERR_SECRET;
   /* Set the size of the secret file. */
-  if (SSC_File_setSize(map->file, size) != SSC_OK)
+  if (SSC_File_setSize(map->file, size) != SSC_OK) {
+    SSC_MemMap_closeFile(map);
     return SSC_MEMMAP_INIT_CODE_ERR_SET_FILE_SIZE;
+  }
   /* Store the requested size in the MemMap struct. */
   map->size = size;
   /* Map the secret file. */
-  if (SSC_MemMap_map(map, false) != SSC_OK)
+  if (SSC_MemMap_map(map, false) != SSC_OK) {
+    SSC_MemMap_closeFile(map);
     return SSC_MEMMAP_INIT_CODE_ERR_MAP;
+  }
   /* Denote that this is a secret Memory Map. */
   map->flags |= SSC_MEMMAP_FLAG_SECRET;
   return SSC_MEMMAP_INIT_CODE_OK;

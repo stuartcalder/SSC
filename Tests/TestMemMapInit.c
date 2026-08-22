@@ -14,15 +14,6 @@ static void TestMemMap_FillPattern(uint8_t* buf, size_t n)
     buf[i] = (uint8_t)(i * 31U + 7U);
 }
 
-/* init() leaves map->file open on some error paths; close it if so. */
-static void TestMemMap_CloseFile(SSC_MemMap* map)
-{
-  if (map->file != SSC_FILE_NULL_LITERAL) {
-    TEST_CHECK(SSC_File_close(map->file) == SSC_OK);
-    map->file = SSC_FILE_NULL_LITERAL;
-  }
-}
-
 int main(void)
 {
   char path[PATH_MAX];
@@ -86,7 +77,7 @@ int main(void)
   m = SSC_MEMMAP_NULL_LITERAL;
   TEST_CHECK(SSC_MemMap_init(&m, path, PATTERN_SIZE, 0U) == SSC_MEMMAP_INIT_CODE_ERR_SHRINK);
   TEST_CHECK(m.ptr == SSC_NULL);
-  TestMemMap_CloseFile(&m);
+  TEST_CHECK(m.file == SSC_FILE_NULL_LITERAL);
   TEST_CHECK_MSG(SSC_FilePath_getSize(path, &size) == SSC_OK && size == PATTERN_SIZE * 2U, "file size = %zu", size);
 
   /* ... and allowed with it. */
@@ -140,7 +131,7 @@ int main(void)
   m = SSC_MEMMAP_NULL_LITERAL;
   TEST_CHECK(SSC_MemMap_init(&m, epath, 0U, 0U) == SSC_MEMMAP_INIT_CODE_ERR_MAP);
   TEST_CHECK(m.ptr == SSC_NULL);
-  TestMemMap_CloseFile(&m);
+  TEST_CHECK(m.file == SSC_FILE_NULL_LITERAL);
 
   /* Direct map()/sync()/unmap() on a manually prepared struct. */
   m = SSC_MEMMAP_NULL_LITERAL;
