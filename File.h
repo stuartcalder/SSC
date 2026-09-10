@@ -157,6 +157,19 @@ SSC_FilePath_createOrTruncateOrDie(const char* R_ fpath)
 }
 /*==========================================================================================*/
 
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Delete the file at the filepath @fpath. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_Error_t
+SSC_FilePath_delete(const char* fpath);
+
+SSC_INLINE void
+SSC_FilePath_deleteOrDie(const char* fpath)
+{
+  SSC_assertMsg(SSC_FilePath_delete(fpath) == SSC_OK, "Error: SSC_FilePath_delete() failed to delete the filepath %s!\n", fpath);
+}
+/*==========================================================================================*/
+
 #ifdef SSC_FILE_HAS_CREATESECRET
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /* Create a "secret" file, with more protections than usually afforded by RAM-backed

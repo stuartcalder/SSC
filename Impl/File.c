@@ -3,9 +3,12 @@
 #include "File.h"
 #include <errno.h>
 
+#ifdef SSC_OS_UNIXLIKE
+ #include <unistd.h>
+#endif
+
 #if defined(__linux__) && defined(SSC_FILE_HAS_CREATESECRET)
  #include <sys/syscall.h>
- #include <unistd.h>
 #endif
 
 #if defined(SSC_OS_UNIXLIKE) && !defined(O_CLOEXEC)
@@ -184,6 +187,18 @@ SSC_FilePath_createOrTruncate(const char* R_ filepath, SSC_File_t* R_ storefile)
  #error "Unsupported operating system."
 #endif
   return (*storefile != SSC_FILE_NULL_LITERAL) ? SSC_OK : SSC_ERR;
+}
+
+SSC_Error_t
+SSC_FilePath_delete(const char* filepath)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  return (unlink(filepath) == 0)  ? SSC_OK : SSC_ERR;
+#elif defined(SSC_OS_WINDOWS)
+  return (_unlink(filepath) == 0) ? SSC_OK : SSC_ERR;
+#else
+  return (remove(filepath) == 0)  ? SSC_OK : SSC_ERR;
+#endif
 }
 
 #ifdef SSC_FILE_HAS_CREATESECRET
