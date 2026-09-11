@@ -80,7 +80,7 @@ int main(void)
   TEST_CHECK(memcmp(buf, "0123WXYZ89abcdef!?", 18) == 0);
 
   SSC_File_close(f);
-  unlink(path);
+  TEST_CHECK(SSC_FilePath_delete(path) == SSC_OK);
   TestUtil_Cleanup();
   return TestUtil_Summary("TestFileSeek");
 }

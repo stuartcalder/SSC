@@ -54,7 +54,7 @@ int main(void)
   SSC_File_t ma;
   TEST_CHECK(SSC_FilePath_openAppend(mpath, &ma) == SSC_ERR);
 
-  unlink(path);
+  TEST_CHECK(SSC_FilePath_delete(path) == SSC_OK);
   TestUtil_Cleanup();
   return TestUtil_Summary("TestFileAppendTruncate");
 }

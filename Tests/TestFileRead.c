@@ -70,8 +70,8 @@ int main(void)
   SSC_File_close(f);
   SSC_File_close(ef);
   SSC_File_close(ro);
-  unlink(path);
-  unlink(epath);
+  TEST_CHECK(SSC_FilePath_delete(path) == SSC_OK);
+  TEST_CHECK(SSC_FilePath_delete(epath) == SSC_OK);
   TestUtil_Cleanup();
   return TestUtil_Summary("TestFileRead");
 }

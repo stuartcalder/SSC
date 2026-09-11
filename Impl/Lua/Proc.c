@@ -173,7 +173,7 @@ static int file_readonly (lua_State* L)
 static int fpath_del (lua_State* L)
 {
   const char* const fpath = luaL_checkstring(L, 1);
-  if (!SSC_FilePath_exists(fpath) || remove(fpath))
+  if (!SSC_FilePath_exists(fpath) || SSC_FilePath_delete(fpath) != SSC_OK)
     lua_pushboolean(L, 0);
   else
     lua_pushboolean(L, 1);

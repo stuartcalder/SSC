@@ -67,7 +67,7 @@ int main(void)
   TEST_CHECK_MSG(m.size == 0, "size after del = %zu", m.size);
   TEST_CHECK(m.flags == 0U);
 
-  unlink(path);
+  TEST_CHECK(SSC_FilePath_delete(path) == SSC_OK);
   TestUtil_Cleanup();
   return TestUtil_Summary("TestMemMapResize");
 }
