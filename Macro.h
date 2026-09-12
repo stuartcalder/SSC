@@ -211,14 +211,15 @@
   #if SSC_COMPILER == SSC_COMPILER_MSVC /* Assume little-endian mode when used with MSVC. */
    #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
    #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
+  #elif defined(__AARCH64EB__)
+   #define SSC_ENDIAN     SSC_ENDIAN_BIG
+   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
+  #elif defined(__ARCH64EL__)
+   #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
+   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
   #else
-   #if   SSC_ENDIAN_DEFAULT == SSC_ENDIAN_LITTLE
-    #warning "Aarch64 is bi-endian, and SSC_ENDIAN is still not yet defined! Using default endianness (Little)."
-   #elif SSC_ENDIAN_DEFAULT == SSC_ENDIAN_BIG
-    #warning "Aarch64 is bi-endian, and SSC_ENDIAN is still not yet defined! Using default endianness (Big)."
-   #else
-    #error "SSC_ENDIAN_DEFAULT is invalid!"
-   #endif
+   #warning "Aarch64 is bi-endian and neither __AARCH64EB__ nor __AARCH64EL__ were defined!"
+   #warning "Therefore assume default endianness and pray."
    #define SSC_ENDIAN     SSC_ENDIAN_DEFAULT
    #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_DEFAULT
   #endif /* ! if (SSC_COMPILER == SSC_COMPILER_MSVC) */
