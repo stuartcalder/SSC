@@ -64,7 +64,8 @@ SSC_FilePath_exists(const char* filepath)
   bool exists = false;
 #if   defined(SSC_OS_UNIXLIKE)
   struct stat s;
-  if (stat(filepath, &s) == 0)
+  /* (The path exists and it is not a directory.) */
+  if (stat(filepath, &s) == 0 && !S_ISDIR(s.st_mode))
     exists = true;
 #elif defined(SSC_OS_WINDOWS)
   const DWORD attrib = GetFileAttributesA(filepath);
@@ -80,6 +81,23 @@ SSC_FilePath_exists(const char* filepath)
   }
 #endif
   return exists;
+}
+
+bool
+SSC_DirPath_exists(const char* filepath)
+{
+#if   defined(SSC_OS_UNIXLIKE)
+  struct stat s;
+  /* (The path exists and it is a directory.) */
+  return (stat(filepath, &s) == 0) && S_ISDIR(s.st_mode);
+#elif defined(SSC_OS_WINDOWS)
+  const DWORD attrib = GetFileAttributesA(filepath);
+  /* (The path exists and it is a directory.) */
+  return (attrib != INVALID_FILE_ATTRIBUTES) && (attrib & FILE_ATTRIBUTE_DIRECTORY);
+#else /* In practice, this codepath is presently unreachable. */
+  (void)filepath;
+  return false;
+#endif
 }
 
 void

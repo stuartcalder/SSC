@@ -78,12 +78,21 @@ SSC_FilePath_getSizeOrDie(const char* fpath)
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/* Is there a file at a specified filepath? */
+/* Is there a file (and not a directory) at a specified filepath? */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 SSC_API bool
 SSC_FilePath_exists(const char* fpath);
 /* ->true : There is a file.
- * ->false: There is not a file. */
+ * ->false: There is not a file (the path does not exist, or it is a directory). */
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Is there a directory at a specified filepath? */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API bool
+SSC_DirPath_exists(const char* fpath);
+/* ->true : There is a directory.
+ * ->false: There is not a directory (the path does not exist, or it is not a directory). */
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
