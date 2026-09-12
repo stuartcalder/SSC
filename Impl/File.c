@@ -37,6 +37,16 @@ SSC_File_getSize(SSC_File_t file, size_t* R_ storesize)
   return SSC_OK;
 }
 
+SSC_PathType_t
+SSC_Path_getType(const char* path)
+{
+  if (SSC_FilePath_exists(path))
+    return SSC_PATH_FILE;
+  if (SSC_DirPath_exists(path))
+    return SSC_PATH_DIR;
+  return SSC_PATH_NONE;
+}
+
 SSC_Error_t
 SSC_FilePath_getSize(const char* R_ fpath, size_t* R_ storesize)
 {
@@ -70,8 +80,7 @@ SSC_FilePath_exists(const char* filepath)
 #elif defined(SSC_OS_WINDOWS)
   const DWORD attrib = GetFileAttributesA(filepath);
   /* (The file exists and it is not a directory.) */
-  if (attrib != INVALID_FILE_ATTRIBUTES &&
-      !(attrib & FILE_ATTRIBUTE_DIRECTORY))
+  if (attrib != INVALID_FILE_ATTRIBUTES && !(attrib & FILE_ATTRIBUTE_DIRECTORY))
     exists = true;
 #else /* In practice, this codepath is presently unreachable. */
   FILE* test = fopen(filepath, "r");
@@ -94,9 +103,8 @@ SSC_DirPath_exists(const char* filepath)
   const DWORD attrib = GetFileAttributesA(filepath);
   /* (The path exists and it is a directory.) */
   return (attrib != INVALID_FILE_ATTRIBUTES) && (attrib & FILE_ATTRIBUTE_DIRECTORY);
-#else /* In practice, this codepath is presently unreachable. */
-  (void)filepath;
-  return false;
+#else
+ #error "Unsupported operating system."
 #endif
 }
 

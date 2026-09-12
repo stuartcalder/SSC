@@ -40,6 +40,12 @@
  #error "Unsupported operating system."
 #endif /* ~ if defined (SSC_OS_UNIXLIKE) or defined (SSC_OS_WINDOWS) */
 
+typedef enum {
+  SSC_PATH_NONE,
+  SSC_PATH_FILE,
+  SSC_PATH_DIR
+} SSC_PathType_t;
+
 #define R_ SSC_RESTRICT
 SSC_BEGIN_C_DECLS
 
@@ -60,6 +66,16 @@ SSC_File_getSizeOrDie(SSC_File_t file)
   #endif
   return s;
 }
+/*==========================================================================================*/
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/* Determine whether a path specifies a file, directory, or nothing. */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+SSC_API SSC_PathType_t
+SSC_Path_getType(const char* path);
+/* ->SSC_PATH_NONE: Neither a file nor a directory exists at @path.
+ * ->SSC_PATH_FILE: A file exists at @path.
+ * ->SSC_PATH_DIR:  A directory exists at @path. */
 /*==========================================================================================*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
