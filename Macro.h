@@ -576,6 +576,26 @@ SSC_STATIC_ASSERT(SSC_SIZEOF_LONGLONG == sizeof(long long), "Invalid long long s
 SSC_STATIC_ASSERT(SSC_SIZEOF_SIZE     == sizeof(size_t),    "Invalid size_t size!");
 SSC_STATIC_ASSERT(SSC_SIZEOF_POINTER  == sizeof(void*),     "Invalid pointer size!");
 
+#if ((defined(SSC_LANG_CPP) && (SSC_LANG_CPP >= SSC_CPP_17)) ||\
+     (defined(SSC_LANG_C)   && (SSC_LANG_C   >= SSC_C_23)))
+ #define SSC_UNUSED_FUNC_BEGIN [[maybe_unused]]
+ #define SSC_UNUSED_FUNC_END
+ #define SSC_UNUSED_FUNC_END_IS_NIL
+#elif SSC_COMPILER_IS_GCC_COMPATIBLE
+ #define SSC_UNUSED_FUNC_BEGIN __attribute__((unused))
+ #define SSC_UNUSED_FUNC_END
+ #define SSC_UNUSED_FUNC_END_IS_NIL
+#elif (SSC_COMPILER == SSC_COMPILER_MSVC)
+ #define SSC_UNUSED_FUNC_BEGIN \
+  _Pragma("warning(push)") \
+  _Pragma("warning(disable: 4505)")
+ #define SSC_UNUSED_FUNC_END \
+  _Pragma("warning(pop)")
+#else
+ #define SSC_UNUSED_FUNC_BEGIN_IS_NIL
+ #define SSC_UNUSED_FUNC_END_IS_NIL
+#endif
+
 /* We conditionally include `Error.h' below, but `Error.h' depends upon some macros defined here in `Macro.h'.
  * The following macros must remain at the end of `Macro.h' to avoid circular dependence problems.*/
 
