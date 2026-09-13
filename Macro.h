@@ -179,6 +179,8 @@
 #define SSC_ISA_ISVALID SSC_ISA_ISVALID_FUNC(SSC_ISA)
 
 /* Architecture macros. */
+
+/* AMD64 */
 #if (defined(__amd64)  || defined(__amd64__)  ||\
      defined(__x86_64) || defined(__x86_64__) ||\
      defined(_M_X64)   || defined(_M_AMD64))
@@ -188,6 +190,7 @@
   #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
  #endif
+/* RISCV64 and RISCV32 */
 #elif defined(__riscv)
  #if defined(__riscv_xlen)
   #if   (__riscv_xlen == 64)
@@ -198,6 +201,7 @@
    #error "__riscv_xlen was not properly defined!"
   #endif
  #else
+  #warning "__riscv was defined but __riscv_xlen wasn't! Choose RISCV64 and pray."
   #define SSC_ISA SSC_ISA_RISCV64 /* __riscv_xlen wasn't defined. Choose 64-bit and pray. */
  #endif
  #ifndef SSC_ENDIAN
@@ -205,6 +209,7 @@
   #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
  #endif
+/* ARM64 */
 #elif defined(__aarch64__) || defined(_M_ARM64)
  #define SSC_ISA SSC_ISA_ARM64
  #ifndef SSC_ENDIAN
@@ -224,6 +229,7 @@
    #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_DEFAULT
   #endif /* ! if (SSC_COMPILER == SSC_COMPILER_MSVC) */
  #endif /* ! ifndef SSC_ENDIAN */
+/* 32-bit X86 */
 #elif defined(__i386__) || defined(_M_IX86)
  #define SSC_ISA SSC_ISA_X86
  #ifndef SSC_ENDIAN
@@ -231,6 +237,7 @@
   #define SSC_ENDIAN     SSC_ENDIAN_LITTLE
   #define SSC_ENDIAN_SRC SSC_ENDIAN_SRC_ISA
  #endif /* ! ifndef SSC_ENDIAN */
+/* ARMv7 */
 #elif defined(__arm__) || defined(_M_ARM)
  #define SSC_ISA SSC_ISA_ARMV7
  #ifndef SSC_ENDIAN
@@ -288,8 +295,7 @@
  #if SSC_LANG_CPP >= SSC_CPP_17
   #define SSC_STATIC_ASSERT_1(Boolean)       static_assert(Boolean)
  #else
-  #define SSC_STATIC_ASSERT_1(Boolean_)
-  #define SSC_STATIC_ASSERT_1_IS_NIL
+  #define SSC_STATIC_ASSERT_1(Boolean)       static_assert(Boolean, "static_assert failed on line " SSC_STRINGIFY(__LINE__) " of file " SSC_STRINGIFY(__FILE__))
  #endif
   /* consteval is similar to, but distinct from, constexpr.
    * Be aware of that when using SSC_CONSTEVAL or SSC_CONSTEXPR in the first place. */
@@ -334,8 +340,11 @@
    #define SSC_STATIC_ASSERT_1(Boolean) _Static_assert(Boolean)
    #define SSC_NULL nullptr
   #else
-   #define SSC_STATIC_ASSERT_1(Boolean_)
-   #define SSC_STATIC_ASSERT_1_IS_NIL
+   #ifdef SSC_STATIC_ASSERT_IS_NIL
+    #define SSC_STATIC_ASSERT_1_IS_NIL
+   #else
+    #define SSC_STATIC_ASSERT_1(Boolean)  _Static_assert(Boolean, "static_assert failed on line " SSC_STRINGIFY(__LINE__) " of file " SSC_STRINGIFY(__FILE__))
+   #endif
    #define SSC_NULL NULL
   #endif
  #else  /* __STDC_VERSION__ not defined. */

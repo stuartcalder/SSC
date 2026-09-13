@@ -5,15 +5,14 @@
 
 #ifdef SSC_OS_UNIXLIKE
  #include <unistd.h>
+ #ifndef O_CLOEXEC
+  #warning "O_CLOEXEC was NOT defined!"
+  #define O_CLOEXEC (0)
+ #endif
 #endif
 
 #if defined(__linux__) && defined(SSC_FILE_HAS_CREATESECRET)
  #include <sys/syscall.h>
-#endif
-
-#if defined(SSC_OS_UNIXLIKE) && !defined(O_CLOEXEC)
- #warning "O_CLOEXEC was NOT defined!"
- #define O_CLOEXEC (0)
 #endif
 
 #define R_ SSC_RESTRICT
@@ -248,9 +247,8 @@ SSC_File_createSecretIsAvailable(void)
 {
   #ifdef SSC_FILE_HAS_CREATESECRET
   SSC_File_t  f;
-  if (SSC_File_createSecret(&f) == SSC_OK &&
-      SSC_File_close(f) == SSC_OK)
-    return true;
+  if (SSC_File_createSecret(&f) == SSC_OK)
+    return SSC_File_close(f) == SSC_OK;
   #endif
   return false;
 }

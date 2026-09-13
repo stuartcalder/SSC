@@ -40,41 +40,46 @@ typedef uint64_t     SSC_BitFlag64_t;
  #include <sys/types.h> /* ssize_t */
  typedef ssize_t   SSC_ssize_t;
  #define SSC_SSIZE_PRI "zi"
+ #define SSC_SSIZE_IS_POSIX
 #else
- #define SSC_NEED_SSIZE_TYPEDEF
+ #define SSC_NEED_SSIZE_TYPEDEF_
 #endif
 
 #if   (SIZE_MAX == ULLONG_MAX)
  #define SSC_SIZEOF_SSIZE SSC_SIZEOF_LONGLONG
  #define SSC_SSIZE_MAX    ((SSC_ssize_t)LLONG_MAX)
  #define SSC_SSIZE_MIN    ((SSC_ssize_t)LLONG_MIN)
- #ifdef SSC_NEED_SSIZE_TYPEDEF
+ #ifdef SSC_NEED_SSIZE_TYPEDEF_
   typedef long long SSC_ssize_t;
   #define SSC_SSIZE_PRI "lli"
+  #define SSC_SSIZE_IS_LONGLONG
  #endif
 #elif (SIZE_MAX == ULONG_MAX)
  #define SSC_SIZEOF_SSIZE SSC_SIZEOF_LONG
  #define SSC_SSIZE_MAX    ((SSC_ssize_t)LONG_MAX)
  #define SSC_SSIZE_MIN    ((SSC_ssize_t)LONG_MIN)
- #ifdef SSC_NEED_SSIZE_TYPEDEF
+ #ifdef SSC_NEED_SSIZE_TYPEDEF_
   typedef long SSC_ssize_t;
   #define SSC_SSIZE_PRI "li"
+  #define SSC_SSIZE_IS_LONG
  #endif
 #elif (SIZE_MAX == UINT_MAX)
  #define SSC_SIZEOF_SSIZE SSC_SIZEOF_INT
  #define SSC_SSIZE_MAX    ((SSC_ssize_t)INT_MAX)
  #define SSC_SSIZE_MIN    ((SSC_ssize_t)INT_MIN)
- #ifdef SSC_NEED_SSIZE_TYPEDEF
+ #ifdef SSC_NEED_SSIZE_TYPEDEF_
   typedef int SSC_ssize_t;
   #define SSC_SSIZE_PRI "i"
+  #define SSC_SSIZE_IS_INT
  #endif
 #elif (SIZE_MAX == USHRT_MAX)
  #define SSC_SIZEOF_SSIZE SSC_SIZEOF_SHORT
  #define SSC_SSIZE_MAX    ((SSC_ssize_t)SHRT_MAX)
  #define SSC_SSIZE_MIN    ((SSC_ssize_t)SHRT_MIN)
- #ifdef SSC_NEED_SSIZE_TYPEDEF
+ #ifdef SSC_NEED_SSIZE_TYPEDEF_
   typedef short SSC_ssize_t;
   #define SSC_SSIZE_PRI "hi"
+  #define SSC_SSIZE_IS_SHORT
  #endif
 #else
  #error "Impossible."
@@ -82,6 +87,6 @@ typedef uint64_t     SSC_BitFlag64_t;
 
 SSC_STATIC_ASSERT(SSC_SIZEOF_SIZE == SSC_SIZEOF_SSIZE, "Invalid size of SSC_ssize_t!");
 
-#undef SSC_NEED_SSIZE_TYPEDEF
+#undef SSC_NEED_SSIZE_TYPEDEF_
 
 #endif /* ! #ifndef SSC_TYPEDEF_H */
