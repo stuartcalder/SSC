@@ -11,7 +11,6 @@
  #define MAP_FAIL_ ((uint8_t*)MAP_FAILED)
 #elif defined(SSC_OS_WINDOWS)
  #define MAP_FAIL_ ((uint8_t*)SSC_NULL)
- typedef DWORD Dw32_t;
 #else
  #error "Unsupported."
 #endif
@@ -26,10 +25,10 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
     return SSC_ERR;
   }
 #elif  defined(SSC_OS_WINDOWS)
-  Dw32_t high, low, page_rw, map_rw;
+  DWORD high, low, page_rw, map_rw;
 
-  high = (Dw32_t)(((uint64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
-  low  = (Dw32_t)(((uint64_t)map->size & UINT64_C(0x00000000ffffffff))      );
+  high = (DWORD)(((uint64_t)map->size & UINT64_C(0xffffffff00000000)) >> 32);
+  low  = (DWORD)(((uint64_t)map->size & UINT64_C(0x00000000ffffffff))      );
   if (readonly) {
     page_rw = PAGE_READONLY;
     map_rw  = FILE_MAP_READ;
@@ -59,31 +58,26 @@ SSC_Error_t SSC_MemMap_map(SSC_MemMap* map, bool readonly)
 
 SSC_Error_t SSC_MemMap_unmap(SSC_MemMap* map)
 {
-  SSC_Error_t ret;
 #if defined(SSC_OS_UNIXLIKE)
-  ret        = (SSC_Error_t)munmap(map->ptr, map->size);
-  map->ptr   = SSC_NULL;
-  map->flags = 0U;
-#elif defined(SSC_OS_WINDOWS)
-  ret = SSC_OK;
-  if (!UnmapViewOfFile((LPCVOID)map->ptr)) {
-    ret = SSC_ERR;
-    map->ptr   = SSC_NULL;
-    map->flags = 0U;
-  } else {
+  if (munmap(map->ptr, map->size) == 0) {
     map->ptr = SSC_NULL;
+    return SSC_OK;
   }
-  if (SSC_File_close(map->windows_filemap) == SSC_OK) {
+  return SSC_ERR;
+#elif defined(SSC_OS_WINDOWS)
+  if (UnmapViewOfFile((LPCVOID)map->ptr))
+    map->ptr = SSC_NULL;
+  else
+    return SSC_ERR;
+
+  if (SSC_File_close(map->windows_filemap) == SSC_OK)
     map->windows_filemap = SSC_FILE_NULL_LITERAL;
-  } else {
-    ret = SSC_ERR;
-  }
-  if (ret == SSC_ERR)
-    map->flags = 0U;
+  else
+    return SSC_ERR;
+  return SSC_OK;
 #else
  #error "Unsupported operating system."
 #endif
-  return ret;
 }
 
 #define RONLY_       SSC_MEMMAP_INIT_READONLY
@@ -115,6 +109,7 @@ SSC_CodeError_t SSC_MemMap_init(
  size_t         size,
  SSC_BitFlag_t  flags)
 {
+  *map = SSC_MEMMAP_NULL_LITERAL;
   bool exists, readonly, allowshrink, setsize;
 
   exists = SSC_FilePath_exists(filepath);

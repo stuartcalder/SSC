@@ -509,10 +509,13 @@
 
 #if   SSC_COMPILER_IS_GCC_COMPATIBLE
  #define SSC_INLINE __attribute__((always_inline)) inline
+ #define SSC_INLINE_IS_COMPILER_EXTENSION
 #elif SSC_COMPILER == SSC_COMPILER_MSVC
  #define SSC_INLINE __forceinline inline
+ #define SSC_INLINE_IS_COMPILER_EXTENSION
 #else
  #define SSC_INLINE static inline
+ #define SSC_INLINE_IS_STATIC_INLINE
 #endif
 
 #define SSC_STRINGIFY_IMPL(Text) #Text
